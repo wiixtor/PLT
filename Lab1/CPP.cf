@@ -1,0 +1,20 @@
+PDefs. Program ::= [Def] ;
+terminator Def "" ;
+
+comment "//" ;
+comment "/*" "*/" ;
+comment "#" ;
+
+DFun. Def ::= Type Id ArgList Body ;
+
+EBody. Body ::= ";" ;
+Body. Body  ::= "{" [Stm] "}" ;
+Args. ArgList ::= "(" [Arg] ")" ;
+separator Arg "," ;
+terminator Stm "" ;
+
+TArg. Arg ::= Type ;
+IdArg. Arg ::= Type Id ;
+DArg. Arg ::= Type Id "=" Exp ;
+CArg. Arg ::= "const" Arg ;
+
