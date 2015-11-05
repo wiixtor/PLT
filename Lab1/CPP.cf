@@ -18,3 +18,25 @@ IdArg. Arg ::= Type Id ;
 DArg. Arg ::= Type Id "=" Exp ;
 CArg. Arg ::= "const" Arg ;
 
+SExp. Stm ::= Exp ";" ;
+SDec. Stm ::= Type Id "=" Exp ";" ;
+SDecs. Stm ::= Type Id "," [Id] "=" Exp ";" ;
+separator Id "," ;
+
+SReturn. Stm ::= "return" Exp ";" ;
+SWhile. Stm ::= "while" "(" Exp ")" Stm ;
+SDo. Stm ::= "do" Stm "while" "(" Exp ")" ";" ;
+SFor. Stm ::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
+SIf. Stm ::= "if" "(" Exp ")" Stm ";" ;
+
+EInt. Exp     ::= Integer ;
+EString. Exp  ::= String ;
+EQConst. Exp  ::= IdT "::" [IdT] ;
+separator IdT "::" ;
+
+ELShift. Exp  ::= Exp "<<" Exp ;
+
+TInt. Type  ::= Integer ;
+
+token Id (letter (letter | digit | '_')*) ;
+token IdT (letter (letter | digit | '_')*) ;
