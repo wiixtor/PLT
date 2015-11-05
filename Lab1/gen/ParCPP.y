@@ -11,14 +11,13 @@ import ErrM
 %name pProgram Program
 %name pListDef ListDef
 %name pDef Def
-%name pBody Body
-%name pArgList ArgList
 %name pListArg ListArg
 %name pListStm ListStm
 %name pArg Arg
 %name pStm Stm
 %name pListId ListId
 %name pExp Exp
+%name pExp1 Exp1
 %name pListIdT ListIdT
 %name pType Type
 
@@ -67,16 +66,7 @@ ListDef : {- empty -} { [] }
 
 
 Def :: { Def }
-Def : Type Id ArgList Body { DFun $1 $2 $3 $4 } 
-
-
-Body :: { Body }
-Body : ';' { EBody } 
-  | '{' ListStm '}' { Body (reverse $2) }
-
-
-ArgList :: { ArgList }
-ArgList : '(' ListArg ')' { Args $2 } 
+Def : Type Id '(' ListArg ')' '{' ListStm '}' { DFun $1 $2 $4 (reverse $7) } 
 
 
 ListArg :: { [Arg] }
@@ -99,8 +89,7 @@ Arg : Type { TArg $1 }
 
 Stm :: { Stm }
 Stm : Exp ';' { SExp $1 } 
-  | Type Id '=' Exp ';' { SDec $1 $2 $4 }
-  | Type Id ',' ListId '=' Exp ';' { SDecs $1 $2 $4 $6 }
+  | Type ListId '=' Exp ';' { SDec $1 $2 $4 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
@@ -109,16 +98,20 @@ Stm : Exp ';' { SExp $1 }
 
 
 ListId :: { [Id] }
-ListId : {- empty -} { [] } 
-  | Id { (:[]) $1 }
+ListId : Id { (:[]) $1 } 
   | Id ',' ListId { (:) $1 $3 }
 
 
 Exp :: { Exp }
 Exp : Integer { EInt $1 } 
   | String { EString $1 }
-  | IdT '::' ListIdT { EQConst $1 $3 }
   | Exp '<<' Exp { ELShift $1 $3 }
+  | Exp1 { $1 }
+
+
+Exp1 :: { Exp }
+Exp1 : IdT '::' ListIdT { EQConst $1 $3 } 
+  | '(' Exp ')' { $2 }
 
 
 ListIdT :: { [IdT] }

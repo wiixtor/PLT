@@ -26,18 +26,7 @@ transProgram x = case x of
 
 transDef :: Def -> Result
 transDef x = case x of
-  DFun type' id arglist body  -> failure x
-
-
-transBody :: Body -> Result
-transBody x = case x of
-  EBody  -> failure x
-  Body stms  -> failure x
-
-
-transArgList :: ArgList -> Result
-transArgList x = case x of
-  Args args  -> failure x
+  DFun type' id args stms  -> failure x
 
 
 transArg :: Arg -> Result
@@ -51,8 +40,7 @@ transArg x = case x of
 transStm :: Stm -> Result
 transStm x = case x of
   SExp exp  -> failure x
-  SDec type' id exp  -> failure x
-  SDecs type' id ids exp  -> failure x
+  SDec type' ids exp  -> failure x
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
   SDo stm exp  -> failure x

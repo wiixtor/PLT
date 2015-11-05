@@ -82,7 +82,6 @@ instance Print Double where
 instance Print Id where
   prt _ (Id i) = doc (showString ( i))
   prtList es = case es of
-   [] -> (concatD [])
    [x] -> (concatD [prt 0 x])
    x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
 
@@ -103,22 +102,11 @@ instance Print Program where
 
 instance Print Def where
   prt i e = case e of
-   DFun type' id arglist body -> prPrec i 0 (concatD [prt 0 type' , prt 0 id , prt 0 arglist , prt 0 body])
+   DFun type' id args stms -> prPrec i 0 (concatD [prt 0 type' , prt 0 id , doc (showString "(") , prt 0 args , doc (showString ")") , doc (showString "{") , prt 0 stms , doc (showString "}")])
 
   prtList es = case es of
    [] -> (concatD [])
    x:xs -> (concatD [prt 0 x , prt 0 xs])
-
-instance Print Body where
-  prt i e = case e of
-   EBody  -> prPrec i 0 (concatD [doc (showString ";")])
-   Body stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
-
-
-instance Print ArgList where
-  prt i e = case e of
-   Args args -> prPrec i 0 (concatD [doc (showString "(") , prt 0 args , doc (showString ")")])
-
 
 instance Print Arg where
   prt i e = case e of
@@ -135,8 +123,7 @@ instance Print Arg where
 instance Print Stm where
   prt i e = case e of
    SExp exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
-   SDec type' id exp -> prPrec i 0 (concatD [prt 0 type' , prt 0 id , doc (showString "=") , prt 0 exp , doc (showString ";")])
-   SDecs type' id ids exp -> prPrec i 0 (concatD [prt 0 type' , prt 0 id , doc (showString ",") , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
+   SDec type' ids exp -> prPrec i 0 (concatD [prt 0 type' , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
    SReturn exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SDo stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
@@ -151,7 +138,7 @@ instance Print Exp where
   prt i e = case e of
    EInt n -> prPrec i 0 (concatD [prt 0 n])
    EString str -> prPrec i 0 (concatD [prt 0 str])
-   EQConst idt idts -> prPrec i 0 (concatD [prt 0 idt , doc (showString "::") , prt 0 idts])
+   EQConst idt idts -> prPrec i 1 (concatD [prt 0 idt , doc (showString "::") , prt 0 idts])
    ELShift exp0 exp -> prPrec i 0 (concatD [prt 0 exp0 , doc (showString "<<") , prt 0 exp])
 
 

@@ -5,11 +5,7 @@ comment "//" ;
 comment "/*" "*/" ;
 comment "#" ;
 
-DFun. Def ::= Type Id ArgList Body ;
-
-EBody. Body ::= ";" ;
-Body. Body  ::= "{" [Stm] "}" ;
-Args. ArgList ::= "(" [Arg] ")" ;
+DFun. Def ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
 separator Arg "," ;
 terminator Stm "" ;
 
@@ -19,9 +15,8 @@ DArg. Arg ::= Type Id "=" Exp ;
 CArg. Arg ::= "const" Arg ;
 
 SExp. Stm ::= Exp ";" ;
-SDec. Stm ::= Type Id "=" Exp ";" ;
-SDecs. Stm ::= Type Id "," [Id] "=" Exp ";" ;
-separator Id "," ;
+SDec. Stm ::= Type [Id] "=" Exp ";" ;
+separator nonempty Id "," ;
 
 SReturn. Stm ::= "return" Exp ";" ;
 SWhile. Stm ::= "while" "(" Exp ")" Stm ;
@@ -31,10 +26,11 @@ SIf. Stm ::= "if" "(" Exp ")" Stm ";" ;
 
 EInt. Exp     ::= Integer ;
 EString. Exp  ::= String ;
-EQConst. Exp  ::= IdT "::" [IdT] ;
+EQConst. Exp1  ::= IdT "::" [IdT] ;
 separator IdT "::" ;
 
 ELShift. Exp  ::= Exp "<<" Exp ;
+coercions Exp 1 ;
 
 TInt. Type  ::= Integer ;
 

@@ -55,9 +55,9 @@ The reserved words used in CPP are the following: \\
 The symbols used in CPP are the following: \\
 
 \begin{tabular}{lll}
-{\symb{;}} &{\symb{\{}} &{\symb{\}}} \\
-{\symb{(}} &{\symb{)}} &{\symb{,}} \\
-{\symb{{$=$}}} &{\symb{::}} &{\symb{{$<$}{$<$}}} \\
+{\symb{(}} &{\symb{)}} &{\symb{\{}} \\
+{\symb{\}}} &{\symb{,}} &{\symb{{$=$}}} \\
+{\symb{;}} &{\symb{::}} &{\symb{{$<$}{$<$}}} \\
 \end{tabular}\\
 
 \subsection*{Comments}
@@ -79,16 +79,7 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Def}} & {\arrow}  &{\nonterminal{Type}} {\nonterminal{Id}} {\nonterminal{ArgList}} {\nonterminal{Body}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Body}} & {\arrow}  &{\terminal{;}}  \\
- & {\delimit}  &{\terminal{\{}} {\nonterminal{ListStm}} {\terminal{\}}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{ArgList}} & {\arrow}  &{\terminal{(}} {\nonterminal{ListArg}} {\terminal{)}}  \\
+{\nonterminal{Def}} & {\arrow}  &{\nonterminal{Type}} {\nonterminal{Id}} {\terminal{(}} {\nonterminal{ListArg}} {\terminal{)}} {\terminal{\{}} {\nonterminal{ListStm}} {\terminal{\}}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -111,8 +102,7 @@ All other symbols are terminals.\\
 
 \begin{tabular}{lll}
 {\nonterminal{Stm}} & {\arrow}  &{\nonterminal{Exp}} {\terminal{;}}  \\
- & {\delimit}  &{\nonterminal{Type}} {\nonterminal{Id}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
- & {\delimit}  &{\nonterminal{Type}} {\nonterminal{Id}} {\terminal{,}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
+ & {\delimit}  &{\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{return}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
@@ -121,16 +111,20 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{ListId}} & {\arrow}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Id}}  \\
+{\nonterminal{ListId}} & {\arrow}  &{\nonterminal{Id}}  \\
  & {\delimit}  &{\nonterminal{Id}} {\terminal{,}} {\nonterminal{ListId}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
 {\nonterminal{Exp}} & {\arrow}  &{\nonterminal{Integer}}  \\
  & {\delimit}  &{\nonterminal{String}}  \\
- & {\delimit}  &{\nonterminal{IdT}} {\terminal{::}} {\nonterminal{ListIdT}}  \\
  & {\delimit}  &{\nonterminal{Exp}} {\terminal{{$<$}{$<$}}} {\nonterminal{Exp}}  \\
+ & {\delimit}  &{\nonterminal{Exp1}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Exp1}} & {\arrow}  &{\nonterminal{IdT}} {\terminal{::}} {\nonterminal{ListIdT}}  \\
+ & {\delimit}  &{\terminal{(}} {\nonterminal{Exp}} {\terminal{)}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}

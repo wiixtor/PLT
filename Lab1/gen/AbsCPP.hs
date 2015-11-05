@@ -10,16 +10,7 @@ data Program =
   deriving (Eq,Ord,Show)
 
 data Def =
-   DFun Type Id ArgList Body
-  deriving (Eq,Ord,Show)
-
-data Body =
-   EBody
- | Body [Stm]
-  deriving (Eq,Ord,Show)
-
-data ArgList =
-   Args [Arg]
+   DFun Type Id [Arg] [Stm]
   deriving (Eq,Ord,Show)
 
 data Arg =
@@ -31,8 +22,7 @@ data Arg =
 
 data Stm =
    SExp Exp
- | SDec Type Id Exp
- | SDecs Type Id [Id] Exp
+ | SDec Type [Id] Exp
  | SReturn Exp
  | SWhile Exp Stm
  | SDo Stm Exp

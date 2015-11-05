@@ -38,8 +38,8 @@ The reserved words used in CPP are the following:
   | ``return`` | ``while`` |  | 
 
 The symbols used in CPP are the following:
-  | ; | { | } | (
-  | ) | , | = | ::
+  | ( | ) | { | }
+  | , | = | ; | ::
   | << |  |  | 
 
 ===Comments===
@@ -54,10 +54,7 @@ All other symbols are terminals.
   | //Program// | -> | //[Def]// 
   | //[Def]// | -> | **eps**
   |  |  **|**  | //Def// //[Def]// 
-  | //Def// | -> | //Type// //Id// //ArgList// //Body// 
-  | //Body// | -> | ``;`` 
-  |  |  **|**  | ``{`` //[Stm]// ``}`` 
-  | //ArgList// | -> | ``(`` //[Arg]// ``)`` 
+  | //Def// | -> | //Type// //Id// ``(`` //[Arg]// ``)`` ``{`` //[Stm]// ``}`` 
   | //[Arg]// | -> | **eps**
   |  |  **|**  | //Arg// 
   |  |  **|**  | //Arg// ``,`` //[Arg]// 
@@ -68,20 +65,20 @@ All other symbols are terminals.
   |  |  **|**  | //Type// //Id// ``=`` //Exp// 
   |  |  **|**  | ``const`` //Arg// 
   | //Stm// | -> | //Exp// ``;`` 
-  |  |  **|**  | //Type// //Id// ``=`` //Exp// ``;`` 
-  |  |  **|**  | //Type// //Id// ``,`` //[Id]// ``=`` //Exp// ``;`` 
+  |  |  **|**  | //Type// //[Id]// ``=`` //Exp// ``;`` 
   |  |  **|**  | ``return`` //Exp// ``;`` 
   |  |  **|**  | ``while`` ``(`` //Exp// ``)`` //Stm// 
   |  |  **|**  | ``do`` //Stm// ``while`` ``(`` //Exp// ``)`` ``;`` 
   |  |  **|**  | ``for`` ``(`` //Stm// ``;`` //Exp// ``;`` //Exp// ``)`` //Stm// 
   |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// ``;`` 
-  | //[Id]// | -> | **eps**
-  |  |  **|**  | //Id// 
+  | //[Id]// | -> | //Id// 
   |  |  **|**  | //Id// ``,`` //[Id]// 
   | //Exp// | -> | //Integer// 
   |  |  **|**  | //String// 
-  |  |  **|**  | //IdT// ``::`` //[IdT]// 
   |  |  **|**  | //Exp// ``<<`` //Exp// 
+  |  |  **|**  | //Exp1// 
+  | //Exp1// | -> | //IdT// ``::`` //[IdT]// 
+  |  |  **|**  | ``(`` //Exp// ``)`` 
   | //[IdT]// | -> | **eps**
   |  |  **|**  | //IdT// 
   |  |  **|**  | //IdT// ``::`` //[IdT]// 
