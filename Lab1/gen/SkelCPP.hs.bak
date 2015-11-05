@@ -79,7 +79,7 @@ transExp x = case x of
 transType :: Type -> Result
 transType x = case x of
   TInt  -> failure x
-  TTemplate id type'  -> failure x
+  TVec type'  -> failure x
   TQConst names  -> failure x
 
 

@@ -5,34 +5,53 @@ comment "//" ;
 comment "/*" "*/" ;
 comment "#" ;
 
-DFun. Def ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
+DFun. Def 		::= Type Id "(" [Arg] ")" Body ;
+DFunIn. Def 	::= "inline" Type Id "(" [Arg] ")" Body ;
 separator Arg "," ;
 terminator Stm "" ;
 
-TArg. Arg ::= Type ;
-IdArg. Arg ::= Type Id ;
-DArg. Arg ::= Type Id "=" Exp ;
-CArg. Arg ::= "const" Arg ;
+DType. Def 	::= "typedef" Type Id ";" ;
+DInit. Def 	::= Type [Id] "=" Exp ";" ;
+DDEc. Def	::= Type [Id] ";" ;
+DStruc. Def ::= "struct" Id "{" [Decs] "}" ";" ;
+terminator Decs ";" ;
 
-SExp. Stm ::= Exp ";" ;
-SDec. Stm ::= Type [Id] "=" Exp ";" ;
+DUsing. Def	::= "using" [Name] ";" ;
+
+Dec. Decs 	::= Type [Id];
+
+EBody. Body ::= ";" ;
+Body. Body  ::= "{" [Stm] "}" ;
+
+TArg. Arg 	::= Type ;
+IdArg. Arg 	::= Type Id ;
+DArg. Arg 	::= Type Id "=" Exp ;
+CArg. Arg 	::= "const" Arg ;
+
+SExp. Stm 	::= Exp ";" ;
+SDecl. Stm	::= Type [Id] ";" ;
+SInit. Stm 	::= Type [Id] "=" Exp ";" ;
 separator nonempty Id "," ;
 
-SReturn. Stm ::= "return" Exp ";" ;
-SWhile. Stm ::= "while" "(" Exp ")" Stm ;
-SDo. Stm ::= "do" Stm "while" "(" Exp ")" ";" ;
-SFor. Stm ::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
-SIf. Stm ::= "if" "(" Exp ")" Stm ";" ;
+SReturn. Stm 	::= "return" Exp ";" ;
+SWhile. Stm 	::= "while" "(" Exp ")" Stm ;
+SDo. Stm 		::= "do" Stm "while" "(" Exp ")" ";" ;
+SFor. Stm 		::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
+SIf. Stm 		::= "if" "(" Exp ")" Stm ";" ;
+STypeD. Stm 	::= "typedef" Type Id ";" ;
 
-EInt. Exp     ::= Integer ;
-EString. Exp  ::= String ;
-EQConst. Exp1  ::= IdT "::" [IdT] ;
-separator IdT "::" ;
+EInt. Exp16     	::= Integer ;
+EString. Exp16  	::= String ;
+EQConst. Exp15  	::= [Name] ;
+separator nonempty Name "::" ;
+Name. Name 		::= Id ;
 
-ELShift. Exp  ::= Exp "<<" Exp ;
-coercions Exp 1 ;
+ELShift. Exp10  	::= Exp10 "<<" Exp11 ;
+ERShift. Exp10 	::= Exp10 ">>" Exp11 ;
+coercions Exp 16 ;
 
-TInt. Type  ::= Integer ;
+TInt. Type  	::= "int" ;
+TTemplate. Type	::= Id "<" Type ">" ;
+TQConst. Type 	::= [Name] ;
 
 token Id (letter (letter | digit | '_')*) ;
-token IdT (letter (letter | digit | '_')*) ;

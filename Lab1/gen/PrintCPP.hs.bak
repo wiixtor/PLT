@@ -168,7 +168,7 @@ instance Print Exp where
 instance Print Type where
   prt i e = case e of
    TInt  -> prPrec i 0 (concatD [doc (showString "int")])
-   TTemplate id type' -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 0 type' , doc (showString ">")])
+   TVec type' -> prPrec i 0 (concatD [doc (showString "vector") , doc (showString "<") , prt 0 type' , doc (showString ">")])
    TQConst names -> prPrec i 0 (concatD [prt 0 names])
 
 

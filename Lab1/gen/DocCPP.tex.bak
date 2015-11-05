@@ -47,7 +47,7 @@ The reserved words used in CPP are the following: \\
 {\reserved{const}} &{\reserved{do}} &{\reserved{for}} \\
 {\reserved{if}} &{\reserved{inline}} &{\reserved{int}} \\
 {\reserved{return}} &{\reserved{struct}} &{\reserved{typedef}} \\
-{\reserved{using}} &{\reserved{while}} & \\
+{\reserved{using}} &{\reserved{vector}} &{\reserved{while}} \\
 \end{tabular}\\
 
 The symbols used in CPP are the following: \\
@@ -220,7 +220,7 @@ All other symbols are terminals.\\
 
 \begin{tabular}{lll}
 {\nonterminal{Type}} & {\arrow}  &{\terminal{int}}  \\
- & {\delimit}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{Type}} {\terminal{{$>$}}}  \\
+ & {\delimit}  &{\terminal{vector}} {\terminal{{$<$}}} {\nonterminal{Type}} {\terminal{{$>$}}}  \\
  & {\delimit}  &{\nonterminal{ListName}}  \\
 \end{tabular}\\
 

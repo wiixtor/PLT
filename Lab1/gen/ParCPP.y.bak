@@ -65,9 +65,10 @@ import ErrM
  'struct' { PT _ (TS _ 18) }
  'typedef' { PT _ (TS _ 19) }
  'using' { PT _ (TS _ 20) }
- 'while' { PT _ (TS _ 21) }
- '{' { PT _ (TS _ 22) }
- '}' { PT _ (TS _ 23) }
+ 'vector' { PT _ (TS _ 21) }
+ 'while' { PT _ (TS _ 22) }
+ '{' { PT _ (TS _ 23) }
+ '}' { PT _ (TS _ 24) }
 
 L_integ  { PT _ (TI $$) }
 L_quoted { PT _ (TL $$) }
@@ -233,7 +234,7 @@ Exp14 : Exp15 { $1 }
 
 Type :: { Type }
 Type : 'int' { TInt } 
-  | Id '<' Type '>' { TTemplate $1 $3 }
+  | 'vector' '<' Type '>' { TVec $3 }
   | ListName { TQConst $1 }
 
 

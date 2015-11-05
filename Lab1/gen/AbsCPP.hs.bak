@@ -60,7 +60,7 @@ data Exp =
 
 data Type =
    TInt
- | TTemplate Id Type
+ | TVec Type
  | TQConst [Name]
   deriving (Eq,Ord,Show)
 

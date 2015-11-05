@@ -32,7 +32,7 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in CPP are the following:
   | ``const`` | ``do`` | ``for`` | ``if``
   | ``inline`` | ``int`` | ``return`` | ``struct``
-  | ``typedef`` | ``using`` | ``while`` | 
+  | ``typedef`` | ``using`` | ``vector`` | ``while``
 
 The symbols used in CPP are the following:
   | ( | ) | , | ;
@@ -109,7 +109,7 @@ All other symbols are terminals.
   | //Exp13// | -> | //Exp14// 
   | //Exp14// | -> | //Exp15// 
   | //Type// | -> | ``int`` 
-  |  |  **|**  | //Id// ``<`` //Type// ``>`` 
+  |  |  **|**  | ``vector`` ``<`` //Type// ``>`` 
   |  |  **|**  | //[Name]// 
 
 
