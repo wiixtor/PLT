@@ -34,20 +34,23 @@ SInit. Stm 	::= Type [Id] "=" Exp ";" ;
 separator nonempty Id "," ;
 
 SReturn. Stm 	::= "return" Exp ";" ;
-SWhile. Stm 	::= "while" "(" Exp ")" Stm ;
-SDo. Stm 		::= "do" Stm "while" "(" Exp ")" ";" ;
-SFor. Stm 		::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
-SIf. Stm 		::= "if" "(" Exp ")" Stm ";" ;
+SWhile.	 Stm 	::= "while" "(" Exp ")" Stm ;
+SDo. 	Stm		::= "do" Stm "while" "(" Exp ")" ";" ;
+SFor. 	Stm		::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
+SIf. 	Stm		::= "if" "(" Exp ")" Stm ";" ;
 STypeD. Stm 	::= "typedef" Type Id ";" ;
 
-EInt. Exp16     	::= Integer ;
-EString. Exp16  	::= String ;
+ELitteral Exp16		::= Litteral ;
 EQConst. Exp15  	::= [Name] ;
+
 separator nonempty Name "::" ;
-Name. Name 		::= Id ;
+Name. Name 			::= Id ;
+
+IntL 	Litteral	::= Integer ;
+StringL Litteral	::= String ;
 
 ELShift. Exp10  	::= Exp10 "<<" Exp11 ;
-ERShift. Exp10 	::= Exp10 ">>" Exp11 ;
+ERShift. Exp10 		::= Exp10 ">>" Exp11 ;
 coercions Exp 16 ;
 
 TInt. Type  	::= "int" ;
