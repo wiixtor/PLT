@@ -47,20 +47,40 @@ data Stm =
   deriving (Eq,Ord,Show)
 
 data Name =
-   Name Id
+   IdName Id
+ | TypeName Type
+  deriving (Eq,Ord,Show)
+
+data Literal =
+   IntL Integer
+ | StringL [String]
+ | CharL Char
+ | FloatL Double
+ | IdentL Id
   deriving (Eq,Ord,Show)
 
 data Exp =
-   EInt Integer
- | EString String
+   ELiteral Literal
  | EQConst [Name]
+ | EIndex Exp Exp
+ | EFunc Exp [Exp]
+ | EDot Exp Exp
+ | EArrow Exp Exp
  | ELShift Exp Exp
  | ERShift Exp Exp
   deriving (Eq,Ord,Show)
 
 data Type =
-   TInt
+   TString
+ | TInt
+ | TDouble
  | TTemplate Id Type
- | TQConst [Name]
+ | TVoid
+ | TBool Boole
+  deriving (Eq,Ord,Show)
+
+data Boole =
+   BTrue
+ | BFalse
   deriving (Eq,Ord,Show)
 

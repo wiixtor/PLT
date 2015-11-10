@@ -1,0 +1,4 @@
+int main()
+{
+		return "Enter all your homework grades," " followed by end-of-file: ";
+}

@@ -19,7 +19,7 @@ $i = [$l $d _ ']          -- identifier character
 $u = [\0-\255]          -- universal: any character
 
 @rsyms =    -- symbols and non-identifier-like reserved words
-   \( | \) | \, | \; | \= | \{ | \} | \: \: | \< \< | \> \> | \< | \>
+   \( | \) | \, | \; | \= | \{ | \} | \[ | \] | \. | \- \> | \: \: | \< \< | \> \> | \< | \>
 
 :-
 "//" [.]* ; -- Toss single line comments
@@ -32,9 +32,9 @@ $l ($l | $d | \_)* { tok (\p s -> PT p (eitherResIdent (T_Id . share) s)) }
 
 $l $i*   { tok (\p s -> PT p (eitherResIdent (TV . share) s)) }
 \" ([$u # [\" \\ \n]] | (\\ (\" | \\ | \' | n | t)))* \"{ tok (\p s -> PT p (TL $ share $ unescapeInitTail s)) }
-
+\' ($u # [\' \\] | \\ [\\ \' n t]) \'  { tok (\p s -> PT p (TC $ share s))  }
 $d+      { tok (\p s -> PT p (TI $ share s))    }
-
+$d+ \. $d+ (e (\-)? $d+)? { tok (\p s -> PT p (TD $ share s)) }
 
 {
 
@@ -89,7 +89,7 @@ eitherResIdent tv s = treeFind resWords
                               | s > a  = treeFind right
                               | s == a = t
 
-resWords = b "do" 12 (b "<" 6 (b "," 3 (b ")" 2 (b "(" 1 N N) N) (b ";" 5 (b "::" 4 N N) N)) (b ">" 9 (b "=" 8 (b "<<" 7 N N) N) (b "const" 11 (b ">>" 10 N N) N))) (b "struct" 18 (b "inline" 15 (b "if" 14 (b "for" 13 N N) N) (b "return" 17 (b "int" 16 N N) N)) (b "while" 21 (b "using" 20 (b "typedef" 19 N N) N) (b "}" 23 (b "{" 22 N N) N)))
+resWords = b "double" 17 (b "<<" 9 (b "." 5 (b "," 3 (b ")" 2 (b "(" 1 N N) N) (b "->" 4 N N)) (b ";" 7 (b "::" 6 N N) (b "<" 8 N N))) (b "[" 13 (b ">" 11 (b "=" 10 N N) (b ">>" 12 N N)) (b "const" 15 (b "]" 14 N N) (b "do" 16 N N)))) (b "struct" 25 (b "inline" 21 (b "for" 19 (b "false" 18 N N) (b "if" 20 N N)) (b "return" 23 (b "int" 22 N N) (b "string" 24 N N))) (b "void" 29 (b "typedef" 27 (b "true" 26 N N) (b "using" 28 N N)) (b "{" 31 (b "while" 30 N N) (b "}" 32 N N))))
    where b s n = let bs = id s
                   in B bs (TS bs n)
 

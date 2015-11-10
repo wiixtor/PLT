@@ -21,8 +21,12 @@ import ErrM
 %name pListId ListId
 %name pExp16 Exp16
 %name pExp15 Exp15
+%name pExp14 Exp14
+%name pListExp ListExp
 %name pListName ListName
 %name pName Name
+%name pLiteral Literal
+%name pListString ListString
 %name pExp10 Exp10
 %name pExp Exp
 %name pExp1 Exp1
@@ -37,8 +41,8 @@ import ErrM
 %name pExp11 Exp11
 %name pExp12 Exp12
 %name pExp13 Exp13
-%name pExp14 Exp14
 %name pType Type
+%name pBoole Boole
 
 -- no lexer declaration
 %monad { Err } { thenM } { returnM }
@@ -48,28 +52,39 @@ import ErrM
  '(' { PT _ (TS _ 1) }
  ')' { PT _ (TS _ 2) }
  ',' { PT _ (TS _ 3) }
- '::' { PT _ (TS _ 4) }
- ';' { PT _ (TS _ 5) }
- '<' { PT _ (TS _ 6) }
- '<<' { PT _ (TS _ 7) }
- '=' { PT _ (TS _ 8) }
- '>' { PT _ (TS _ 9) }
- '>>' { PT _ (TS _ 10) }
- 'const' { PT _ (TS _ 11) }
- 'do' { PT _ (TS _ 12) }
- 'for' { PT _ (TS _ 13) }
- 'if' { PT _ (TS _ 14) }
- 'inline' { PT _ (TS _ 15) }
- 'int' { PT _ (TS _ 16) }
- 'return' { PT _ (TS _ 17) }
- 'struct' { PT _ (TS _ 18) }
- 'typedef' { PT _ (TS _ 19) }
- 'using' { PT _ (TS _ 20) }
- 'while' { PT _ (TS _ 21) }
- '{' { PT _ (TS _ 22) }
- '}' { PT _ (TS _ 23) }
+ '->' { PT _ (TS _ 4) }
+ '.' { PT _ (TS _ 5) }
+ '::' { PT _ (TS _ 6) }
+ ';' { PT _ (TS _ 7) }
+ '<' { PT _ (TS _ 8) }
+ '<<' { PT _ (TS _ 9) }
+ '=' { PT _ (TS _ 10) }
+ '>' { PT _ (TS _ 11) }
+ '>>' { PT _ (TS _ 12) }
+ '[' { PT _ (TS _ 13) }
+ ']' { PT _ (TS _ 14) }
+ 'const' { PT _ (TS _ 15) }
+ 'do' { PT _ (TS _ 16) }
+ 'double' { PT _ (TS _ 17) }
+ 'false' { PT _ (TS _ 18) }
+ 'for' { PT _ (TS _ 19) }
+ 'if' { PT _ (TS _ 20) }
+ 'inline' { PT _ (TS _ 21) }
+ 'int' { PT _ (TS _ 22) }
+ 'return' { PT _ (TS _ 23) }
+ 'string' { PT _ (TS _ 24) }
+ 'struct' { PT _ (TS _ 25) }
+ 'true' { PT _ (TS _ 26) }
+ 'typedef' { PT _ (TS _ 27) }
+ 'using' { PT _ (TS _ 28) }
+ 'void' { PT _ (TS _ 29) }
+ 'while' { PT _ (TS _ 30) }
+ '{' { PT _ (TS _ 31) }
+ '}' { PT _ (TS _ 32) }
 
 L_integ  { PT _ (TI $$) }
+L_charac { PT _ (TC $$) }
+L_doubl  { PT _ (TD $$) }
 L_quoted { PT _ (TL $$) }
 L_Id { PT _ (T_Id $$) }
 L_err    { _ }
@@ -78,6 +93,8 @@ L_err    { _ }
 %%
 
 Integer :: { Integer } : L_integ  { (read ( $1)) :: Integer }
+Char    :: { Char }    : L_charac { (read ( $1)) :: Char }
+Double  :: { Double }  : L_doubl  { (read ( $1)) :: Double }
 String  :: { String }  : L_quoted {  $1 }
 Id    :: { Id} : L_Id { Id ($1)}
 
@@ -150,14 +167,27 @@ ListId : Id { (:[]) $1 }
 
 
 Exp16 :: { Exp }
-Exp16 : Integer { EInt $1 } 
-  | String { EString $1 }
+Exp16 : Literal { ELiteral $1 } 
+  | ListName { EQConst $1 }
   | '(' Exp ')' { $2 }
 
 
 Exp15 :: { Exp }
-Exp15 : ListName { EQConst $1 } 
+Exp15 : Exp15 '[' Exp ']' { EIndex $1 $3 } 
+  | Exp16 '(' ListExp ')' { EFunc $1 $3 }
   | Exp16 { $1 }
+
+
+Exp14 :: { Exp }
+Exp14 : Exp14 '.' Exp15 { EDot $1 $3 } 
+  | Exp14 '->' Exp15 { EArrow $1 $3 }
+  | Exp15 { $1 }
+
+
+ListExp :: { [Exp] }
+ListExp : {- empty -} { [] } 
+  | Exp { (:[]) $1 }
+  | Exp ',' ListExp { (:) $1 $3 }
 
 
 ListName :: { [Name] }
@@ -166,7 +196,21 @@ ListName : Name { (:[]) $1 }
 
 
 Name :: { Name }
-Name : Id { Name $1 } 
+Name : Id { IdName $1 } 
+  | Type { TypeName $1 }
+
+
+Literal :: { Literal }
+Literal : Integer { IntL $1 } 
+  | ListString { StringL $1 }
+  | Char { CharL $1 }
+  | Double { FloatL $1 }
+  | Id { IdentL $1 }
+
+
+ListString :: { [String] }
+ListString : String { (:[]) $1 } 
+  | String ListString { (:) $1 $2 }
 
 
 Exp10 :: { Exp }
@@ -227,14 +271,18 @@ Exp13 :: { Exp }
 Exp13 : Exp14 { $1 } 
 
 
-Exp14 :: { Exp }
-Exp14 : Exp15 { $1 } 
-
-
 Type :: { Type }
-Type : 'int' { TInt } 
+Type : 'string' { TString } 
+  | 'int' { TInt }
+  | 'double' { TDouble }
   | Id '<' Type '>' { TTemplate $1 $3 }
-  | ListName { TQConst $1 }
+  | 'void' { TVoid }
+  | Boole { TBool $1 }
+
+
+Boole :: { Boole }
+Boole : 'true' { BTrue } 
+  | 'false' { BFalse }
 
 
 

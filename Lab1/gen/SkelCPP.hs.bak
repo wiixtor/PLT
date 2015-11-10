@@ -64,14 +64,27 @@ transStm x = case x of
 
 transName :: Name -> Result
 transName x = case x of
-  Name id  -> failure x
+  IdName id  -> failure x
+  TypeName type'  -> failure x
+
+
+transLiteral :: Literal -> Result
+transLiteral x = case x of
+  IntL n  -> failure x
+  StringL strs  -> failure x
+  CharL c  -> failure x
+  FloatL d  -> failure x
+  IdentL id  -> failure x
 
 
 transExp :: Exp -> Result
 transExp x = case x of
-  EInt n  -> failure x
-  EString str  -> failure x
+  ELiteral literal  -> failure x
   EQConst names  -> failure x
+  EIndex exp1 exp2  -> failure x
+  EFunc exp exps  -> failure x
+  EDot exp1 exp2  -> failure x
+  EArrow exp1 exp2  -> failure x
   ELShift exp1 exp2  -> failure x
   ERShift exp1 exp2  -> failure x
 
@@ -79,8 +92,16 @@ transExp x = case x of
 transType :: Type -> Result
 transType x = case x of
   TInt  -> failure x
-  TVec type'  -> failure x
-  TQConst names  -> failure x
+  TDouble  -> failure x
+  TTemplate id type'  -> failure x
+  TVoid  -> failure x
+  TBool boole  -> failure x
+
+
+transBoole :: Boole -> Result
+transBoole x = case x of
+  BTrue  -> failure x
+  BFalse  -> failure x
 
 
 

@@ -5,56 +5,74 @@ comment "//" ;
 comment "/*" "*/" ;
 comment "#" ;
 
-DFun. Def 		::= Type Id "(" [Arg] ")" Body ;
-DFunIn. Def 	::= "inline" Type Id "(" [Arg] ")" Body ;
+DFun. Def         ::= Type Id "(" [Arg] ")" Body ;
+DFunIn. Def       ::= "inline" Type Id "(" [Arg] ")" Body ;
 separator Arg "," ;
 terminator Stm "" ;
 
-DType. Def 	::= "typedef" Type Id ";" ;
-DInit. Def 	::= Type [Id] "=" Exp ";" ;
-DDEc. Def	::= Type [Id] ";" ;
+DType. Def  ::= "typedef" Type Id ";" ;
+DInit. Def  ::= Type [Id] "=" Exp ";" ;
+DDEc. Def   ::= Type [Id] ";" ;
 DStruc. Def ::= "struct" Id "{" [Decs] "}" ";" ;
 terminator Decs ";" ;
 
-DUsing. Def	::= "using" [Name] ";" ;
+DUsing. Def ::= "using" [Name] ";" ;
 
-Dec. Decs 	::= Type [Id];
+Dec. Decs   ::= Type [Id];
 
 EBody. Body ::= ";" ;
 Body. Body  ::= "{" [Stm] "}" ;
 
-TArg. Arg 	::= Type ;
-IdArg. Arg 	::= Type Id ;
-DArg. Arg 	::= Type Id "=" Exp ;
-CArg. Arg 	::= "const" Arg ;
+TArg. Arg   ::= Type ;
+IdArg. Arg  ::= Type Id ;
+DArg. Arg   ::= Type Id "=" Exp ;
+CArg. Arg   ::= "const" Arg ;
 
-SExp. Stm 	::= Exp ";" ;
-SDecl. Stm	::= Type [Id] ";" ;
-SInit. Stm 	::= Type [Id] "=" Exp ";" ;
+SExp. Stm   ::= Exp ";" ;
+SDecl. Stm  ::= Type [Id] ";" ;
+SInit. Stm  ::= Type [Id] "=" Exp ";" ;
 separator nonempty Id "," ;
 
-SReturn. Stm 	::= "return" Exp ";" ;
-SWhile.	 Stm 	::= "while" "(" Exp ")" Stm ;
-SDo. 	Stm		::= "do" Stm "while" "(" Exp ")" ";" ;
-SFor. 	Stm		::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
-SIf. 	Stm		::= "if" "(" Exp ")" Stm ";" ;
-STypeD. Stm 	::= "typedef" Type Id ";" ;
+SReturn. Stm  ::= "return" Exp ";" ;
+SWhile.  Stm  ::= "while" "(" Exp ")" Stm ;
+SDo.     Stm  ::= "do" Stm "while" "(" Exp ")" ";" ;
+SFor.    Stm  ::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
+SIf.     Stm  ::= "if" "(" Exp ")" Stm ";" ;
+STypeD.  Stm  ::= "typedef" Type Id ";" ;
 
-ELitteral Exp16		::= Litteral ;
-EQConst. Exp15  	::= [Name] ;
+ELiteral. Exp16 ::= Literal ;
+EQConst.  Exp16 ::= [Name] ;
+EIndex.   Exp15 ::= Exp15 "[" Exp "]" ;
+EFunc.    Exp15 ::= Exp16 "(" [Exp] ")" ;
+EDot.     Exp14 ::= Exp14 "." Exp15 ;
+EArrow.   Exp14 ::= Exp14 "->" Exp15 ;
 
+separator Exp "," ;
 separator nonempty Name "::" ;
-Name. Name 			::= Id ;
+IdName.   Name    ::= Id ;
+TypeName. Name    ::= Type ;
 
-IntL 	Litteral	::= Integer ;
-StringL Litteral	::= String ;
+IntL.    Literal ::= Integer ;
+StringL. Literal ::= [String] ;
+CharL.   Literal ::= Char ;
+FloatL.  Literal ::= Double ;
+IdentL.  Literal ::= Id ;
 
-ELShift. Exp10  	::= Exp10 "<<" Exp11 ;
-ERShift. Exp10 		::= Exp10 ">>" Exp11 ;
+separator nonempty String "" ;
+
+ELShift. Exp10  ::= Exp10 "<<" Exp11 ;
+ERShift. Exp10  ::= Exp10 ">>" Exp11 ;
 coercions Exp 16 ;
 
-TInt. Type  	::= "int" ;
-TTemplate. Type	::= Id "<" Type ">" ;
-TQConst. Type 	::= [Name] ;
+TString. Type     ::= "string" ;
+TInt. Type        ::= "int" ;
+TDouble. Type     ::= "double" ;
+TTemplate. Type   ::= Id "<" Type ">" ;
+TQConst. Type     ::= [Name] ;
+TVoid. Type       ::= "void" ;
+TBool. Type       ::= Boole ;
+
+BTrue. Boole  ::= "true" ;
+BFalse. Boole ::= "false" ;
 
 token Id (letter (letter | digit | '_')*) ;

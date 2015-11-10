@@ -150,26 +150,52 @@ instance Print Stm where
 
 instance Print Name where
   prt i e = case e of
-   Name id -> prPrec i 0 (concatD [prt 0 id])
+   IdName id -> prPrec i 0 (concatD [prt 0 id])
+   TypeName type' -> prPrec i 0 (concatD [prt 0 type'])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
    x:xs -> (concatD [prt 0 x , doc (showString "::") , prt 0 xs])
 
+instance Print Literal where
+  prt i e = case e of
+   IntL n -> prPrec i 0 (concatD [prt 0 n])
+   StringL strs -> prPrec i 0 (concatD [prt 0 strs])
+   CharL c -> prPrec i 0 (concatD [prt 0 c])
+   FloatL d -> prPrec i 0 (concatD [prt 0 d])
+   IdentL id -> prPrec i 0 (concatD [prt 0 id])
+
+
 instance Print Exp where
   prt i e = case e of
-   EInt n -> prPrec i 16 (concatD [prt 0 n])
-   EString str -> prPrec i 16 (concatD [prt 0 str])
-   EQConst names -> prPrec i 15 (concatD [prt 0 names])
+   ELiteral literal -> prPrec i 16 (concatD [prt 0 literal])
+   EQConst names -> prPrec i 16 (concatD [prt 0 names])
+   EIndex exp0 exp -> prPrec i 15 (concatD [prt 15 exp0 , doc (showString "[") , prt 0 exp , doc (showString "]")])
+   EFunc exp exps -> prPrec i 15 (concatD [prt 16 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
+   EDot exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString ".") , prt 15 exp])
+   EArrow exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString "->") , prt 15 exp])
    ELShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString "<<") , prt 11 exp])
    ERShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString ">>") , prt 11 exp])
 
+  prtList es = case es of
+   [] -> (concatD [])
+   [x] -> (concatD [prt 0 x])
+   x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
 
 instance Print Type where
   prt i e = case e of
+   TString  -> prPrec i 0 (concatD [doc (showString "string")])
    TInt  -> prPrec i 0 (concatD [doc (showString "int")])
+   TDouble  -> prPrec i 0 (concatD [doc (showString "double")])
    TTemplate id type' -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 0 type' , doc (showString ">")])
-   TQConst names -> prPrec i 0 (concatD [prt 0 names])
+   TVoid  -> prPrec i 0 (concatD [doc (showString "void")])
+   TBool boole -> prPrec i 0 (concatD [prt 0 boole])
+
+
+instance Print Boole where
+  prt i e = case e of
+   BTrue  -> prPrec i 0 (concatD [doc (showString "true")])
+   BFalse  -> prPrec i 0 (concatD [doc (showString "false")])
 
 
 
