@@ -137,11 +137,12 @@ instance Print Stm where
    SExp exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
    SDecl type' ids -> prPrec i 0 (concatD [prt 0 type' , prt 0 ids , doc (showString ";")])
    SInit type' ids exp -> prPrec i 0 (concatD [prt 0 type' , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
+   SConst type' ids exp -> prPrec i 0 (concatD [doc (showString "const") , prt 0 type' , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
    SReturn exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SDo stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
-   SFor stm0 exp1 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 stm0 , doc (showString ";") , prt 0 exp1 , doc (showString ";") , prt 0 exp , doc (showString ")") , prt 0 stm])
-   SIf exp stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
+   SFor stm0 stm1 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 stm0 , prt 0 stm1 , prt 0 exp , doc (showString ")") , prt 0 stm])
+   SIf exp stm else' -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm , prt 0 else'])
    STypeD type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
    SBlock stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
 
@@ -150,6 +151,12 @@ instance Print Stm where
    [] -> (concatD [])
    x:xs -> (concatD [prt 0 x , prt 0 xs])
    x:xs -> (concatD [prt 0 x , prt 0 xs])
+
+instance Print Else where
+  prt i e = case e of
+   RElse stm -> prPrec i 0 (concatD [doc (showString "else") , prt 0 stm])
+   REmpty  -> prPrec i 0 (concatD [])
+
 
 instance Print Exp where
   prt i e = case e of
@@ -194,7 +201,7 @@ instance Print Exp where
 instance Print Name where
   prt i e = case e of
    IdName id -> prPrec i 0 (concatD [prt 0 id])
-   TypeName type' -> prPrec i 0 (concatD [prt 1 type'])
+   TypeName type' -> prPrec i 0 (concatD [prt 2 type'])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
@@ -211,13 +218,20 @@ instance Print Literal where
 
 instance Print Type where
   prt i e = case e of
-   TString  -> prPrec i 1 (concatD [doc (showString "string")])
-   TInt  -> prPrec i 1 (concatD [doc (showString "int")])
-   TDouble  -> prPrec i 1 (concatD [doc (showString "double")])
-   TTemplate id type' -> prPrec i 1 (concatD [prt 0 id , doc (showString "<") , prt 0 type' , doc (showString ">")])
-   TQConst names -> prPrec i 0 (concatD [prt 0 names])
-   TVoid  -> prPrec i 1 (concatD [doc (showString "void")])
-   TBool boole -> prPrec i 1 (concatD [prt 0 boole])
+   TString  -> prPrec i 2 (concatD [doc (showString "string")])
+   TInt  -> prPrec i 2 (concatD [doc (showString "int")])
+   TDouble  -> prPrec i 2 (concatD [doc (showString "double")])
+   TTemplate id targ -> prPrec i 2 (concatD [prt 0 id , doc (showString "<") , prt 0 targ , doc (showString ">")])
+   TQConst names -> prPrec i 1 (concatD [prt 0 names])
+   TVoid  -> prPrec i 2 (concatD [doc (showString "void")])
+   TBool boole -> prPrec i 2 (concatD [prt 0 boole])
+   TRef type' -> prPrec i 0 (concatD [prt 1 type' , doc (showString "&")])
+
+
+instance Print TArg where
+  prt i e = case e of
+   TArgT type' -> prPrec i 0 (concatD [prt 1 type'])
+   TArgM type' id -> prPrec i 0 (concatD [prt 1 type' , doc (showString ",") , prt 0 id])
 
 
 instance Print Boole where

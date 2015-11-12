@@ -31,16 +31,21 @@ CArg. Arg   ::= "const" Arg ;
 SExp. Stm   ::= Exp ";" ;
 SDecl. Stm  ::= Type [Id] ";" ;
 SInit. Stm  ::= Type [Id] "=" Exp ";" ;
+SConst. Stm ::= "const" Type [Id] "=" Exp ";" ;
 separator nonempty Id "," ;
 
 SReturn. Stm  ::= "return" Exp ";" ;
 SWhile.  Stm  ::= "while" "(" Exp ")" Stm ;
 SDo.     Stm  ::= "do" Stm "while" "(" Exp ")" ";" ;
-SFor.    Stm  ::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
-SIf.     Stm  ::= "if" "(" Exp ")" Stm ;
+SFor.    Stm  ::= "for" "(" Stm Stm Exp ")" Stm ;
+SIf.     Stm  ::= "if" "(" Exp ")" Stm Else ;
 STypeD.  Stm  ::= "typedef" Type Id ";" ;
 SBlock.  Stm  ::= "{" [Stm] "}" ;
 separator Stm "" ;
+
+
+RElse. Else  ::=  "else" Stm ;
+REmpty. Else ::= ;
 
 ELiteral. Exp16 ::= Literal ;
 EQConst.  Exp16 ::= [Name] ;
@@ -80,7 +85,7 @@ coercions Exp 16 ;
 separator Exp "," ;
 separator nonempty Name "::" ;
 IdName.   Name    ::= Id ;
-TypeName. Name    ::= Type1 ;
+TypeName. Name    ::= Type2 ;
 
 IntL.    Literal ::= Integer ;
 StringL. Literal ::= [String] ;
@@ -91,15 +96,19 @@ IdentL.  Literal ::= Id ;
 separator nonempty String "" ;
 
 
-TString. Type1    ::= "string" ;
-TInt. Type1       ::= "int" ;
-TDouble. Type1    ::= "double" ;
-TTemplate. Type1  ::= Id "<" Type ">" ;
-TQConst. Type     ::= [Name] ;
-TVoid. Type1      ::= "void" ;
-TBool. Type1      ::= Boole ;
+TString. Type2    ::= "string" ;
+TInt. Type2       ::= "int" ;
+TDouble. Type2    ::= "double" ;
+TTemplate. Type2  ::= Id "<" TArg ">" ;
+TQConst. Type1    ::= [Name] ;
+TVoid. Type2      ::= "void" ;
+TBool. Type2      ::= Boole ;
+TRef.  Type       ::= Type1 "&" ;
 
-coercions Type 1 ;
+coercions Type 2 ;
+
+TArgT. TArg    ::= Type1 ;
+TArgM. TArg    ::= Type1 "," Id ;
 
 BTrue. Boole  ::= "true" ;
 BFalse. Boole ::= "false" ;

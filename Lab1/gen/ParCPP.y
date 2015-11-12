@@ -19,6 +19,7 @@ import ErrM
 %name pArg Arg
 %name pStm Stm
 %name pListId ListId
+%name pElse Else
 %name pExp16 Exp16
 %name pExp15 Exp15
 %name pExp14 Exp14
@@ -41,8 +42,10 @@ import ErrM
 %name pName Name
 %name pLiteral Literal
 %name pListString ListString
+%name pType2 Type2
 %name pType1 Type1
 %name pType Type
+%name pTArg TArg
 %name pBoole Boole
 
 -- no lexer declaration
@@ -53,54 +56,56 @@ import ErrM
  '!' { PT _ (TS _ 1) }
  '!=' { PT _ (TS _ 2) }
  '%' { PT _ (TS _ 3) }
- '&&' { PT _ (TS _ 4) }
- '(' { PT _ (TS _ 5) }
- ')' { PT _ (TS _ 6) }
- '*' { PT _ (TS _ 7) }
- '+' { PT _ (TS _ 8) }
- '++' { PT _ (TS _ 9) }
- '+=' { PT _ (TS _ 10) }
- ',' { PT _ (TS _ 11) }
- '-' { PT _ (TS _ 12) }
- '--' { PT _ (TS _ 13) }
- '-=' { PT _ (TS _ 14) }
- '->' { PT _ (TS _ 15) }
- '.' { PT _ (TS _ 16) }
- '/' { PT _ (TS _ 17) }
- ':' { PT _ (TS _ 18) }
- '::' { PT _ (TS _ 19) }
- ';' { PT _ (TS _ 20) }
- '<' { PT _ (TS _ 21) }
- '<<' { PT _ (TS _ 22) }
- '<=' { PT _ (TS _ 23) }
- '=' { PT _ (TS _ 24) }
- '==' { PT _ (TS _ 25) }
- '>' { PT _ (TS _ 26) }
- '>=' { PT _ (TS _ 27) }
- '>>' { PT _ (TS _ 28) }
- '?' { PT _ (TS _ 29) }
- '[' { PT _ (TS _ 30) }
- ']' { PT _ (TS _ 31) }
- 'const' { PT _ (TS _ 32) }
- 'do' { PT _ (TS _ 33) }
- 'double' { PT _ (TS _ 34) }
- 'false' { PT _ (TS _ 35) }
- 'for' { PT _ (TS _ 36) }
- 'if' { PT _ (TS _ 37) }
- 'inline' { PT _ (TS _ 38) }
- 'int' { PT _ (TS _ 39) }
- 'return' { PT _ (TS _ 40) }
- 'string' { PT _ (TS _ 41) }
- 'struct' { PT _ (TS _ 42) }
- 'throw' { PT _ (TS _ 43) }
- 'true' { PT _ (TS _ 44) }
- 'typedef' { PT _ (TS _ 45) }
- 'using' { PT _ (TS _ 46) }
- 'void' { PT _ (TS _ 47) }
- 'while' { PT _ (TS _ 48) }
- '{' { PT _ (TS _ 49) }
- '||' { PT _ (TS _ 50) }
- '}' { PT _ (TS _ 51) }
+ '&' { PT _ (TS _ 4) }
+ '&&' { PT _ (TS _ 5) }
+ '(' { PT _ (TS _ 6) }
+ ')' { PT _ (TS _ 7) }
+ '*' { PT _ (TS _ 8) }
+ '+' { PT _ (TS _ 9) }
+ '++' { PT _ (TS _ 10) }
+ '+=' { PT _ (TS _ 11) }
+ ',' { PT _ (TS _ 12) }
+ '-' { PT _ (TS _ 13) }
+ '--' { PT _ (TS _ 14) }
+ '-=' { PT _ (TS _ 15) }
+ '->' { PT _ (TS _ 16) }
+ '.' { PT _ (TS _ 17) }
+ '/' { PT _ (TS _ 18) }
+ ':' { PT _ (TS _ 19) }
+ '::' { PT _ (TS _ 20) }
+ ';' { PT _ (TS _ 21) }
+ '<' { PT _ (TS _ 22) }
+ '<<' { PT _ (TS _ 23) }
+ '<=' { PT _ (TS _ 24) }
+ '=' { PT _ (TS _ 25) }
+ '==' { PT _ (TS _ 26) }
+ '>' { PT _ (TS _ 27) }
+ '>=' { PT _ (TS _ 28) }
+ '>>' { PT _ (TS _ 29) }
+ '?' { PT _ (TS _ 30) }
+ '[' { PT _ (TS _ 31) }
+ ']' { PT _ (TS _ 32) }
+ 'const' { PT _ (TS _ 33) }
+ 'do' { PT _ (TS _ 34) }
+ 'double' { PT _ (TS _ 35) }
+ 'else' { PT _ (TS _ 36) }
+ 'false' { PT _ (TS _ 37) }
+ 'for' { PT _ (TS _ 38) }
+ 'if' { PT _ (TS _ 39) }
+ 'inline' { PT _ (TS _ 40) }
+ 'int' { PT _ (TS _ 41) }
+ 'return' { PT _ (TS _ 42) }
+ 'string' { PT _ (TS _ 43) }
+ 'struct' { PT _ (TS _ 44) }
+ 'throw' { PT _ (TS _ 45) }
+ 'true' { PT _ (TS _ 46) }
+ 'typedef' { PT _ (TS _ 47) }
+ 'using' { PT _ (TS _ 48) }
+ 'void' { PT _ (TS _ 49) }
+ 'while' { PT _ (TS _ 50) }
+ '{' { PT _ (TS _ 51) }
+ '||' { PT _ (TS _ 52) }
+ '}' { PT _ (TS _ 53) }
 
 L_integ  { PT _ (TI $$) }
 L_charac { PT _ (TC $$) }
@@ -175,11 +180,12 @@ Stm :: { Stm }
 Stm : Exp ';' { SExp $1 } 
   | Type ListId ';' { SDecl $1 $2 }
   | Type ListId '=' Exp ';' { SInit $1 $2 $4 }
+  | 'const' Type ListId '=' Exp ';' { SConst $2 $3 $5 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
-  | 'for' '(' Stm ';' Exp ';' Exp ')' Stm { SFor $3 $5 $7 $9 }
-  | 'if' '(' Exp ')' Stm { SIf $3 $5 }
+  | 'for' '(' Stm Stm Exp ')' Stm { SFor $3 $4 $5 $7 }
+  | 'if' '(' Exp ')' Stm Else { SIf $3 $5 $6 }
   | 'typedef' Type Id ';' { STypeD $2 $3 }
   | '{' ListStm '}' { SBlock $2 }
 
@@ -187,6 +193,11 @@ Stm : Exp ';' { SExp $1 }
 ListId :: { [Id] }
 ListId : Id { (:[]) $1 } 
   | Id ',' ListId { (:) $1 $3 }
+
+
+Else :: { Else }
+Else : 'else' Stm { RElse $2 } 
+  | {- empty -} { REmpty }
 
 
 Exp16 :: { Exp }
@@ -302,7 +313,7 @@ ListName : Name { (:[]) $1 }
 
 Name :: { Name }
 Name : Id { IdName $1 } 
-  | Type1 { TypeName $1 }
+  | Type2 { TypeName $1 }
 
 
 Literal :: { Literal }
@@ -318,19 +329,29 @@ ListString : String { (:[]) $1 }
   | String ListString { (:) $1 $2 }
 
 
-Type1 :: { Type }
-Type1 : 'string' { TString } 
+Type2 :: { Type }
+Type2 : 'string' { TString } 
   | 'int' { TInt }
   | 'double' { TDouble }
-  | Id '<' Type '>' { TTemplate $1 $3 }
+  | Id '<' TArg '>' { TTemplate $1 $3 }
   | 'void' { TVoid }
   | Boole { TBool $1 }
   | '(' Type ')' { $2 }
 
 
+Type1 :: { Type }
+Type1 : ListName { TQConst $1 } 
+  | Type2 { $1 }
+
+
 Type :: { Type }
-Type : ListName { TQConst $1 } 
+Type : Type1 '&' { TRef $1 } 
   | Type1 { $1 }
+
+
+TArg :: { TArg }
+TArg : Type1 { TArgT $1 } 
+  | Type1 ',' Id { TArgM $1 $3 }
 
 
 Boole :: { Boole }

@@ -1,7 +1,4 @@
-
-int main()
-{
-
-	if (size == 0) {
+	int main() {
+		for (Rule::const_iterator i = r.begin(); i != r.end(); ++i)
+			gen_aux(g, *i, ret);
 	}
-}

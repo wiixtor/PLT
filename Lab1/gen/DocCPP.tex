@@ -55,11 +55,11 @@ The reserved words used in CPP are the following: \\
 
 \begin{tabular}{lll}
 {\reserved{const}} &{\reserved{do}} &{\reserved{double}} \\
-{\reserved{false}} &{\reserved{for}} &{\reserved{if}} \\
-{\reserved{inline}} &{\reserved{int}} &{\reserved{return}} \\
-{\reserved{string}} &{\reserved{struct}} &{\reserved{throw}} \\
-{\reserved{true}} &{\reserved{typedef}} &{\reserved{using}} \\
-{\reserved{void}} &{\reserved{while}} & \\
+{\reserved{else}} &{\reserved{false}} &{\reserved{for}} \\
+{\reserved{if}} &{\reserved{inline}} &{\reserved{int}} \\
+{\reserved{return}} &{\reserved{string}} &{\reserved{struct}} \\
+{\reserved{throw}} &{\reserved{true}} &{\reserved{typedef}} \\
+{\reserved{using}} &{\reserved{void}} &{\reserved{while}} \\
 \end{tabular}\\
 
 The symbols used in CPP are the following: \\
@@ -76,7 +76,7 @@ The symbols used in CPP are the following: \\
 {\symb{{$>$}{$=$}}} &{\symb{{$=$}{$=$}}} &{\symb{!{$=$}}} \\
 {\symb{\&\&}} &{\symb{{$|$}{$|$}}} &{\symb{{$+$}{$=$}}} \\
 {\symb{{$-$}{$=$}}} &{\symb{?}} &{\symb{:}} \\
-{\symb{::}} & & \\
+{\symb{::}} &{\symb{\&}} & \\
 \end{tabular}\\
 
 \subsection*{Comments}
@@ -145,11 +145,12 @@ All other symbols are terminals.\\
 {\nonterminal{Stm}} & {\arrow}  &{\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{;}}  \\
  & {\delimit}  &{\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{const}} {\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{return}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
- & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Stm}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
- & {\delimit}  &{\terminal{if}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
+ & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Stm}} {\nonterminal{Stm}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
+ & {\delimit}  &{\terminal{if}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}} {\nonterminal{Else}}  \\
  & {\delimit}  &{\terminal{typedef}} {\nonterminal{Type}} {\nonterminal{Id}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{\{}} {\nonterminal{ListStm}} {\terminal{\}}}  \\
 \end{tabular}\\
@@ -157,6 +158,11 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{ListId}} & {\arrow}  &{\nonterminal{Id}}  \\
  & {\delimit}  &{\nonterminal{Id}} {\terminal{,}} {\nonterminal{ListId}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Else}} & {\arrow}  &{\terminal{else}} {\nonterminal{Stm}}  \\
+ & {\delimit}  &{\emptyP} \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -272,7 +278,7 @@ All other symbols are terminals.\\
 
 \begin{tabular}{lll}
 {\nonterminal{Name}} & {\arrow}  &{\nonterminal{Id}}  \\
- & {\delimit}  &{\nonterminal{Type1}}  \\
+ & {\delimit}  &{\nonterminal{Type2}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -289,18 +295,28 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type1}} & {\arrow}  &{\terminal{string}}  \\
+{\nonterminal{Type2}} & {\arrow}  &{\terminal{string}}  \\
  & {\delimit}  &{\terminal{int}}  \\
  & {\delimit}  &{\terminal{double}}  \\
- & {\delimit}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{Type}} {\terminal{{$>$}}}  \\
+ & {\delimit}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{TArg}} {\terminal{{$>$}}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\nonterminal{Boole}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type}} & {\arrow}  &{\nonterminal{ListName}}  \\
+{\nonterminal{Type1}} & {\arrow}  &{\nonterminal{ListName}}  \\
+ & {\delimit}  &{\nonterminal{Type2}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Type}} & {\arrow}  &{\nonterminal{Type1}} {\terminal{\&}}  \\
  & {\delimit}  &{\nonterminal{Type1}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{TArg}} & {\arrow}  &{\nonterminal{Type1}}  \\
+ & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{Id}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}

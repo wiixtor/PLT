@@ -54,13 +54,20 @@ transStm x = case x of
   SExp exp  -> failure x
   SDecl type' ids  -> failure x
   SInit type' ids exp  -> failure x
+  SConst type' ids exp  -> failure x
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
   SDo stm exp  -> failure x
-  SFor stm1 exp2 exp3 stm4  -> failure x
-  SIf exp stm  -> failure x
+  SFor arg exp1 exp2 stm3  -> failure x
+  SIf exp stm else'  -> failure x
   STypeD type' id  -> failure x
   SBlock stms  -> failure x
+
+
+transElse :: Else -> Result
+transElse x = case x of
+  RElse stm  -> failure x
+  REmpty  -> failure x
 
 
 transExp :: Exp -> Result
@@ -90,6 +97,13 @@ transExp x = case x of
   EGreatE exp1 exp2  -> failure x
   EEquals exp1 exp2  -> failure x
   EInEqual exp1 exp2  -> failure x
+  EConj exp1 exp2  -> failure x
+  EDisj exp1 exp2  -> failure x
+  EAss exp1 exp2  -> failure x
+  EAddAss exp1 exp2  -> failure x
+  ESubAss exp1 exp2  -> failure x
+  ECond exp1 exp2 exp3  -> failure x
+  EExept exp  -> failure x
 
 
 transName :: Name -> Result
@@ -112,10 +126,17 @@ transType x = case x of
   TString  -> failure x
   TInt  -> failure x
   TDouble  -> failure x
-  TTemplate id type'  -> failure x
+  TTemplate id targ  -> failure x
   TQConst names  -> failure x
   TVoid  -> failure x
   TBool boole  -> failure x
+  TRef type'  -> failure x
+
+
+transTArg :: TArg -> Result
+transTArg x = case x of
+  TArgT type'  -> failure x
+  TArgM type' id  -> failure x
 
 
 transBoole :: Boole -> Result

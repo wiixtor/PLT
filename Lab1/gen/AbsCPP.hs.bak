@@ -38,13 +38,19 @@ data Stm =
    SExp Exp
  | SDecl Type [Id]
  | SInit Type [Id] Exp
+ | SConst Type [Id] Exp
  | SReturn Exp
  | SWhile Exp Stm
  | SDo Stm Exp
- | SFor Stm Exp Exp Stm
- | SIf Exp Stm
+ | SFor Arg Exp Exp Stm
+ | SIf Exp Stm Else
  | STypeD Type Id
  | SBlock [Stm]
+  deriving (Eq,Ord,Show)
+
+data Else =
+   RElse Stm
+ | REmpty
   deriving (Eq,Ord,Show)
 
 data Exp =
@@ -73,6 +79,13 @@ data Exp =
  | EGreatE Exp Exp
  | EEquals Exp Exp
  | EInEqual Exp Exp
+ | EConj Exp Exp
+ | EDisj Exp Exp
+ | EAss Exp Exp
+ | EAddAss Exp Exp
+ | ESubAss Exp Exp
+ | ECond Exp Exp Exp
+ | EExept Exp
   deriving (Eq,Ord,Show)
 
 data Name =
@@ -92,10 +105,16 @@ data Type =
    TString
  | TInt
  | TDouble
- | TTemplate Id Type
+ | TTemplate Id TArg
  | TQConst [Name]
  | TVoid
  | TBool Boole
+ | TRef Type
+  deriving (Eq,Ord,Show)
+
+data TArg =
+   TArgT Type
+ | TArgM Type Id
   deriving (Eq,Ord,Show)
 
 data Boole =
