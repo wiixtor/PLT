@@ -42,14 +42,20 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in CPP are the following:
   | ``const`` | ``do`` | ``double`` | ``false``
   | ``for`` | ``if`` | ``inline`` | ``int``
-  | ``return`` | ``string`` | ``struct`` | ``true``
-  | ``typedef`` | ``using`` | ``void`` | ``while``
+  | ``return`` | ``string`` | ``struct`` | ``throw``
+  | ``true`` | ``typedef`` | ``using`` | ``void``
+  | ``while`` |  |  | 
 
 The symbols used in CPP are the following:
   | ( | ) | , | ;
   | = | { | } | [
-  | ] | . | -> | ::
-  | << | >> | < | >
+  | ] | . | -> | ++
+  | -- | * | ! | /
+  | % | + | - | <<
+  | >> | < | > | <=
+  | >= | == | != | &&
+  | || | += | -= | ?
+  | : | :: |  | 
 
 ===Comments===
 Single-line comments begin with //, #.Multiple-line comments are  enclosed with /* and */.
@@ -75,6 +81,8 @@ All other symbols are terminals.
   |  |  **|**  | //Arg// ``,`` //[Arg]// 
   | //[Stm]// | -> | **eps**
   |  |  **|**  | //Stm// //[Stm]// 
+  |  |  **|**  | **eps**
+  |  |  **|**  | //Stm// //[Stm]// 
   | //[Decs]// | -> | **eps**
   |  |  **|**  | //Decs// ``;`` //[Decs]// 
   | //Decs// | -> | //Type// //[Id]// 
@@ -91,8 +99,9 @@ All other symbols are terminals.
   |  |  **|**  | ``while`` ``(`` //Exp// ``)`` //Stm// 
   |  |  **|**  | ``do`` //Stm// ``while`` ``(`` //Exp// ``)`` ``;`` 
   |  |  **|**  | ``for`` ``(`` //Stm// ``;`` //Exp// ``;`` //Exp// ``)`` //Stm// 
-  |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// ``;`` 
+  |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// 
   |  |  **|**  | ``typedef`` //Type// //Id// ``;`` 
+  |  |  **|**  | ``{`` //[Stm]// ``}`` 
   | //[Id]// | -> | //Id// 
   |  |  **|**  | //Id// ``,`` //[Id]// 
   | //Exp16// | -> | //Literal// 
@@ -103,14 +112,54 @@ All other symbols are terminals.
   |  |  **|**  | //Exp16// 
   | //Exp14// | -> | //Exp14// ``.`` //Exp15// 
   |  |  **|**  | //Exp14// ``->`` //Exp15// 
+  |  |  **|**  | //Exp14// ``++`` 
+  |  |  **|**  | //Exp14// ``--`` 
   |  |  **|**  | //Exp15// 
+  | //Exp13// | -> | ``++`` //Exp13// 
+  |  |  **|**  | ``--`` //Exp13// 
+  |  |  **|**  | ``*`` //Exp13// 
+  |  |  **|**  | ``!`` //Exp13// 
+  |  |  **|**  | //Exp14// 
+  | //Exp12// | -> | //Exp12// ``*`` //Exp13// 
+  |  |  **|**  | //Exp12// ``/`` //Exp13// 
+  |  |  **|**  | //Exp12// ``%`` //Exp13// 
+  |  |  **|**  | //Exp13// 
+  | //Exp11// | -> | //Exp11// ``+`` //Exp12// 
+  |  |  **|**  | //Exp11// ``-`` //Exp12// 
+  |  |  **|**  | //Exp12// 
+  | //Exp10// | -> | //Exp10// ``<<`` //Exp11// 
+  |  |  **|**  | //Exp10// ``>>`` //Exp11// 
+  |  |  **|**  | //Exp11// 
+  | //Exp9// | -> | //Exp9// ``<`` //Exp9// 
+  |  |  **|**  | //Exp9// ``>`` //Exp9// 
+  |  |  **|**  | //Exp9// ``<=`` //Exp9// 
+  |  |  **|**  | //Exp9// ``>=`` //Exp9// 
+  |  |  **|**  | //Exp10// 
+  | //Exp8// | -> | //Exp8// ``==`` //Exp8// 
+  |  |  **|**  | //Exp8// ``!=`` //Exp8// 
+  |  |  **|**  | //Exp9// 
+  | //Exp4// | -> | //Exp4// ``&&`` //Exp5// 
+  |  |  **|**  | //Exp5// 
+  | //Exp3// | -> | //Exp3// ``||`` //Exp4// 
+  |  |  **|**  | //Exp4// 
+  | //Exp2// | -> | //Exp3// ``=`` //Exp2// 
+  |  |  **|**  | //Exp3// ``+=`` //Exp2// 
+  |  |  **|**  | //Exp3// ``-=`` //Exp2// 
+  |  |  **|**  | //Exp3// ``?`` //Exp2// ``:`` //Exp2// 
+  |  |  **|**  | //Exp3// 
+  | //Exp// | -> | ``throw`` //Exp2// 
+  |  |  **|**  | //Exp1// 
+  | //Exp1// | -> | //Exp2// 
+  | //Exp5// | -> | //Exp6// 
+  | //Exp6// | -> | //Exp7// 
+  | //Exp7// | -> | //Exp8// 
   | //[Exp]// | -> | **eps**
   |  |  **|**  | //Exp// 
   |  |  **|**  | //Exp// ``,`` //[Exp]// 
   | //[Name]// | -> | //Name// 
   |  |  **|**  | //Name// ``::`` //[Name]// 
   | //Name// | -> | //Id// 
-  |  |  **|**  | //Type// 
+  |  |  **|**  | //Type1// 
   | //Literal// | -> | //Integer// 
   |  |  **|**  | //[String]// 
   |  |  **|**  | //Char// 
@@ -118,28 +167,15 @@ All other symbols are terminals.
   |  |  **|**  | //Id// 
   | //[String]// | -> | //String// 
   |  |  **|**  | //String// //[String]// 
-  | //Exp10// | -> | //Exp10// ``<<`` //Exp11// 
-  |  |  **|**  | //Exp10// ``>>`` //Exp11// 
-  |  |  **|**  | //Exp11// 
-  | //Exp// | -> | //Exp1// 
-  | //Exp1// | -> | //Exp2// 
-  | //Exp2// | -> | //Exp3// 
-  | //Exp3// | -> | //Exp4// 
-  | //Exp4// | -> | //Exp5// 
-  | //Exp5// | -> | //Exp6// 
-  | //Exp6// | -> | //Exp7// 
-  | //Exp7// | -> | //Exp8// 
-  | //Exp8// | -> | //Exp9// 
-  | //Exp9// | -> | //Exp10// 
-  | //Exp11// | -> | //Exp12// 
-  | //Exp12// | -> | //Exp13// 
-  | //Exp13// | -> | //Exp14// 
-  | //Type// | -> | ``string`` 
+  | //Type1// | -> | ``string`` 
   |  |  **|**  | ``int`` 
   |  |  **|**  | ``double`` 
   |  |  **|**  | //Id// ``<`` //Type// ``>`` 
   |  |  **|**  | ``void`` 
   |  |  **|**  | //Boole// 
+  |  |  **|**  | ``(`` //Type// ``)`` 
+  | //Type// | -> | //[Name]// 
+  |  |  **|**  | //Type1// 
   | //Boole// | -> | ``true`` 
   |  |  **|**  | ``false`` 
 

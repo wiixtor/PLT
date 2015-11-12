@@ -141,17 +141,60 @@ instance Print Stm where
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SDo stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
    SFor stm0 exp1 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 stm0 , doc (showString ";") , prt 0 exp1 , doc (showString ";") , prt 0 exp , doc (showString ")") , prt 0 stm])
-   SIf exp stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm , doc (showString ";")])
+   SIf exp stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    STypeD type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
+   SBlock stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
 
   prtList es = case es of
    [] -> (concatD [])
+   [] -> (concatD [])
    x:xs -> (concatD [prt 0 x , prt 0 xs])
+   x:xs -> (concatD [prt 0 x , prt 0 xs])
+
+instance Print Exp where
+  prt i e = case e of
+   ELiteral literal -> prPrec i 16 (concatD [prt 0 literal])
+   EQConst names -> prPrec i 16 (concatD [prt 0 names])
+   EIndex exp0 exp -> prPrec i 15 (concatD [prt 15 exp0 , doc (showString "[") , prt 0 exp , doc (showString "]")])
+   EFunc exp exps -> prPrec i 15 (concatD [prt 16 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
+   EDot exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString ".") , prt 15 exp])
+   EArrow exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString "->") , prt 15 exp])
+   EIncR exp -> prPrec i 14 (concatD [prt 14 exp , doc (showString "++")])
+   EDecR exp -> prPrec i 14 (concatD [prt 14 exp , doc (showString "--")])
+   EIncL exp -> prPrec i 13 (concatD [doc (showString "++") , prt 13 exp])
+   EDecL exp -> prPrec i 13 (concatD [doc (showString "--") , prt 13 exp])
+   EDefr exp -> prPrec i 13 (concatD [doc (showString "*") , prt 13 exp])
+   ENeg exp -> prPrec i 13 (concatD [doc (showString "!") , prt 13 exp])
+   EMul exp0 exp -> prPrec i 12 (concatD [prt 12 exp0 , doc (showString "*") , prt 13 exp])
+   EDiv exp0 exp -> prPrec i 12 (concatD [prt 12 exp0 , doc (showString "/") , prt 13 exp])
+   ERem exp0 exp -> prPrec i 12 (concatD [prt 12 exp0 , doc (showString "%") , prt 13 exp])
+   EAdd exp0 exp -> prPrec i 11 (concatD [prt 11 exp0 , doc (showString "+") , prt 12 exp])
+   ESub exp0 exp -> prPrec i 11 (concatD [prt 11 exp0 , doc (showString "-") , prt 12 exp])
+   ELShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString "<<") , prt 11 exp])
+   ERShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString ">>") , prt 11 exp])
+   ELesser exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString "<") , prt 9 exp])
+   EGreater exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString ">") , prt 9 exp])
+   ELesserE exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString "<=") , prt 9 exp])
+   EGreatE exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString ">=") , prt 9 exp])
+   EEquals exp0 exp -> prPrec i 8 (concatD [prt 8 exp0 , doc (showString "==") , prt 8 exp])
+   EInEqual exp0 exp -> prPrec i 8 (concatD [prt 8 exp0 , doc (showString "!=") , prt 8 exp])
+   EConj exp0 exp -> prPrec i 4 (concatD [prt 4 exp0 , doc (showString "&&") , prt 5 exp])
+   EDisj exp0 exp -> prPrec i 3 (concatD [prt 3 exp0 , doc (showString "||") , prt 4 exp])
+   EAss exp0 exp -> prPrec i 2 (concatD [prt 3 exp0 , doc (showString "=") , prt 2 exp])
+   EAddAss exp0 exp -> prPrec i 2 (concatD [prt 3 exp0 , doc (showString "+=") , prt 2 exp])
+   ESubAss exp0 exp -> prPrec i 2 (concatD [prt 3 exp0 , doc (showString "-=") , prt 2 exp])
+   ECond exp0 exp1 exp -> prPrec i 2 (concatD [prt 3 exp0 , doc (showString "?") , prt 2 exp1 , doc (showString ":") , prt 2 exp])
+   EExept exp -> prPrec i 0 (concatD [doc (showString "throw") , prt 2 exp])
+
+  prtList es = case es of
+   [] -> (concatD [])
+   [x] -> (concatD [prt 0 x])
+   x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
 
 instance Print Name where
   prt i e = case e of
    IdName id -> prPrec i 0 (concatD [prt 0 id])
-   TypeName type' -> prPrec i 0 (concatD [prt 0 type'])
+   TypeName type' -> prPrec i 0 (concatD [prt 1 type'])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
@@ -166,30 +209,15 @@ instance Print Literal where
    IdentL id -> prPrec i 0 (concatD [prt 0 id])
 
 
-instance Print Exp where
-  prt i e = case e of
-   ELiteral literal -> prPrec i 16 (concatD [prt 0 literal])
-   EQConst names -> prPrec i 16 (concatD [prt 0 names])
-   EIndex exp0 exp -> prPrec i 15 (concatD [prt 15 exp0 , doc (showString "[") , prt 0 exp , doc (showString "]")])
-   EFunc exp exps -> prPrec i 15 (concatD [prt 16 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
-   EDot exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString ".") , prt 15 exp])
-   EArrow exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString "->") , prt 15 exp])
-   ELShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString "<<") , prt 11 exp])
-   ERShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString ">>") , prt 11 exp])
-
-  prtList es = case es of
-   [] -> (concatD [])
-   [x] -> (concatD [prt 0 x])
-   x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
-
 instance Print Type where
   prt i e = case e of
-   TString  -> prPrec i 0 (concatD [doc (showString "string")])
-   TInt  -> prPrec i 0 (concatD [doc (showString "int")])
-   TDouble  -> prPrec i 0 (concatD [doc (showString "double")])
-   TTemplate id type' -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 0 type' , doc (showString ">")])
-   TVoid  -> prPrec i 0 (concatD [doc (showString "void")])
-   TBool boole -> prPrec i 0 (concatD [prt 0 boole])
+   TString  -> prPrec i 1 (concatD [doc (showString "string")])
+   TInt  -> prPrec i 1 (concatD [doc (showString "int")])
+   TDouble  -> prPrec i 1 (concatD [doc (showString "double")])
+   TTemplate id type' -> prPrec i 1 (concatD [prt 0 id , doc (showString "<") , prt 0 type' , doc (showString ">")])
+   TQConst names -> prPrec i 0 (concatD [prt 0 names])
+   TVoid  -> prPrec i 1 (concatD [doc (showString "void")])
+   TBool boole -> prPrec i 1 (concatD [prt 0 boole])
 
 
 instance Print Boole where

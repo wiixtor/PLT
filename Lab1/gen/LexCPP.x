@@ -19,7 +19,7 @@ $i = [$l $d _ ']          -- identifier character
 $u = [\0-\255]          -- universal: any character
 
 @rsyms =    -- symbols and non-identifier-like reserved words
-   \( | \) | \, | \; | \= | \{ | \} | \[ | \] | \. | \- \> | \: \: | \< \< | \> \> | \< | \>
+   \( | \) | \, | \; | \= | \{ | \} | \[ | \] | \. | \- \> | \+ \+ | \- \- | \* | \! | \/ | \% | \+ | \- | \< \< | \> \> | \< | \> | \< \= | \> \= | \= \= | \! \= | \& \& | \| \| | \+ \= | \- \= | \? | \: | \: \:
 
 :-
 "//" [.]* ; -- Toss single line comments
@@ -89,7 +89,7 @@ eitherResIdent tv s = treeFind resWords
                               | s > a  = treeFind right
                               | s == a = t
 
-resWords = b "double" 17 (b "<<" 9 (b "." 5 (b "," 3 (b ")" 2 (b "(" 1 N N) N) (b "->" 4 N N)) (b ";" 7 (b "::" 6 N N) (b "<" 8 N N))) (b "[" 13 (b ">" 11 (b "=" 10 N N) (b ">>" 12 N N)) (b "const" 15 (b "]" 14 N N) (b "do" 16 N N)))) (b "struct" 25 (b "inline" 21 (b "for" 19 (b "false" 18 N N) (b "if" 20 N N)) (b "return" 23 (b "int" 22 N N) (b "string" 24 N N))) (b "void" 29 (b "typedef" 27 (b "true" 26 N N) (b "using" 28 N N)) (b "{" 31 (b "while" 30 N N) (b "}" 32 N N))))
+resWords = b ">" 26 (b "--" 13 (b "*" 7 (b "&&" 4 (b "!=" 2 (b "!" 1 N N) (b "%" 3 N N)) (b ")" 6 (b "(" 5 N N) N)) (b "+=" 10 (b "++" 9 (b "+" 8 N N) N) (b "-" 12 (b "," 11 N N) N))) (b ";" 20 (b "/" 17 (b "->" 15 (b "-=" 14 N N) (b "." 16 N N)) (b "::" 19 (b ":" 18 N N) N)) (b "<=" 23 (b "<<" 22 (b "<" 21 N N) N) (b "==" 25 (b "=" 24 N N) N)))) (b "int" 39 (b "do" 33 (b "[" 30 (b ">>" 28 (b ">=" 27 N N) (b "?" 29 N N)) (b "const" 32 (b "]" 31 N N) N)) (b "for" 36 (b "false" 35 (b "double" 34 N N) N) (b "inline" 38 (b "if" 37 N N) N))) (b "using" 46 (b "throw" 43 (b "string" 41 (b "return" 40 N N) (b "struct" 42 N N)) (b "typedef" 45 (b "true" 44 N N) N)) (b "{" 49 (b "while" 48 (b "void" 47 N N) N) (b "}" 51 (b "||" 50 N N) N))))
    where b s n = let bs = id s
                   in B bs (TS bs n)
 

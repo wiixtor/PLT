@@ -60,6 +60,43 @@ transStm x = case x of
   SFor stm1 exp2 exp3 stm4  -> failure x
   SIf exp stm  -> failure x
   STypeD type' id  -> failure x
+  SBlock stms  -> failure x
+
+
+transExp :: Exp -> Result
+transExp x = case x of
+  ELiteral literal  -> failure x
+  EQConst names  -> failure x
+  EIndex exp1 exp2  -> failure x
+  EFunc exp exps  -> failure x
+  EDot exp1 exp2  -> failure x
+  EArrow exp1 exp2  -> failure x
+  EIncR exp  -> failure x
+  EDecR exp  -> failure x
+  EIncL exp  -> failure x
+  EDecL exp  -> failure x
+  EDefr exp  -> failure x
+  ENeg exp  -> failure x
+  EMul exp1 exp2  -> failure x
+  EDiv exp1 exp2  -> failure x
+  ERem exp1 exp2  -> failure x
+  EAdd exp1 exp2  -> failure x
+  ESub exp1 exp2  -> failure x
+  ELShift exp1 exp2  -> failure x
+  ERShift exp1 exp2  -> failure x
+  ELesser exp1 exp2  -> failure x
+  EGreater exp1 exp2  -> failure x
+  ELesserE exp1 exp2  -> failure x
+  EGreatE exp1 exp2  -> failure x
+  EEquals exp1 exp2  -> failure x
+  EInEqual exp1 exp2  -> failure x
+  EConj exp1 exp2  -> failure x
+  EDisj exp1 exp2  -> failure x
+  EAss exp1 exp2  -> failure x
+  EAddAss exp1 exp2  -> failure x
+  ESubAss exp1 exp2  -> failure x
+  ECond exp1 exp2 exp3  -> failure x
+  EExept exp  -> failure x
 
 
 transName :: Name -> Result
@@ -77,24 +114,13 @@ transLiteral x = case x of
   IdentL id  -> failure x
 
 
-transExp :: Exp -> Result
-transExp x = case x of
-  ELiteral literal  -> failure x
-  EQConst names  -> failure x
-  EIndex exp1 exp2  -> failure x
-  EFunc exp exps  -> failure x
-  EDot exp1 exp2  -> failure x
-  EArrow exp1 exp2  -> failure x
-  ELShift exp1 exp2  -> failure x
-  ERShift exp1 exp2  -> failure x
-
-
 transType :: Type -> Result
 transType x = case x of
   TString  -> failure x
   TInt  -> failure x
   TDouble  -> failure x
   TTemplate id type'  -> failure x
+  TQConst names  -> failure x
   TVoid  -> failure x
   TBool boole  -> failure x
 

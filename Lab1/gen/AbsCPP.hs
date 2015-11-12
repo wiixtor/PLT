@@ -44,6 +44,42 @@ data Stm =
  | SFor Stm Exp Exp Stm
  | SIf Exp Stm
  | STypeD Type Id
+ | SBlock [Stm]
+  deriving (Eq,Ord,Show)
+
+data Exp =
+   ELiteral Literal
+ | EQConst [Name]
+ | EIndex Exp Exp
+ | EFunc Exp [Exp]
+ | EDot Exp Exp
+ | EArrow Exp Exp
+ | EIncR Exp
+ | EDecR Exp
+ | EIncL Exp
+ | EDecL Exp
+ | EDefr Exp
+ | ENeg Exp
+ | EMul Exp Exp
+ | EDiv Exp Exp
+ | ERem Exp Exp
+ | EAdd Exp Exp
+ | ESub Exp Exp
+ | ELShift Exp Exp
+ | ERShift Exp Exp
+ | ELesser Exp Exp
+ | EGreater Exp Exp
+ | ELesserE Exp Exp
+ | EGreatE Exp Exp
+ | EEquals Exp Exp
+ | EInEqual Exp Exp
+ | EConj Exp Exp
+ | EDisj Exp Exp
+ | EAss Exp Exp
+ | EAddAss Exp Exp
+ | ESubAss Exp Exp
+ | ECond Exp Exp Exp
+ | EExept Exp
   deriving (Eq,Ord,Show)
 
 data Name =
@@ -59,22 +95,12 @@ data Literal =
  | IdentL Id
   deriving (Eq,Ord,Show)
 
-data Exp =
-   ELiteral Literal
- | EQConst [Name]
- | EIndex Exp Exp
- | EFunc Exp [Exp]
- | EDot Exp Exp
- | EArrow Exp Exp
- | ELShift Exp Exp
- | ERShift Exp Exp
-  deriving (Eq,Ord,Show)
-
 data Type =
    TString
  | TInt
  | TDouble
  | TTemplate Id Type
+ | TQConst [Name]
  | TVoid
  | TBool Boole
   deriving (Eq,Ord,Show)

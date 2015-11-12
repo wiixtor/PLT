@@ -37,8 +37,10 @@ SReturn. Stm  ::= "return" Exp ";" ;
 SWhile.  Stm  ::= "while" "(" Exp ")" Stm ;
 SDo.     Stm  ::= "do" Stm "while" "(" Exp ")" ";" ;
 SFor.    Stm  ::= "for" "(" Stm ";" Exp ";" Exp ")" Stm ;
-SIf.     Stm  ::= "if" "(" Exp ")" Stm ";" ;
+SIf.     Stm  ::= "if" "(" Exp ")" Stm ;
 STypeD.  Stm  ::= "typedef" Type Id ";" ;
+SBlock.  Stm  ::= "{" [Stm] "}" ;
+separator Stm "" ;
 
 ELiteral. Exp16 ::= Literal ;
 EQConst.  Exp16 ::= [Name] ;
@@ -46,11 +48,39 @@ EIndex.   Exp15 ::= Exp15 "[" Exp "]" ;
 EFunc.    Exp15 ::= Exp16 "(" [Exp] ")" ;
 EDot.     Exp14 ::= Exp14 "." Exp15 ;
 EArrow.   Exp14 ::= Exp14 "->" Exp15 ;
+EIncR.    Exp14 ::= Exp14 "++" ;
+EDecR.    Exp14 ::= Exp14 "--" ;
+EIncL.    Exp13 ::= "++" Exp13 ;
+EDecL.    Exp13 ::= "--" Exp13 ;
+EDefr.    Exp13 ::= "*" Exp13 ;
+ENeg.     Exp13 ::= "!" Exp13 ;
+EMul.     Exp12 ::= Exp12 "*" Exp13 ;
+EDiv.     Exp12 ::= Exp12 "/" Exp13 ;
+ERem.     Exp12 ::= Exp12 "%" Exp13 ;
+EAdd.     Exp11 ::= Exp11 "+" Exp12 ;
+ESub.     Exp11 ::= Exp11 "-" Exp12 ;
+ELShift.  Exp10 ::= Exp10 "<<" Exp11 ;
+ERShift.  Exp10 ::= Exp10 ">>" Exp11 ;
+ELesser.  Exp9  ::= Exp9 "<" Exp9 ;
+EGreater. Exp9  ::= Exp9 ">" Exp9 ;
+ELesserE. Exp9  ::= Exp9 "<=" Exp9 ;
+EGreatE.  Exp9  ::= Exp9 ">=" Exp9 ;
+EEquals.  Exp8  ::= Exp8 "==" Exp8 ;
+EInEqual. Exp8  ::= Exp8 "!=" Exp8 ;
+EConj.    Exp4  ::= Exp4 "&&" Exp5 ;
+EDisj.    Exp3  ::= Exp3 "||" Exp4 ;
+EAss.     Exp2  ::= Exp3 "=" Exp2 ;
+EAddAss.  Exp2  ::= Exp3 "+=" Exp2 ;
+ESubAss.  Exp2  ::= Exp3 "-=" Exp2 ;
+ECond.    Exp2 	::= Exp3 "?" Exp2 ":" Exp2 ;
+EExept.   Exp   ::= "throw" Exp2 ;
+coercions Exp 16 ;
+
 
 separator Exp "," ;
 separator nonempty Name "::" ;
 IdName.   Name    ::= Id ;
-TypeName. Name    ::= Type ;
+TypeName. Name    ::= Type1 ;
 
 IntL.    Literal ::= Integer ;
 StringL. Literal ::= [String] ;
@@ -60,17 +90,16 @@ IdentL.  Literal ::= Id ;
 
 separator nonempty String "" ;
 
-ELShift. Exp10  ::= Exp10 "<<" Exp11 ;
-ERShift. Exp10  ::= Exp10 ">>" Exp11 ;
-coercions Exp 16 ;
 
-TString. Type     ::= "string" ;
-TInt. Type        ::= "int" ;
-TDouble. Type     ::= "double" ;
-TTemplate. Type   ::= Id "<" Type ">" ;
+TString. Type1    ::= "string" ;
+TInt. Type1       ::= "int" ;
+TDouble. Type1    ::= "double" ;
+TTemplate. Type1  ::= Id "<" Type ">" ;
 TQConst. Type     ::= [Name] ;
-TVoid. Type       ::= "void" ;
-TBool. Type       ::= Boole ;
+TVoid. Type1      ::= "void" ;
+TBool. Type1      ::= Boole ;
+
+coercions Type 1 ;
 
 BTrue. Boole  ::= "true" ;
 BFalse. Boole ::= "false" ;

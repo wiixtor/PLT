@@ -57,8 +57,9 @@ The reserved words used in CPP are the following: \\
 {\reserved{const}} &{\reserved{do}} &{\reserved{double}} \\
 {\reserved{false}} &{\reserved{for}} &{\reserved{if}} \\
 {\reserved{inline}} &{\reserved{int}} &{\reserved{return}} \\
-{\reserved{struct}} &{\reserved{true}} &{\reserved{typedef}} \\
-{\reserved{using}} &{\reserved{void}} &{\reserved{while}} \\
+{\reserved{string}} &{\reserved{struct}} &{\reserved{true}} \\
+{\reserved{typedef}} &{\reserved{using}} &{\reserved{void}} \\
+{\reserved{while}} & & \\
 \end{tabular}\\
 
 The symbols used in CPP are the following: \\
@@ -67,9 +68,13 @@ The symbols used in CPP are the following: \\
 {\symb{(}} &{\symb{)}} &{\symb{,}} \\
 {\symb{;}} &{\symb{{$=$}}} &{\symb{\{}} \\
 {\symb{\}}} &{\symb{[}} &{\symb{]}} \\
-{\symb{.}} &{\symb{{$-$}{$>$}}} &{\symb{::}} \\
-{\symb{{$<$}{$<$}}} &{\symb{{$>$}{$>$}}} &{\symb{{$<$}}} \\
-{\symb{{$>$}}} & & \\
+{\symb{.}} &{\symb{{$-$}{$>$}}} &{\symb{{$+$}{$+$}}} \\
+{\symb{{$-$}{$-$}}} &{\symb{*}} &{\symb{!}} \\
+{\symb{/}} &{\symb{\%}} &{\symb{{$+$}}} \\
+{\symb{{$-$}}} &{\symb{{$<$}{$<$}}} &{\symb{{$>$}{$>$}}} \\
+{\symb{{$<$}}} &{\symb{{$>$}}} &{\symb{{$<$}{$=$}}} \\
+{\symb{{$>$}{$=$}}} &{\symb{{$=$}{$=$}}} &{\symb{!{$=$}}} \\
+{\symb{::}} & & \\
 \end{tabular}\\
 
 \subsection*{Comments}
@@ -109,6 +114,8 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{ListStm}} & {\arrow}  &{\emptyP} \\
  & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
+ & {\delimit}  &{\emptyP} \\
+ & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -140,8 +147,9 @@ All other symbols are terminals.\\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Stm}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
- & {\delimit}  &{\terminal{if}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{if}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{typedef}} {\nonterminal{Type}} {\nonterminal{Id}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{\{}} {\nonterminal{ListStm}} {\terminal{\}}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -164,42 +172,50 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{Exp14}} & {\arrow}  &{\nonterminal{Exp14}} {\terminal{.}} {\nonterminal{Exp15}}  \\
  & {\delimit}  &{\nonterminal{Exp14}} {\terminal{{$-$}{$>$}}} {\nonterminal{Exp15}}  \\
+ & {\delimit}  &{\nonterminal{Exp14}} {\terminal{{$+$}{$+$}}}  \\
+ & {\delimit}  &{\nonterminal{Exp14}} {\terminal{{$-$}{$-$}}}  \\
  & {\delimit}  &{\nonterminal{Exp15}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{ListExp}} & {\arrow}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Exp}}  \\
- & {\delimit}  &{\nonterminal{Exp}} {\terminal{,}} {\nonterminal{ListExp}}  \\
+{\nonterminal{Exp13}} & {\arrow}  &{\terminal{{$+$}{$+$}}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\terminal{{$-$}{$-$}}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\terminal{*}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\terminal{!}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\nonterminal{Exp14}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{ListName}} & {\arrow}  &{\nonterminal{Name}}  \\
- & {\delimit}  &{\nonterminal{Name}} {\terminal{::}} {\nonterminal{ListName}}  \\
+{\nonterminal{Exp12}} & {\arrow}  &{\nonterminal{Exp12}} {\terminal{*}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\nonterminal{Exp12}} {\terminal{/}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\nonterminal{Exp12}} {\terminal{\%}} {\nonterminal{Exp13}}  \\
+ & {\delimit}  &{\nonterminal{Exp13}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Name}} & {\arrow}  &{\nonterminal{Id}}  \\
- & {\delimit}  &{\nonterminal{Type}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Literal}} & {\arrow}  &{\nonterminal{Integer}}  \\
- & {\delimit}  &{\nonterminal{ListString}}  \\
- & {\delimit}  &{\nonterminal{Char}}  \\
- & {\delimit}  &{\nonterminal{Double}}  \\
- & {\delimit}  &{\nonterminal{Id}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{ListString}} & {\arrow}  &{\nonterminal{String}}  \\
- & {\delimit}  &{\nonterminal{String}} {\nonterminal{ListString}}  \\
+{\nonterminal{Exp11}} & {\arrow}  &{\nonterminal{Exp11}} {\terminal{{$+$}}} {\nonterminal{Exp12}}  \\
+ & {\delimit}  &{\nonterminal{Exp11}} {\terminal{{$-$}}} {\nonterminal{Exp12}}  \\
+ & {\delimit}  &{\nonterminal{Exp12}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
 {\nonterminal{Exp10}} & {\arrow}  &{\nonterminal{Exp10}} {\terminal{{$<$}{$<$}}} {\nonterminal{Exp11}}  \\
  & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$>$}{$>$}}} {\nonterminal{Exp11}}  \\
  & {\delimit}  &{\nonterminal{Exp11}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp9}} {\terminal{{$<$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$<$}{$=$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}{$=$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp8}} {\terminal{{$=$}{$=$}}} {\nonterminal{Exp8}}  \\
+ & {\delimit}  &{\nonterminal{Exp8}} {\terminal{!{$=$}}} {\nonterminal{Exp8}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -235,31 +251,47 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp9}}  \\
+{\nonterminal{ListExp}} & {\arrow}  &{\emptyP} \\
+ & {\delimit}  &{\nonterminal{Exp}}  \\
+ & {\delimit}  &{\nonterminal{Exp}} {\terminal{,}} {\nonterminal{ListExp}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp10}}  \\
+{\nonterminal{ListName}} & {\arrow}  &{\nonterminal{Name}}  \\
+ & {\delimit}  &{\nonterminal{Name}} {\terminal{::}} {\nonterminal{ListName}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp11}} & {\arrow}  &{\nonterminal{Exp12}}  \\
+{\nonterminal{Name}} & {\arrow}  &{\nonterminal{Id}}  \\
+ & {\delimit}  &{\nonterminal{Type1}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp12}} & {\arrow}  &{\nonterminal{Exp13}}  \\
+{\nonterminal{Literal}} & {\arrow}  &{\nonterminal{Integer}}  \\
+ & {\delimit}  &{\nonterminal{ListString}}  \\
+ & {\delimit}  &{\nonterminal{Char}}  \\
+ & {\delimit}  &{\nonterminal{Double}}  \\
+ & {\delimit}  &{\nonterminal{Id}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp13}} & {\arrow}  &{\nonterminal{Exp14}}  \\
+{\nonterminal{ListString}} & {\arrow}  &{\nonterminal{String}}  \\
+ & {\delimit}  &{\nonterminal{String}} {\nonterminal{ListString}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type}} & {\arrow}  &{\terminal{int}}  \\
+{\nonterminal{Type1}} & {\arrow}  &{\terminal{string}}  \\
+ & {\delimit}  &{\terminal{int}}  \\
  & {\delimit}  &{\terminal{double}}  \\
  & {\delimit}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{Type}} {\terminal{{$>$}}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\nonterminal{Boole}}  \\
+ & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Type}} & {\arrow}  &{\nonterminal{ListName}}  \\
+ & {\delimit}  &{\nonterminal{Type1}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}

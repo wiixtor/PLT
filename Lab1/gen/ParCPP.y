@@ -22,25 +22,26 @@ import ErrM
 %name pExp16 Exp16
 %name pExp15 Exp15
 %name pExp14 Exp14
+%name pExp13 Exp13
+%name pExp12 Exp12
+%name pExp11 Exp11
+%name pExp10 Exp10
+%name pExp9 Exp9
+%name pExp8 Exp8
+%name pExp4 Exp4
+%name pExp3 Exp3
+%name pExp2 Exp2
+%name pExp Exp
+%name pExp1 Exp1
+%name pExp5 Exp5
+%name pExp6 Exp6
+%name pExp7 Exp7
 %name pListExp ListExp
 %name pListName ListName
 %name pName Name
 %name pLiteral Literal
 %name pListString ListString
-%name pExp10 Exp10
-%name pExp Exp
-%name pExp1 Exp1
-%name pExp2 Exp2
-%name pExp3 Exp3
-%name pExp4 Exp4
-%name pExp5 Exp5
-%name pExp6 Exp6
-%name pExp7 Exp7
-%name pExp8 Exp8
-%name pExp9 Exp9
-%name pExp11 Exp11
-%name pExp12 Exp12
-%name pExp13 Exp13
+%name pType1 Type1
 %name pType Type
 %name pBoole Boole
 
@@ -49,38 +50,57 @@ import ErrM
 %tokentype { Token }
 
 %token 
- '(' { PT _ (TS _ 1) }
- ')' { PT _ (TS _ 2) }
- ',' { PT _ (TS _ 3) }
- '->' { PT _ (TS _ 4) }
- '.' { PT _ (TS _ 5) }
- '::' { PT _ (TS _ 6) }
- ';' { PT _ (TS _ 7) }
- '<' { PT _ (TS _ 8) }
- '<<' { PT _ (TS _ 9) }
- '=' { PT _ (TS _ 10) }
- '>' { PT _ (TS _ 11) }
- '>>' { PT _ (TS _ 12) }
- '[' { PT _ (TS _ 13) }
- ']' { PT _ (TS _ 14) }
- 'const' { PT _ (TS _ 15) }
- 'do' { PT _ (TS _ 16) }
- 'double' { PT _ (TS _ 17) }
- 'false' { PT _ (TS _ 18) }
- 'for' { PT _ (TS _ 19) }
- 'if' { PT _ (TS _ 20) }
- 'inline' { PT _ (TS _ 21) }
- 'int' { PT _ (TS _ 22) }
- 'return' { PT _ (TS _ 23) }
- 'string' { PT _ (TS _ 24) }
- 'struct' { PT _ (TS _ 25) }
- 'true' { PT _ (TS _ 26) }
- 'typedef' { PT _ (TS _ 27) }
- 'using' { PT _ (TS _ 28) }
- 'void' { PT _ (TS _ 29) }
- 'while' { PT _ (TS _ 30) }
- '{' { PT _ (TS _ 31) }
- '}' { PT _ (TS _ 32) }
+ '!' { PT _ (TS _ 1) }
+ '!=' { PT _ (TS _ 2) }
+ '%' { PT _ (TS _ 3) }
+ '&&' { PT _ (TS _ 4) }
+ '(' { PT _ (TS _ 5) }
+ ')' { PT _ (TS _ 6) }
+ '*' { PT _ (TS _ 7) }
+ '+' { PT _ (TS _ 8) }
+ '++' { PT _ (TS _ 9) }
+ '+=' { PT _ (TS _ 10) }
+ ',' { PT _ (TS _ 11) }
+ '-' { PT _ (TS _ 12) }
+ '--' { PT _ (TS _ 13) }
+ '-=' { PT _ (TS _ 14) }
+ '->' { PT _ (TS _ 15) }
+ '.' { PT _ (TS _ 16) }
+ '/' { PT _ (TS _ 17) }
+ ':' { PT _ (TS _ 18) }
+ '::' { PT _ (TS _ 19) }
+ ';' { PT _ (TS _ 20) }
+ '<' { PT _ (TS _ 21) }
+ '<<' { PT _ (TS _ 22) }
+ '<=' { PT _ (TS _ 23) }
+ '=' { PT _ (TS _ 24) }
+ '==' { PT _ (TS _ 25) }
+ '>' { PT _ (TS _ 26) }
+ '>=' { PT _ (TS _ 27) }
+ '>>' { PT _ (TS _ 28) }
+ '?' { PT _ (TS _ 29) }
+ '[' { PT _ (TS _ 30) }
+ ']' { PT _ (TS _ 31) }
+ 'const' { PT _ (TS _ 32) }
+ 'do' { PT _ (TS _ 33) }
+ 'double' { PT _ (TS _ 34) }
+ 'false' { PT _ (TS _ 35) }
+ 'for' { PT _ (TS _ 36) }
+ 'if' { PT _ (TS _ 37) }
+ 'inline' { PT _ (TS _ 38) }
+ 'int' { PT _ (TS _ 39) }
+ 'return' { PT _ (TS _ 40) }
+ 'string' { PT _ (TS _ 41) }
+ 'struct' { PT _ (TS _ 42) }
+ 'throw' { PT _ (TS _ 43) }
+ 'true' { PT _ (TS _ 44) }
+ 'typedef' { PT _ (TS _ 45) }
+ 'using' { PT _ (TS _ 46) }
+ 'void' { PT _ (TS _ 47) }
+ 'while' { PT _ (TS _ 48) }
+ '{' { PT _ (TS _ 49) }
+ '||' { PT _ (TS _ 50) }
+ '}' { PT _ (TS _ 51) }
 
 L_integ  { PT _ (TI $$) }
 L_charac { PT _ (TC $$) }
@@ -125,7 +145,9 @@ ListArg : {- empty -} { [] }
 
 ListStm :: { [Stm] }
 ListStm : {- empty -} { [] } 
-  | ListStm Stm { flip (:) $1 $2 }
+  | Stm ListStm { (:) $1 $2 }
+  | {- empty -} { [] }
+  | Stm ListStm { (:) $1 $2 }
 
 
 ListDecs :: { [Decs] }
@@ -139,7 +161,7 @@ Decs : Type ListId { Dec $1 $2 }
 
 Body :: { Body }
 Body : ';' { EBody } 
-  | '{' ListStm '}' { Body (reverse $2) }
+  | '{' ListStm '}' { Body $2 }
 
 
 Arg :: { Arg }
@@ -157,8 +179,9 @@ Stm : Exp ';' { SExp $1 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
   | 'for' '(' Stm ';' Exp ';' Exp ')' Stm { SFor $3 $5 $7 $9 }
-  | 'if' '(' Exp ')' Stm ';' { SIf $3 $5 }
+  | 'if' '(' Exp ')' Stm { SIf $3 $5 }
   | 'typedef' Type Id ';' { STypeD $2 $3 }
+  | '{' ListStm '}' { SBlock $2 }
 
 
 ListId :: { [Id] }
@@ -181,7 +204,89 @@ Exp15 : Exp15 '[' Exp ']' { EIndex $1 $3 }
 Exp14 :: { Exp }
 Exp14 : Exp14 '.' Exp15 { EDot $1 $3 } 
   | Exp14 '->' Exp15 { EArrow $1 $3 }
+  | Exp14 '++' { EIncR $1 }
+  | Exp14 '--' { EDecR $1 }
   | Exp15 { $1 }
+
+
+Exp13 :: { Exp }
+Exp13 : '++' Exp13 { EIncL $2 } 
+  | '--' Exp13 { EDecL $2 }
+  | '*' Exp13 { EDefr $2 }
+  | '!' Exp13 { ENeg $2 }
+  | Exp14 { $1 }
+
+
+Exp12 :: { Exp }
+Exp12 : Exp12 '*' Exp13 { EMul $1 $3 } 
+  | Exp12 '/' Exp13 { EDiv $1 $3 }
+  | Exp12 '%' Exp13 { ERem $1 $3 }
+  | Exp13 { $1 }
+
+
+Exp11 :: { Exp }
+Exp11 : Exp11 '+' Exp12 { EAdd $1 $3 } 
+  | Exp11 '-' Exp12 { ESub $1 $3 }
+  | Exp12 { $1 }
+
+
+Exp10 :: { Exp }
+Exp10 : Exp10 '<<' Exp11 { ELShift $1 $3 } 
+  | Exp10 '>>' Exp11 { ERShift $1 $3 }
+  | Exp11 { $1 }
+
+
+Exp9 :: { Exp }
+Exp9 : Exp9 '<' Exp9 { ELesser $1 $3 } 
+  | Exp9 '>' Exp9 { EGreater $1 $3 }
+  | Exp9 '<=' Exp9 { ELesserE $1 $3 }
+  | Exp9 '>=' Exp9 { EGreatE $1 $3 }
+  | Exp10 { $1 }
+
+
+Exp8 :: { Exp }
+Exp8 : Exp8 '==' Exp8 { EEquals $1 $3 } 
+  | Exp8 '!=' Exp8 { EInEqual $1 $3 }
+  | Exp9 { $1 }
+
+
+Exp4 :: { Exp }
+Exp4 : Exp4 '&&' Exp5 { EConj $1 $3 } 
+  | Exp5 { $1 }
+
+
+Exp3 :: { Exp }
+Exp3 : Exp3 '||' Exp4 { EDisj $1 $3 } 
+  | Exp4 { $1 }
+
+
+Exp2 :: { Exp }
+Exp2 : Exp3 '=' Exp2 { EAss $1 $3 } 
+  | Exp3 '+=' Exp2 { EAddAss $1 $3 }
+  | Exp3 '-=' Exp2 { ESubAss $1 $3 }
+  | Exp3 '?' Exp2 ':' Exp2 { ECond $1 $3 $5 }
+  | Exp3 { $1 }
+
+
+Exp :: { Exp }
+Exp : 'throw' Exp2 { EExept $2 } 
+  | Exp1 { $1 }
+
+
+Exp1 :: { Exp }
+Exp1 : Exp2 { $1 } 
+
+
+Exp5 :: { Exp }
+Exp5 : Exp6 { $1 } 
+
+
+Exp6 :: { Exp }
+Exp6 : Exp7 { $1 } 
+
+
+Exp7 :: { Exp }
+Exp7 : Exp8 { $1 } 
 
 
 ListExp :: { [Exp] }
@@ -197,7 +302,7 @@ ListName : Name { (:[]) $1 }
 
 Name :: { Name }
 Name : Id { IdName $1 } 
-  | Type { TypeName $1 }
+  | Type1 { TypeName $1 }
 
 
 Literal :: { Literal }
@@ -213,71 +318,19 @@ ListString : String { (:[]) $1 }
   | String ListString { (:) $1 $2 }
 
 
-Exp10 :: { Exp }
-Exp10 : Exp10 '<<' Exp11 { ELShift $1 $3 } 
-  | Exp10 '>>' Exp11 { ERShift $1 $3 }
-  | Exp11 { $1 }
-
-
-Exp :: { Exp }
-Exp : Exp1 { $1 } 
-
-
-Exp1 :: { Exp }
-Exp1 : Exp2 { $1 } 
-
-
-Exp2 :: { Exp }
-Exp2 : Exp3 { $1 } 
-
-
-Exp3 :: { Exp }
-Exp3 : Exp4 { $1 } 
-
-
-Exp4 :: { Exp }
-Exp4 : Exp5 { $1 } 
-
-
-Exp5 :: { Exp }
-Exp5 : Exp6 { $1 } 
-
-
-Exp6 :: { Exp }
-Exp6 : Exp7 { $1 } 
-
-
-Exp7 :: { Exp }
-Exp7 : Exp8 { $1 } 
-
-
-Exp8 :: { Exp }
-Exp8 : Exp9 { $1 } 
-
-
-Exp9 :: { Exp }
-Exp9 : Exp10 { $1 } 
-
-
-Exp11 :: { Exp }
-Exp11 : Exp12 { $1 } 
-
-
-Exp12 :: { Exp }
-Exp12 : Exp13 { $1 } 
-
-
-Exp13 :: { Exp }
-Exp13 : Exp14 { $1 } 
-
-
-Type :: { Type }
-Type : 'string' { TString } 
+Type1 :: { Type }
+Type1 : 'string' { TString } 
   | 'int' { TInt }
   | 'double' { TDouble }
   | Id '<' Type '>' { TTemplate $1 $3 }
   | 'void' { TVoid }
   | Boole { TBool $1 }
+  | '(' Type ')' { $2 }
+
+
+Type :: { Type }
+Type : ListName { TQConst $1 } 
+  | Type1 { $1 }
 
 
 Boole :: { Boole }
