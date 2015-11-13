@@ -42,7 +42,7 @@ data Stm =
  | SReturn Exp
  | SWhile Exp Stm
  | SDo Stm Exp
- | SFor Arg Exp Exp Stm
+ | SFor Stm Stm Exp Stm
  | SIf Exp Stm Else
  | STypeD Type Id
  | SBlock [Stm]

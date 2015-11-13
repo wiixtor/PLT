@@ -99,8 +99,8 @@ instance Print Def where
    DType type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
    DInit type' ids exp -> prPrec i 0 (concatD [prt 0 type' , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
    DDEc type' ids -> prPrec i 0 (concatD [prt 0 type' , prt 0 ids , doc (showString ";")])
-   DStruc id decss -> prPrec i 0 (concatD [doc (showString "struct") , prt 0 id , doc (showString "{") , prt 0 decss , doc (showString "}") , doc (showString ";")])
    DUsing names -> prPrec i 0 (concatD [doc (showString "using") , prt 0 names , doc (showString ";")])
+   DStruc id decss -> prPrec i 0 (concatD [doc (showString "struct") , prt 0 id , doc (showString "{") , prt 0 decss , doc (showString "}") , doc (showString ";")])
 
   prtList es = case es of
    [] -> (concatD [])
@@ -117,7 +117,7 @@ instance Print Decs where
 instance Print Body where
   prt i e = case e of
    EBody  -> prPrec i 0 (concatD [doc (showString ";")])
-   Body stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
+   FBody stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
 
 
 instance Print Arg where

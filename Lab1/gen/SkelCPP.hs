@@ -26,8 +26,8 @@ transDef x = case x of
   DType type' id  -> failure x
   DInit type' ids exp  -> failure x
   DDEc type' ids  -> failure x
-  DStruc id decss  -> failure x
   DUsing names  -> failure x
+  DStruc id decss  -> failure x
 
 
 transDecs :: Decs -> Result
@@ -38,7 +38,7 @@ transDecs x = case x of
 transBody :: Body -> Result
 transBody x = case x of
   EBody  -> failure x
-  Body stms  -> failure x
+  FBody stms  -> failure x
 
 
 transArg :: Arg -> Result

@@ -149,7 +149,7 @@ All other symbols are terminals.\\
  & {\delimit}  &{\terminal{return}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
- & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Arg}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{;}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
+ & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Stm}} {\nonterminal{Stm}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{if}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}} {\nonterminal{Else}}  \\
  & {\delimit}  &{\terminal{typedef}} {\nonterminal{Type}} {\nonterminal{Id}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{\{}} {\nonterminal{ListStm}} {\terminal{\}}}  \\

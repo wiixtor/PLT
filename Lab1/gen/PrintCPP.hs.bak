@@ -141,7 +141,7 @@ instance Print Stm where
    SReturn exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SDo stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
-   SFor arg exp0 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 arg , doc (showString ";") , prt 0 exp0 , doc (showString ";") , prt 0 exp , doc (showString ")") , prt 0 stm])
+   SFor stm0 stm1 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 stm0 , prt 0 stm1 , prt 0 exp , doc (showString ")") , prt 0 stm])
    SIf exp stm else' -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm , prt 0 else'])
    STypeD type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
    SBlock stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])

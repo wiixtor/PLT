@@ -14,8 +14,8 @@ data Def =
  | DType Type Id
  | DInit Type [Id] Exp
  | DDEc Type [Id]
- | DStruc Id [Decs]
  | DUsing [Name]
+ | DStruc Id [Decs]
   deriving (Eq,Ord,Show)
 
 data Decs =
@@ -24,7 +24,7 @@ data Decs =
 
 data Body =
    EBody
- | Body [Stm]
+ | FBody [Stm]
   deriving (Eq,Ord,Show)
 
 data Arg =

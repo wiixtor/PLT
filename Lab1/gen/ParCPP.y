@@ -11,10 +11,10 @@ import ErrM
 %name pProgram Program
 %name pListDef ListDef
 %name pDef Def
-%name pListArg ListArg
-%name pListStm ListStm
-%name pListDecs ListDecs
 %name pDecs Decs
+%name pListStm ListStm
+%name pListArg ListArg
+%name pListDecs ListDecs
 %name pBody Body
 %name pArg Arg
 %name pStm Stm
@@ -138,14 +138,12 @@ Def : Type Id '(' ListArg ')' Body { DFun $1 $2 $4 $6 }
   | 'typedef' Type Id ';' { DType $2 $3 }
   | Type ListId '=' Exp ';' { DInit $1 $2 $4 }
   | Type ListId ';' { DDEc $1 $2 }
-  | 'struct' Id '{' ListDecs '}' ';' { DStruc $2 (reverse $4) }
   | 'using' ListName ';' { DUsing $2 }
+  | 'struct' Id '{' ListDecs '}' ';' { DStruc $2 (reverse $4) }
 
 
-ListArg :: { [Arg] }
-ListArg : {- empty -} { [] } 
-  | Arg { (:[]) $1 }
-  | Arg ',' ListArg { (:) $1 $3 }
+Decs :: { Decs }
+Decs : Type ListId { Dec $1 $2 } 
 
 
 ListStm :: { [Stm] }
@@ -155,18 +153,20 @@ ListStm : {- empty -} { [] }
   | Stm ListStm { (:) $1 $2 }
 
 
+ListArg :: { [Arg] }
+ListArg : {- empty -} { [] } 
+  | Arg { (:[]) $1 }
+  | Arg ',' ListArg { (:) $1 $3 }
+
+
 ListDecs :: { [Decs] }
 ListDecs : {- empty -} { [] } 
   | ListDecs Decs ';' { flip (:) $1 $2 }
 
 
-Decs :: { Decs }
-Decs : Type ListId { Dec $1 $2 } 
-
-
 Body :: { Body }
 Body : ';' { EBody } 
-  | '{' ListStm '}' { Body $2 }
+  | '{' ListStm '}' { FBody $2 }
 
 
 Arg :: { Arg }

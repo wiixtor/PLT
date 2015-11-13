@@ -58,7 +58,7 @@ transStm x = case x of
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
   SDo stm exp  -> failure x
-  SFor arg exp1 exp2 stm3  -> failure x
+  SFor stm1 stm2 exp3 stm4  -> failure x
   SIf exp stm else'  -> failure x
   STypeD type' id  -> failure x
   SBlock stms  -> failure x

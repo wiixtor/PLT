@@ -184,7 +184,7 @@ Stm : Exp ';' { SExp $1 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
-  | 'for' '(' Arg ';' Exp ';' Exp ')' Stm { SFor $3 $5 $7 $9 }
+  | 'for' '(' Stm Stm Exp ')' Stm { SFor $3 $4 $5 $7 }
   | 'if' '(' Exp ')' Stm Else { SIf $3 $5 $6 }
   | 'typedef' Type Id ';' { STypeD $2 $3 }
   | '{' ListStm '}' { SBlock $2 }
