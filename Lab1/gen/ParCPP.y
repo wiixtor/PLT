@@ -12,7 +12,6 @@ import ErrM
 %name pListDef ListDef
 %name pDef Def
 %name pListArg ListArg
-%name pListStm ListStm
 %name pListDec1 ListDec1
 %name pDec1 Dec1
 %name pDec Dec
@@ -21,6 +20,7 @@ import ErrM
 %name pArg Arg
 %name pStm Stm
 %name pListId ListId
+%name pListStm ListStm
 %name pElse Else
 %name pExp16 Exp16
 %name pExp15 Exp15
@@ -40,15 +40,15 @@ import ErrM
 %name pExp6 Exp6
 %name pExp7 Exp7
 %name pListExp ListExp
-%name pListQConst ListQConst
 %name pQConst QConst
+%name pItem Item
+%name pListItem ListItem
 %name pLiteral Literal
 %name pListString ListString
-%name pType3 Type3
-%name pType2 Type2
 %name pType1 Type1
 %name pType Type
-%name pTArg TArg
+%name pTemplate Template
+%name pListType1 ListType1
 
 -- no lexer declaration
 %monad { Err } { thenM } { returnM }
@@ -97,16 +97,15 @@ import ErrM
  'inline' { PT _ (TS _ 40) }
  'int' { PT _ (TS _ 41) }
  'return' { PT _ (TS _ 42) }
- 'string' { PT _ (TS _ 43) }
- 'struct' { PT _ (TS _ 44) }
- 'throw' { PT _ (TS _ 45) }
- 'typedef' { PT _ (TS _ 46) }
- 'using' { PT _ (TS _ 47) }
- 'void' { PT _ (TS _ 48) }
- 'while' { PT _ (TS _ 49) }
- '{' { PT _ (TS _ 50) }
- '||' { PT _ (TS _ 51) }
- '}' { PT _ (TS _ 52) }
+ 'struct' { PT _ (TS _ 43) }
+ 'throw' { PT _ (TS _ 44) }
+ 'typedef' { PT _ (TS _ 45) }
+ 'using' { PT _ (TS _ 46) }
+ 'void' { PT _ (TS _ 47) }
+ 'while' { PT _ (TS _ 48) }
+ '{' { PT _ (TS _ 49) }
+ '||' { PT _ (TS _ 50) }
+ '}' { PT _ (TS _ 51) }
 
 L_integ  { PT _ (TI $$) }
 L_charac { PT _ (TC $$) }
@@ -138,7 +137,7 @@ Def : Type Id '(' ListArg ')' Body { DFun $1 $2 $4 $6 }
   | 'inline' Type Id '(' ListArg ')' Body { DFunIn $2 $3 $5 $7 }
   | 'typedef' Type Id ';' { DType $2 $3 }
   | Dec ';' { DDecInit $1 }
-  | 'using' ListQConst ';' { DUsing $2 }
+  | 'using' QConst ';' { DUsing $2 }
   | 'struct' Id '{' ListDec1 '}' ';' { DStruc $2 (reverse $4) }
 
 
@@ -146,13 +145,6 @@ ListArg :: { [Arg] }
 ListArg : {- empty -} { [] } 
   | Arg { (:[]) $1 }
   | Arg ',' ListArg { (:) $1 $3 }
-
-
-ListStm :: { [Stm] }
-ListStm : {- empty -} { [] } 
-  | Stm ListStm { (:) $1 $2 }
-  | {- empty -} { [] }
-  | Stm ListStm { (:) $1 $2 }
 
 
 ListDec1 :: { [Dec] }
@@ -172,7 +164,7 @@ Dec : Type ListId '=' Exp { NormalInit $1 $2 $4 }
 
 Body :: { Body }
 Body : ';' { EBody } 
-  | '{' ListStm '}' { FBody $2 }
+  | '{' ListStm '}' { FBody (reverse $2) }
 
 
 Arg1 :: { Arg }
@@ -206,6 +198,11 @@ ListId : Id { (:[]) $1 }
   | Id ',' ListId { (:) $1 $3 }
 
 
+ListStm :: { [Stm] }
+ListStm : {- empty -} { [] } 
+  | ListStm Stm { flip (:) $1 $2 }
+
+
 Else :: { Else }
 Else : 'else' Stm { RElse $2 } 
   | {- empty -} { REmpty }
@@ -213,7 +210,7 @@ Else : 'else' Stm { RElse $2 }
 
 Exp16 :: { Exp }
 Exp16 : Literal { ELiteral $1 } 
-  | ListQConst { EQConst $1 }
+  | QConst { EQConst $1 }
   | '(' Exp ')' { $2 }
 
 
@@ -317,14 +314,18 @@ ListExp : {- empty -} { [] }
   | Exp ',' ListExp { (:) $1 $3 }
 
 
-ListQConst :: { [QConst] }
-ListQConst : QConst { (:[]) $1 } 
-  | QConst '::' ListQConst { (:) $1 $3 }
-
-
 QConst :: { QConst }
-QConst : Id { IdName $1 } 
-  | Type3 { TypeName $1 }
+QConst : ListItem { TypeName $1 } 
+
+
+Item :: { Item }
+Item : Id { IdItem $1 } 
+  | Template { TypeItem $1 }
+
+
+ListItem :: { [Item] }
+ListItem : Item { (:[]) $1 } 
+  | Item '::' ListItem { (:) $1 $3 }
 
 
 Literal :: { Literal }
@@ -332,7 +333,6 @@ Literal : Integer { IntL $1 }
   | ListString { StringL $1 }
   | Char { CharL $1 }
   | Double { FloatL $1 }
-  | Id { IdentL $1 }
 
 
 ListString :: { [String] }
@@ -340,23 +340,14 @@ ListString : String { (:[]) $1 }
   | String ListString { (:) $1 $2 }
 
 
-Type3 :: { Type }
-Type3 : 'string' { TString } 
-  | Id '<' TArg '>' { TTemplate $1 $3 }
-  | '(' Type ')' { $2 }
-
-
-Type2 :: { Type }
-Type2 : 'int' { TInt } 
+Type1 :: { Type }
+Type1 : Item { TItem $1 } 
+  | 'int' { TInt }
   | 'double' { TDouble }
   | 'void' { TVoid }
   | 'bool' { TBool }
-  | Type3 { $1 }
-
-
-Type1 :: { Type }
-Type1 : ListQConst { TQConst $1 } 
-  | Type2 { $1 }
+  | QConst { TQConst $1 }
+  | '(' Type ')' { $2 }
 
 
 Type :: { Type }
@@ -364,9 +355,13 @@ Type : Type1 '&' { TRef $1 }
   | Type1 { $1 }
 
 
-TArg :: { TArg }
-TArg : Type1 { TArgT $1 } 
-  | Type1 ',' Id { TArgM $1 $3 }
+Template :: { Template }
+Template : Id '<' ListType1 '>' { NormTemp $1 $3 } 
+
+
+ListType1 :: { [Type] }
+ListType1 : Type1 { (:[]) $1 } 
+  | Type1 ',' ListType1 { (:) $1 $3 }
 
 
 

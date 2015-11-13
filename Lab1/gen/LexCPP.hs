@@ -94,7 +94,7 @@ eitherResIdent tv s = treeFind resWords
                               | s > a  = treeFind right
                               | s == a = t
 
-resWords = b ">" 27 (b "--" 14 (b ")" 7 (b "&" 4 (b "!=" 2 (b "!" 1 N N) (b "%" 3 N N)) (b "(" 6 (b "&&" 5 N N) N)) (b "+=" 11 (b "+" 9 (b "*" 8 N N) (b "++" 10 N N)) (b "-" 13 (b "," 12 N N) N))) (b ";" 21 (b "/" 18 (b "->" 16 (b "-=" 15 N N) (b "." 17 N N)) (b "::" 20 (b ":" 19 N N) N)) (b "<=" 24 (b "<<" 23 (b "<" 22 N N) N) (b "==" 26 (b "=" 25 N N) N)))) (b "inline" 40 (b "const" 34 (b "[" 31 (b ">>" 29 (b ">=" 28 N N) (b "?" 30 N N)) (b "bool" 33 (b "]" 32 N N) N)) (b "else" 37 (b "double" 36 (b "do" 35 N N) N) (b "if" 39 (b "for" 38 N N) N))) (b "using" 47 (b "struct" 44 (b "return" 42 (b "int" 41 N N) (b "string" 43 N N)) (b "typedef" 46 (b "throw" 45 N N) N)) (b "{" 50 (b "while" 49 (b "void" 48 N N) N) (b "}" 52 (b "||" 51 N N) N))))
+resWords = b "==" 26 (b "-" 13 (b ")" 7 (b "&" 4 (b "!=" 2 (b "!" 1 N N) (b "%" 3 N N)) (b "(" 6 (b "&&" 5 N N) N)) (b "++" 10 (b "+" 9 (b "*" 8 N N) N) (b "," 12 (b "+=" 11 N N) N))) (b "::" 20 (b "." 17 (b "-=" 15 (b "--" 14 N N) (b "->" 16 N N)) (b ":" 19 (b "/" 18 N N) N)) (b "<<" 23 (b "<" 22 (b ";" 21 N N) N) (b "=" 25 (b "<=" 24 N N) N)))) (b "if" 39 (b "bool" 33 (b "?" 30 (b ">=" 28 (b ">" 27 N N) (b ">>" 29 N N)) (b "]" 32 (b "[" 31 N N) N)) (b "double" 36 (b "do" 35 (b "const" 34 N N) N) (b "for" 38 (b "else" 37 N N) N))) (b "using" 46 (b "struct" 43 (b "int" 41 (b "inline" 40 N N) (b "return" 42 N N)) (b "typedef" 45 (b "throw" 44 N N) N)) (b "{" 49 (b "while" 48 (b "void" 47 N N) N) (b "}" 51 (b "||" 50 N N) N))))
    where b s n = let bs = id s
                   in B bs (TS bs n)
 

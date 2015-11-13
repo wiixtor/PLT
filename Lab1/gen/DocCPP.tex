@@ -57,9 +57,9 @@ The reserved words used in CPP are the following: \\
 {\reserved{bool}} &{\reserved{const}} &{\reserved{do}} \\
 {\reserved{double}} &{\reserved{else}} &{\reserved{for}} \\
 {\reserved{if}} &{\reserved{inline}} &{\reserved{int}} \\
-{\reserved{return}} &{\reserved{string}} &{\reserved{struct}} \\
-{\reserved{throw}} &{\reserved{typedef}} &{\reserved{using}} \\
-{\reserved{void}} &{\reserved{while}} & \\
+{\reserved{return}} &{\reserved{struct}} &{\reserved{throw}} \\
+{\reserved{typedef}} &{\reserved{using}} &{\reserved{void}} \\
+{\reserved{while}} & & \\
 \end{tabular}\\
 
 The symbols used in CPP are the following: \\
@@ -102,7 +102,7 @@ All other symbols are terminals.\\
  & {\delimit}  &{\terminal{inline}} {\nonterminal{Type}} {\nonterminal{Id}} {\terminal{(}} {\nonterminal{ListArg}} {\terminal{)}} {\nonterminal{Body}}  \\
  & {\delimit}  &{\terminal{typedef}} {\nonterminal{Type}} {\nonterminal{Id}} {\terminal{;}}  \\
  & {\delimit}  &{\nonterminal{Dec}} {\terminal{;}}  \\
- & {\delimit}  &{\terminal{using}} {\nonterminal{ListQConst}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{using}} {\nonterminal{QConst}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{struct}} {\nonterminal{Id}} {\terminal{\{}} {\nonterminal{ListDec1}} {\terminal{\}}} {\terminal{;}}  \\
 \end{tabular}\\
 
@@ -110,13 +110,6 @@ All other symbols are terminals.\\
 {\nonterminal{ListArg}} & {\arrow}  &{\emptyP} \\
  & {\delimit}  &{\nonterminal{Arg}}  \\
  & {\delimit}  &{\nonterminal{Arg}} {\terminal{,}} {\nonterminal{ListArg}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{ListStm}} & {\arrow}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
- & {\delimit}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -171,13 +164,18 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
+{\nonterminal{ListStm}} & {\arrow}  &{\emptyP} \\
+ & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
 {\nonterminal{Else}} & {\arrow}  &{\terminal{else}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\emptyP} \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
 {\nonterminal{Exp16}} & {\arrow}  &{\nonterminal{Literal}}  \\
- & {\delimit}  &{\nonterminal{ListQConst}}  \\
+ & {\delimit}  &{\nonterminal{QConst}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Exp}} {\terminal{)}}  \\
 \end{tabular}\\
 
@@ -282,13 +280,17 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{ListQConst}} & {\arrow}  &{\nonterminal{QConst}}  \\
- & {\delimit}  &{\nonterminal{QConst}} {\terminal{::}} {\nonterminal{ListQConst}}  \\
+{\nonterminal{QConst}} & {\arrow}  &{\nonterminal{ListItem}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{QConst}} & {\arrow}  &{\nonterminal{Id}}  \\
- & {\delimit}  &{\nonterminal{Type3}}  \\
+{\nonterminal{Item}} & {\arrow}  &{\nonterminal{Id}}  \\
+ & {\delimit}  &{\nonterminal{Template}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{ListItem}} & {\arrow}  &{\nonterminal{Item}}  \\
+ & {\delimit}  &{\nonterminal{Item}} {\terminal{::}} {\nonterminal{ListItem}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -296,7 +298,6 @@ All other symbols are terminals.\\
  & {\delimit}  &{\nonterminal{ListString}}  \\
  & {\delimit}  &{\nonterminal{Char}}  \\
  & {\delimit}  &{\nonterminal{Double}}  \\
- & {\delimit}  &{\nonterminal{Id}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -305,22 +306,13 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type3}} & {\arrow}  &{\terminal{string}}  \\
- & {\delimit}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{TArg}} {\terminal{{$>$}}}  \\
- & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Type2}} & {\arrow}  &{\terminal{int}}  \\
+{\nonterminal{Type1}} & {\arrow}  &{\nonterminal{Item}}  \\
+ & {\delimit}  &{\terminal{int}}  \\
  & {\delimit}  &{\terminal{double}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\terminal{bool}}  \\
- & {\delimit}  &{\nonterminal{Type3}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Type1}} & {\arrow}  &{\nonterminal{ListQConst}}  \\
- & {\delimit}  &{\nonterminal{Type2}}  \\
+ & {\delimit}  &{\nonterminal{QConst}}  \\
+ & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -329,8 +321,12 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{TArg}} & {\arrow}  &{\nonterminal{Type1}}  \\
- & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{Id}}  \\
+{\nonterminal{Template}} & {\arrow}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{ListType1}} {\terminal{{$>$}}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{ListType1}} & {\arrow}  &{\nonterminal{Type1}}  \\
+ & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{ListType1}}  \\
 \end{tabular}\\
 
 

@@ -25,7 +25,7 @@ transDef x = case x of
   DFunIn type' id args body  -> failure x
   DType type' id  -> failure x
   DDecInit dec  -> failure x
-  DUsing qconsts  -> failure x
+  DUsing qconst  -> failure x
   DStruc id decs  -> failure x
 
 
@@ -73,7 +73,7 @@ transElse x = case x of
 transExp :: Exp -> Result
 transExp x = case x of
   ELiteral literal  -> failure x
-  EQConst qconsts  -> failure x
+  EQConst qconst  -> failure x
   EIndex exp1 exp2  -> failure x
   EFunc exp exps  -> failure x
   EDot exp1 exp2  -> failure x
@@ -108,8 +108,13 @@ transExp x = case x of
 
 transQConst :: QConst -> Result
 transQConst x = case x of
-  IdName id  -> failure x
-  TypeName type'  -> failure x
+  TypeName items  -> failure x
+
+
+transItem :: Item -> Result
+transItem x = case x of
+  IdItem id  -> failure x
+  TypeItem template  -> failure x
 
 
 transLiteral :: Literal -> Result
@@ -118,25 +123,22 @@ transLiteral x = case x of
   StringL strs  -> failure x
   CharL c  -> failure x
   FloatL d  -> failure x
-  IdentL id  -> failure x
 
 
 transType :: Type -> Result
 transType x = case x of
-  TString  -> failure x
+  TItem item  -> failure x
   TInt  -> failure x
   TDouble  -> failure x
-  TTemplate id targ  -> failure x
-  TQConst qconsts  -> failure x
   TVoid  -> failure x
   TBool  -> failure x
+  TQConst qconst  -> failure x
   TRef type'  -> failure x
 
 
-transTArg :: TArg -> Result
-transTArg x = case x of
-  TArgT type'  -> failure x
-  TArgM type' id  -> failure x
+transTemplate :: Template -> Result
+transTemplate x = case x of
+  NormTemp id types  -> failure x
 
 
 

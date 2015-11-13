@@ -42,9 +42,8 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in CPP are the following:
   | ``bool`` | ``const`` | ``do`` | ``double``
   | ``else`` | ``for`` | ``if`` | ``inline``
-  | ``int`` | ``return`` | ``string`` | ``struct``
-  | ``throw`` | ``typedef`` | ``using`` | ``void``
-  | ``while`` |  |  | 
+  | ``int`` | ``return`` | ``struct`` | ``throw``
+  | ``typedef`` | ``using`` | ``void`` | ``while``
 
 The symbols used in CPP are the following:
   | ( | ) | ; | {
@@ -73,7 +72,7 @@ All other symbols are terminals.
   |  |  **|**  | ``inline`` //Type// //Id// ``(`` //[Arg]// ``)`` //Body// 
   |  |  **|**  | ``typedef`` //Type// //Id// ``;`` 
   |  |  **|**  | //Dec// ``;`` 
-  |  |  **|**  | ``using`` //[QConst]// ``;`` 
+  |  |  **|**  | ``using`` //QConst// ``;`` 
   |  |  **|**  | ``struct`` //Id// ``{`` //[Dec1]// ``}`` ``;`` 
   | //[Arg]// | -> | **eps**
   |  |  **|**  | //Arg// 
@@ -105,14 +104,14 @@ All other symbols are terminals.
   |  |  **|**  | ``for`` ``(`` //Dec// ``;`` //Exp// ``;`` //Exp// ``)`` //Stm// 
   |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// //Else// 
   |  |  **|**  | ``typedef`` //Type// //Id// ``;`` 
-  |  |  **|**  | ``{`` //[Stm]// ``}`` 
+  |  |  **|**  | //Body// 
   |  |  **|**  | ``struct`` //Id// ``{`` //[Dec1]// ``}`` ``;`` 
   | //[Id]// | -> | //Id// 
   |  |  **|**  | //Id// ``,`` //[Id]// 
   | //Else// | -> | ``else`` //Stm// 
   |  |  **|**  | **eps**
   | //Exp16// | -> | //Literal// 
-  |  |  **|**  | //[QConst]// 
+  |  |  **|**  | //QConst// 
   |  |  **|**  | ``(`` //Exp// ``)`` 
   | //Exp15// | -> | //Exp15// ``[`` //Exp// ``]`` 
   |  |  **|**  | //Exp16// ``(`` //[Exp]// ``)`` 
@@ -163,30 +162,28 @@ All other symbols are terminals.
   | //[Exp]// | -> | **eps**
   |  |  **|**  | //Exp// 
   |  |  **|**  | //Exp// ``,`` //[Exp]// 
-  | //[QConst]// | -> | //QConst// 
-  |  |  **|**  | //QConst// ``::`` //[QConst]// 
-  | //QConst// | -> | //Id// 
-  |  |  **|**  | //Type3// 
+  | //QConst// | -> | //[Item]// 
+  | //Item// | -> | //Id// 
+  |  |  **|**  | //Template// 
+  | //[Item]// | -> | //Item// 
+  |  |  **|**  | //Item// ``::`` //[Item]// 
   | //Literal// | -> | //Integer// 
   |  |  **|**  | //[String]// 
   |  |  **|**  | //Char// 
   |  |  **|**  | //Double// 
-  |  |  **|**  | //Id// 
   | //[String]// | -> | //String// 
   |  |  **|**  | //String// //[String]// 
-  | //Type3// | -> | ``string`` 
-  |  |  **|**  | //Id// ``<`` //TArg// ``>`` 
-  |  |  **|**  | ``(`` //Type// ``)`` 
-  | //Type2// | -> | ``int`` 
+  | //Type1// | -> | //Item// 
+  |  |  **|**  | ``int`` 
   |  |  **|**  | ``double`` 
   |  |  **|**  | ``void`` 
   |  |  **|**  | ``bool`` 
-  |  |  **|**  | //Type3// 
-  | //Type1// | -> | //[QConst]// 
-  |  |  **|**  | //Type2// 
+  |  |  **|**  | //QConst// 
+  |  |  **|**  | ``(`` //Type// ``)`` 
   | //Type// | -> | //Type1// ``&`` 
   |  |  **|**  | //Type1// 
-  | //TArg// | -> | //Type1// 
-  |  |  **|**  | //Type1// ``,`` //Id// 
+  | //Template// | -> | //Id// ``<`` //[Type1]// ``>`` 
+  | //[Type1]// | -> | //Type1// 
+  |  |  **|**  | //Type1// ``,`` //[Type1]// 
 
 

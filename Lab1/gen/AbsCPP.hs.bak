@@ -13,7 +13,7 @@ data Def =
  | DFunIn Type Id [Arg] Body
  | DType Type Id
  | DDecInit Dec
- | DUsing [QConst]
+ | DUsing QConst
  | DStruc Id [Dec]
   deriving (Eq,Ord,Show)
 
@@ -44,7 +44,7 @@ data Stm =
  | SFor Dec Exp Exp Stm
  | SIf Exp Stm Else
  | STypeD Type Id
- | SBlock [Stm]
+ | SBlock Body
  | SStruct Id [Dec]
   deriving (Eq,Ord,Show)
 
@@ -55,7 +55,7 @@ data Else =
 
 data Exp =
    ELiteral Literal
- | EQConst [QConst]
+ | EQConst QConst
  | EIndex Exp Exp
  | EFunc Exp [Exp]
  | EDot Exp Exp
@@ -89,8 +89,12 @@ data Exp =
   deriving (Eq,Ord,Show)
 
 data QConst =
-   IdName Id
- | TypeName Type
+   TypeName [Item]
+  deriving (Eq,Ord,Show)
+
+data Item =
+   IdItem Id
+ | TypeItem Template
   deriving (Eq,Ord,Show)
 
 data Literal =
@@ -98,22 +102,20 @@ data Literal =
  | StringL [String]
  | CharL Char
  | FloatL Double
- | IdentL Id
   deriving (Eq,Ord,Show)
 
 data Type =
-   TString
+   TTemplate Template
+ | TId Id
  | TInt
  | TDouble
- | TTemplate Id TArg
- | TQConst [QConst]
  | TVoid
  | TBool
+ | TQConst QConst
  | TRef Type
   deriving (Eq,Ord,Show)
 
-data TArg =
-   TArgT Type
- | TArgM Type Id
+data Template =
+   NormTemp Id [Type]
   deriving (Eq,Ord,Show)
 

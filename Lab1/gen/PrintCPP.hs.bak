@@ -98,7 +98,7 @@ instance Print Def where
    DFunIn type' id args body -> prPrec i 0 (concatD [doc (showString "inline") , prt 0 type' , prt 0 id , doc (showString "(") , prt 0 args , doc (showString ")") , prt 0 body])
    DType type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
    DDecInit dec -> prPrec i 0 (concatD [prt 0 dec , doc (showString ";")])
-   DUsing qconsts -> prPrec i 0 (concatD [doc (showString "using") , prt 0 qconsts , doc (showString ";")])
+   DUsing qconst -> prPrec i 0 (concatD [doc (showString "using") , prt 0 qconst , doc (showString ";")])
    DStruc id decs -> prPrec i 0 (concatD [doc (showString "struct") , prt 0 id , doc (showString "{") , prt 1 decs , doc (showString "}") , doc (showString ";")])
 
   prtList es = case es of
@@ -143,7 +143,7 @@ instance Print Stm where
    SFor dec exp0 exp stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 dec , doc (showString ";") , prt 0 exp0 , doc (showString ";") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SIf exp stm else' -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm , prt 0 else'])
    STypeD type' id -> prPrec i 0 (concatD [doc (showString "typedef") , prt 0 type' , prt 0 id , doc (showString ";")])
-   SBlock stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
+   SBlock body -> prPrec i 0 (concatD [prt 0 body])
    SStruct id decs -> prPrec i 0 (concatD [doc (showString "struct") , prt 0 id , doc (showString "{") , prt 1 decs , doc (showString "}") , doc (showString ";")])
 
   prtList es = case es of
@@ -161,7 +161,7 @@ instance Print Else where
 instance Print Exp where
   prt i e = case e of
    ELiteral literal -> prPrec i 16 (concatD [prt 0 literal])
-   EQConst qconsts -> prPrec i 16 (concatD [prt 0 qconsts])
+   EQConst qconst -> prPrec i 16 (concatD [prt 0 qconst])
    EIndex exp0 exp -> prPrec i 15 (concatD [prt 15 exp0 , doc (showString "[") , prt 0 exp , doc (showString "]")])
    EFunc exp exps -> prPrec i 15 (concatD [prt 16 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
    EDot exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString ".") , prt 15 exp])
@@ -200,8 +200,13 @@ instance Print Exp where
 
 instance Print QConst where
   prt i e = case e of
-   IdName id -> prPrec i 0 (concatD [prt 0 id])
-   TypeName type' -> prPrec i 0 (concatD [prt 3 type'])
+   TypeName items -> prPrec i 0 (concatD [prt 0 items])
+
+
+instance Print Item where
+  prt i e = case e of
+   IdItem id -> prPrec i 0 (concatD [prt 0 id])
+   TypeItem template -> prPrec i 0 (concatD [prt 0 template])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
@@ -213,25 +218,25 @@ instance Print Literal where
    StringL strs -> prPrec i 0 (concatD [prt 0 strs])
    CharL c -> prPrec i 0 (concatD [prt 0 c])
    FloatL d -> prPrec i 0 (concatD [prt 0 d])
-   IdentL id -> prPrec i 0 (concatD [prt 0 id])
 
 
 instance Print Type where
   prt i e = case e of
-   TString  -> prPrec i 3 (concatD [doc (showString "string")])
-   TInt  -> prPrec i 2 (concatD [doc (showString "int")])
-   TDouble  -> prPrec i 2 (concatD [doc (showString "double")])
-   TTemplate id targ -> prPrec i 3 (concatD [prt 0 id , doc (showString "<") , prt 0 targ , doc (showString ">")])
-   TQConst qconsts -> prPrec i 1 (concatD [prt 0 qconsts])
-   TVoid  -> prPrec i 2 (concatD [doc (showString "void")])
-   TBool  -> prPrec i 2 (concatD [doc (showString "bool")])
+   TItem item -> prPrec i 1 (concatD [prt 0 item])
+   TInt  -> prPrec i 1 (concatD [doc (showString "int")])
+   TDouble  -> prPrec i 1 (concatD [doc (showString "double")])
+   TVoid  -> prPrec i 1 (concatD [doc (showString "void")])
+   TBool  -> prPrec i 1 (concatD [doc (showString "bool")])
+   TQConst qconst -> prPrec i 1 (concatD [prt 0 qconst])
    TRef type' -> prPrec i 0 (concatD [prt 1 type' , doc (showString "&")])
 
+  prtList es = case es of
+   [x] -> (concatD [prt 1 x])
+   x:xs -> (concatD [prt 1 x , doc (showString ",") , prt 1 xs])
 
-instance Print TArg where
+instance Print Template where
   prt i e = case e of
-   TArgT type' -> prPrec i 0 (concatD [prt 1 type'])
-   TArgM type' id -> prPrec i 0 (concatD [prt 1 type' , doc (showString ",") , prt 0 id])
+   NormTemp id types -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 1 types , doc (showString ">")])
 
 
 

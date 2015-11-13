@@ -9,11 +9,10 @@ DFun. Def     ::= Type Id "(" [Arg] ")" Body ;
 DFunIn. Def   ::= "inline" Type Id "(" [Arg] ")" Body ;
 DType. Def    ::= "typedef" Type Id ";" ;
 DDecInit. Def ::= Dec ";" ;
-DUsing. Def   ::= "using" [QConst] ";" ;
+DUsing. Def   ::= "using" QConst ";" ;
 DStruc. Def   ::= "struct" Id "{" [Dec1] "}" ";" ;
 
 separator Arg "," ;
-terminator Stm "" ;
 terminator Dec1 ";" ;
 
 NormalDec. Dec1  ::= Type [Id] ;
@@ -49,7 +48,7 @@ RElse. Else  ::=  "else" Stm ;
 REmpty. Else ::= ;
 
 ELiteral. Exp16 ::= Literal ;
-EQConst.  Exp16 ::= [QConst] ;
+EQConst.  Exp16 ::= QConst ;
 EIndex.   Exp15 ::= Exp15 "[" Exp "]" ;
 EFunc.    Exp15 ::= Exp16 "(" [Exp] ")" ;
 EDot.     Exp14 ::= Exp14 "." Exp15 ;
@@ -81,34 +80,32 @@ ESubAss.  Exp2  ::= Exp3 "-=" Exp2 ;
 ECond.    Exp2  ::= Exp3 "?" Exp2 ":" Exp2 ;
 EExept.   Exp   ::= "throw" Exp2 ;
 coercions Exp 16 ;
-
-
 separator Exp "," ;
-separator nonempty QConst "::" ;
-IdName. QConst   ::= Id ;
-TypeName. QConst ::= Type3 ;
+
+QConsts. QConst ::= [Item] ;
+IdItem. Item     ::= Id ;
+TypeItem. Item   ::=  Template ;
+
+NormTemp. Template ::= Id "<" [Type1] ">" ;
+
+separator nonempty Type1 "," ;
+separator nonempty Item "::" ;
 
 IntL.    Literal ::= Integer ;
 StringL. Literal ::= [String] ;
 CharL.   Literal ::= Char ;
 FloatL.  Literal ::= Double ;
-IdentL.  Literal ::= Id ;
 
 separator nonempty String "" ;
 
-
-TString. Type3    ::= "string" ;
-TInt. Type2       ::= "int" ;
-TDouble. Type2    ::= "double" ;
-TTemplate. Type3  ::= Id "<" TArg ">" ;
-TQConst. Type1    ::= [QConst] ;
-TVoid. Type2      ::= "void" ;
-TBool. Type2      ::= "bool" ;
+TItem. Type1      ::= Item ;
+TInt. Type1       ::= "int" ;
+TDouble. Type1    ::= "double" ;
+TVoid. Type1      ::= "void" ;
+TBool. Type1      ::= "bool" ;
+TQConst. Type1    ::= QConst ;
 TRef.  Type       ::= Type1 "&" ;
 
-coercions Type 3 ;
-
-TArgT. TArg    ::= Type1 ;
-TArgM. TArg    ::= Type1 "," Id ;
+coercions Type 1 ;
 
 token Id (letter (letter | digit | '_')*) ;
