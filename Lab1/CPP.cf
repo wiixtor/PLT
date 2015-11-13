@@ -14,7 +14,7 @@ DStruc. Def   ::= "struct" Id "{" [Dec1] "}" ";" ;
 
 separator Arg "," ;
 terminator Stm "" ;
-terminator Decs ";" ;
+terminator Dec1 ";" ;
 
 NormalDec. Dec1  ::= Type [Id] ;
 NormalInit. Dec ::= Type [Id] "=" Exp ;
@@ -23,10 +23,12 @@ coercions Dec 1 ;
 EBody. Body ::= ";" ;
 FBody. Body ::= "{" [Stm] "}" ;
 
-TArg. Arg   ::= Type ;
-IdArg. Arg  ::= Type Id ;
-DArg. Arg   ::= Type Id "=" Exp ;
-CArg. Arg   ::= "const" Arg ;
+TArg. Arg1   ::= Type ;
+IdArg. Arg1  ::= Type Id ;
+DArg. Arg1   ::= Type Id "=" Exp ;
+CArg. Arg    ::= "const" Arg1 ;
+
+coercions Arg 1 ;
 
 SExp. Stm     ::= Exp ";" ;
 SDecInit. Stm ::= Dec ";" ;
@@ -37,7 +39,8 @@ SDo.     Stm  ::= "do" Stm "while" "(" Exp ")" ";" ;
 SFor.    Stm  ::= "for" "(" Dec ";" Exp ";" Exp ")" Stm ;
 SIf.     Stm  ::= "if" "(" Exp ")" Stm Else ;
 STypeD.  Stm  ::= "typedef" Type Id ";" ;
-SBlock.  Stm  ::= "{" [Stm] "}" ;
+SBlock.  Stm  ::= Body ;
+SStruct. Stm  ::= "struct" Id "{" [Dec1] "}" ";" ;
 
 separator nonempty Id "," ;
 separator Stm "" ;
@@ -83,7 +86,7 @@ coercions Exp 16 ;
 separator Exp "," ;
 separator nonempty QConst "::" ;
 IdName. QConst   ::= Id ;
-TypeName. QConst ::= Type2 ;
+TypeName. QConst ::= Type3 ;
 
 IntL.    Literal ::= Integer ;
 StringL. Literal ::= [String] ;
@@ -94,21 +97,18 @@ IdentL.  Literal ::= Id ;
 separator nonempty String "" ;
 
 
-TString. Type2    ::= "string" ;
+TString. Type3    ::= "string" ;
 TInt. Type2       ::= "int" ;
 TDouble. Type2    ::= "double" ;
-TTemplate. Type2  ::= Id "<" TArg ">" ;
+TTemplate. Type3  ::= Id "<" TArg ">" ;
 TQConst. Type1    ::= [QConst] ;
 TVoid. Type2      ::= "void" ;
-TBool. Type2      ::= Boole ;
+TBool. Type2      ::= "bool" ;
 TRef.  Type       ::= Type1 "&" ;
 
-coercions Type 2 ;
+coercions Type 3 ;
 
 TArgT. TArg    ::= Type1 ;
 TArgM. TArg    ::= Type1 "," Id ;
-
-BTrue. Boole  ::= "true" ;
-BFalse. Boole ::= "false" ;
 
 token Id (letter (letter | digit | '_')*) ;

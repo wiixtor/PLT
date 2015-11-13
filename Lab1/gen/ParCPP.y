@@ -11,11 +11,13 @@ import ErrM
 %name pProgram Program
 %name pListDef ListDef
 %name pDef Def
-%name pDecs Decs
-%name pListStm ListStm
 %name pListArg ListArg
-%name pListDecs ListDecs
+%name pListStm ListStm
+%name pListDec1 ListDec1
+%name pDec1 Dec1
+%name pDec Dec
 %name pBody Body
+%name pArg1 Arg1
 %name pArg Arg
 %name pStm Stm
 %name pListId ListId
@@ -38,15 +40,15 @@ import ErrM
 %name pExp6 Exp6
 %name pExp7 Exp7
 %name pListExp ListExp
-%name pListName ListName
-%name pName Name
+%name pListQConst ListQConst
+%name pQConst QConst
 %name pLiteral Literal
 %name pListString ListString
+%name pType3 Type3
 %name pType2 Type2
 %name pType1 Type1
 %name pType Type
 %name pTArg TArg
-%name pBoole Boole
 
 -- no lexer declaration
 %monad { Err } { thenM } { returnM }
@@ -85,11 +87,11 @@ import ErrM
  '?' { PT _ (TS _ 30) }
  '[' { PT _ (TS _ 31) }
  ']' { PT _ (TS _ 32) }
- 'const' { PT _ (TS _ 33) }
- 'do' { PT _ (TS _ 34) }
- 'double' { PT _ (TS _ 35) }
- 'else' { PT _ (TS _ 36) }
- 'false' { PT _ (TS _ 37) }
+ 'bool' { PT _ (TS _ 33) }
+ 'const' { PT _ (TS _ 34) }
+ 'do' { PT _ (TS _ 35) }
+ 'double' { PT _ (TS _ 36) }
+ 'else' { PT _ (TS _ 37) }
  'for' { PT _ (TS _ 38) }
  'if' { PT _ (TS _ 39) }
  'inline' { PT _ (TS _ 40) }
@@ -98,14 +100,13 @@ import ErrM
  'string' { PT _ (TS _ 43) }
  'struct' { PT _ (TS _ 44) }
  'throw' { PT _ (TS _ 45) }
- 'true' { PT _ (TS _ 46) }
- 'typedef' { PT _ (TS _ 47) }
- 'using' { PT _ (TS _ 48) }
- 'void' { PT _ (TS _ 49) }
- 'while' { PT _ (TS _ 50) }
- '{' { PT _ (TS _ 51) }
- '||' { PT _ (TS _ 52) }
- '}' { PT _ (TS _ 53) }
+ 'typedef' { PT _ (TS _ 46) }
+ 'using' { PT _ (TS _ 47) }
+ 'void' { PT _ (TS _ 48) }
+ 'while' { PT _ (TS _ 49) }
+ '{' { PT _ (TS _ 50) }
+ '||' { PT _ (TS _ 51) }
+ '}' { PT _ (TS _ 52) }
 
 L_integ  { PT _ (TI $$) }
 L_charac { PT _ (TC $$) }
@@ -136,14 +137,15 @@ Def :: { Def }
 Def : Type Id '(' ListArg ')' Body { DFun $1 $2 $4 $6 } 
   | 'inline' Type Id '(' ListArg ')' Body { DFunIn $2 $3 $5 $7 }
   | 'typedef' Type Id ';' { DType $2 $3 }
-  | Type ListId '=' Exp ';' { DInit $1 $2 $4 }
-  | Type ListId ';' { DDEc $1 $2 }
-  | 'using' ListName ';' { DUsing $2 }
-  | 'struct' Id '{' ListDecs '}' ';' { DStruc $2 (reverse $4) }
+  | Dec ';' { DDecInit $1 }
+  | 'using' ListQConst ';' { DUsing $2 }
+  | 'struct' Id '{' ListDec1 '}' ';' { DStruc $2 (reverse $4) }
 
 
-Decs :: { Decs }
-Decs : Type ListId { Dec $1 $2 } 
+ListArg :: { [Arg] }
+ListArg : {- empty -} { [] } 
+  | Arg { (:[]) $1 }
+  | Arg ',' ListArg { (:) $1 $3 }
 
 
 ListStm :: { [Stm] }
@@ -153,15 +155,19 @@ ListStm : {- empty -} { [] }
   | Stm ListStm { (:) $1 $2 }
 
 
-ListArg :: { [Arg] }
-ListArg : {- empty -} { [] } 
-  | Arg { (:[]) $1 }
-  | Arg ',' ListArg { (:) $1 $3 }
+ListDec1 :: { [Dec] }
+ListDec1 : {- empty -} { [] } 
+  | ListDec1 Dec1 ';' { flip (:) $1 $2 }
 
 
-ListDecs :: { [Decs] }
-ListDecs : {- empty -} { [] } 
-  | ListDecs Decs ';' { flip (:) $1 $2 }
+Dec1 :: { Dec }
+Dec1 : Type ListId { NormalDec $1 $2 } 
+  | '(' Dec ')' { $2 }
+
+
+Dec :: { Dec }
+Dec : Type ListId '=' Exp { NormalInit $1 $2 $4 } 
+  | Dec1 { $1 }
 
 
 Body :: { Body }
@@ -169,25 +175,30 @@ Body : ';' { EBody }
   | '{' ListStm '}' { FBody $2 }
 
 
-Arg :: { Arg }
-Arg : Type { TArg $1 } 
+Arg1 :: { Arg }
+Arg1 : Type { TArg $1 } 
   | Type Id { IdArg $1 $2 }
   | Type Id '=' Exp { DArg $1 $2 $4 }
-  | 'const' Arg { CArg $2 }
+  | '(' Arg ')' { $2 }
+
+
+Arg :: { Arg }
+Arg : 'const' Arg1 { CArg $2 } 
+  | Arg1 { $1 }
 
 
 Stm :: { Stm }
 Stm : Exp ';' { SExp $1 } 
-  | Type ListId ';' { SDecl $1 $2 }
-  | Type ListId '=' Exp ';' { SInit $1 $2 $4 }
+  | Dec ';' { SDecInit $1 }
   | 'const' Type ListId '=' Exp ';' { SConst $2 $3 $5 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
-  | 'for' '(' Stm Stm Exp ')' Stm { SFor $3 $4 $5 $7 }
+  | 'for' '(' Dec ';' Exp ';' Exp ')' Stm { SFor $3 $5 $7 $9 }
   | 'if' '(' Exp ')' Stm Else { SIf $3 $5 $6 }
   | 'typedef' Type Id ';' { STypeD $2 $3 }
-  | '{' ListStm '}' { SBlock $2 }
+  | Body { SBlock $1 }
+  | 'struct' Id '{' ListDec1 '}' ';' { SStruct $2 (reverse $4) }
 
 
 ListId :: { [Id] }
@@ -202,7 +213,7 @@ Else : 'else' Stm { RElse $2 }
 
 Exp16 :: { Exp }
 Exp16 : Literal { ELiteral $1 } 
-  | ListName { EQConst $1 }
+  | ListQConst { EQConst $1 }
   | '(' Exp ')' { $2 }
 
 
@@ -306,14 +317,14 @@ ListExp : {- empty -} { [] }
   | Exp ',' ListExp { (:) $1 $3 }
 
 
-ListName :: { [Name] }
-ListName : Name { (:[]) $1 } 
-  | Name '::' ListName { (:) $1 $3 }
+ListQConst :: { [QConst] }
+ListQConst : QConst { (:[]) $1 } 
+  | QConst '::' ListQConst { (:) $1 $3 }
 
 
-Name :: { Name }
-Name : Id { IdName $1 } 
-  | Type2 { TypeName $1 }
+QConst :: { QConst }
+QConst : Id { IdName $1 } 
+  | Type3 { TypeName $1 }
 
 
 Literal :: { Literal }
@@ -329,18 +340,22 @@ ListString : String { (:[]) $1 }
   | String ListString { (:) $1 $2 }
 
 
-Type2 :: { Type }
-Type2 : 'string' { TString } 
-  | 'int' { TInt }
-  | 'double' { TDouble }
+Type3 :: { Type }
+Type3 : 'string' { TString } 
   | Id '<' TArg '>' { TTemplate $1 $3 }
-  | 'void' { TVoid }
-  | Boole { TBool $1 }
   | '(' Type ')' { $2 }
 
 
+Type2 :: { Type }
+Type2 : 'int' { TInt } 
+  | 'double' { TDouble }
+  | 'void' { TVoid }
+  | 'bool' { TBool }
+  | Type3 { $1 }
+
+
 Type1 :: { Type }
-Type1 : ListName { TQConst $1 } 
+Type1 : ListQConst { TQConst $1 } 
   | Type2 { $1 }
 
 
@@ -352,11 +367,6 @@ Type : Type1 '&' { TRef $1 }
 TArg :: { TArg }
 TArg : Type1 { TArgT $1 } 
   | Type1 ',' Id { TArgM $1 $3 }
-
-
-Boole :: { Boole }
-Boole : 'true' { BTrue } 
-  | 'false' { BFalse }
 
 
 

@@ -24,15 +24,15 @@ transDef x = case x of
   DFun type' id args body  -> failure x
   DFunIn type' id args body  -> failure x
   DType type' id  -> failure x
-  DInit type' ids exp  -> failure x
-  DDEc type' ids  -> failure x
-  DUsing names  -> failure x
-  DStruc id decss  -> failure x
+  DDecInit dec  -> failure x
+  DUsing qconsts  -> failure x
+  DStruc id decs  -> failure x
 
 
-transDecs :: Decs -> Result
-transDecs x = case x of
-  Dec type' ids  -> failure x
+transDec :: Dec -> Result
+transDec x = case x of
+  NormalDec type' ids  -> failure x
+  NormalInit type' ids exp  -> failure x
 
 
 transBody :: Body -> Result
@@ -52,16 +52,16 @@ transArg x = case x of
 transStm :: Stm -> Result
 transStm x = case x of
   SExp exp  -> failure x
-  SDecl type' ids  -> failure x
-  SInit type' ids exp  -> failure x
+  SDecInit dec  -> failure x
   SConst type' ids exp  -> failure x
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
   SDo stm exp  -> failure x
-  SFor stm1 stm2 exp3 stm4  -> failure x
+  SFor dec exp1 exp2 stm3  -> failure x
   SIf exp stm else'  -> failure x
   STypeD type' id  -> failure x
-  SBlock stms  -> failure x
+  SBlock body  -> failure x
+  SStruct id decs  -> failure x
 
 
 transElse :: Else -> Result
@@ -73,7 +73,7 @@ transElse x = case x of
 transExp :: Exp -> Result
 transExp x = case x of
   ELiteral literal  -> failure x
-  EQConst names  -> failure x
+  EQConst qconsts  -> failure x
   EIndex exp1 exp2  -> failure x
   EFunc exp exps  -> failure x
   EDot exp1 exp2  -> failure x
@@ -106,8 +106,8 @@ transExp x = case x of
   EExept exp  -> failure x
 
 
-transName :: Name -> Result
-transName x = case x of
+transQConst :: QConst -> Result
+transQConst x = case x of
   IdName id  -> failure x
   TypeName type'  -> failure x
 
@@ -127,9 +127,9 @@ transType x = case x of
   TInt  -> failure x
   TDouble  -> failure x
   TTemplate id targ  -> failure x
-  TQConst names  -> failure x
+  TQConst qconsts  -> failure x
   TVoid  -> failure x
-  TBool boole  -> failure x
+  TBool  -> failure x
   TRef type'  -> failure x
 
 
@@ -137,12 +137,6 @@ transTArg :: TArg -> Result
 transTArg x = case x of
   TArgT type'  -> failure x
   TArgM type' id  -> failure x
-
-
-transBoole :: Boole -> Result
-transBoole x = case x of
-  BTrue  -> failure x
-  BFalse  -> failure x
 
 
 

@@ -12,19 +12,19 @@ data Def =
    DFun Type Id [Arg] Body
  | DFunIn Type Id [Arg] Body
  | DType Type Id
- | DInit Type [Id] Exp
- | DDEc Type [Id]
- | DStruc Id [Decs]
- | DUsing [Name]
+ | DDecInit Dec
+ | DUsing [QConst]
+ | DStruc Id [Dec]
   deriving (Eq,Ord,Show)
 
-data Decs =
-   Dec Type [Id]
+data Dec =
+   NormalDec Type [Id]
+ | NormalInit Type [Id] Exp
   deriving (Eq,Ord,Show)
 
 data Body =
    EBody
- | Body [Stm]
+ | FBody [Stm]
   deriving (Eq,Ord,Show)
 
 data Arg =
@@ -36,16 +36,16 @@ data Arg =
 
 data Stm =
    SExp Exp
- | SDecl Type [Id]
- | SInit Type [Id] Exp
+ | SDecInit Dec
  | SConst Type [Id] Exp
  | SReturn Exp
  | SWhile Exp Stm
  | SDo Stm Exp
- | SFor Stm Stm Exp Stm
+ | SFor Dec Exp Exp Stm
  | SIf Exp Stm Else
  | STypeD Type Id
  | SBlock [Stm]
+ | SStruct Id [Dec]
   deriving (Eq,Ord,Show)
 
 data Else =
@@ -55,7 +55,7 @@ data Else =
 
 data Exp =
    ELiteral Literal
- | EQConst [Name]
+ | EQConst [QConst]
  | EIndex Exp Exp
  | EFunc Exp [Exp]
  | EDot Exp Exp
@@ -88,7 +88,7 @@ data Exp =
  | EExept Exp
   deriving (Eq,Ord,Show)
 
-data Name =
+data QConst =
    IdName Id
  | TypeName Type
   deriving (Eq,Ord,Show)
@@ -106,19 +106,14 @@ data Type =
  | TInt
  | TDouble
  | TTemplate Id TArg
- | TQConst [Name]
+ | TQConst [QConst]
  | TVoid
- | TBool Boole
+ | TBool
  | TRef Type
   deriving (Eq,Ord,Show)
 
 data TArg =
    TArgT Type
  | TArgM Type Id
-  deriving (Eq,Ord,Show)
-
-data Boole =
-   BTrue
- | BFalse
   deriving (Eq,Ord,Show)
 
