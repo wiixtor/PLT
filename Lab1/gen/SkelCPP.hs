@@ -53,7 +53,7 @@ transStm :: Stm -> Result
 transStm x = case x of
   SExp exp  -> failure x
   SDecInit dec  -> failure x
-  SConst type' ids exp  -> failure x
+  SConst dec  -> failure x
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
   SDo stm exp  -> failure x
@@ -108,13 +108,18 @@ transExp x = case x of
 
 transQConst :: QConst -> Result
 transQConst x = case x of
-  TypeName items  -> failure x
+  QConsts items  -> failure x
 
 
 transItem :: Item -> Result
 transItem x = case x of
   IdItem id  -> failure x
   TypeItem template  -> failure x
+
+
+transTemplate :: Template -> Result
+transTemplate x = case x of
+  NormTemp id types  -> failure x
 
 
 transLiteral :: Literal -> Result
@@ -127,18 +132,12 @@ transLiteral x = case x of
 
 transType :: Type -> Result
 transType x = case x of
-  TItem item  -> failure x
   TInt  -> failure x
   TDouble  -> failure x
   TVoid  -> failure x
   TBool  -> failure x
   TQConst qconst  -> failure x
   TRef type'  -> failure x
-
-
-transTemplate :: Template -> Result
-transTemplate x = case x of
-  NormTemp id types  -> failure x
 
 
 

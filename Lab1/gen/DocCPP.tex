@@ -147,7 +147,7 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{Stm}} & {\arrow}  &{\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\nonterminal{Dec}} {\terminal{;}}  \\
- & {\delimit}  &{\terminal{const}} {\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{const}} {\nonterminal{Dec}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{return}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
@@ -221,16 +221,16 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp9}} {\terminal{{$<$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$<$}{$=$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}{$=$}}} {\nonterminal{Exp9}}  \\
+{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp10}} {\terminal{{$<$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$>$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$<$}{$=$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$>$}{$=$}}} {\nonterminal{Exp10}}  \\
  & {\delimit}  &{\nonterminal{Exp10}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp8}} {\terminal{{$=$}{$=$}}} {\nonterminal{Exp8}}  \\
- & {\delimit}  &{\nonterminal{Exp8}} {\terminal{!{$=$}}} {\nonterminal{Exp8}}  \\
+{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp9}} {\terminal{{$=$}{$=$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}} {\terminal{!{$=$}}} {\nonterminal{Exp9}}  \\
  & {\delimit}  &{\nonterminal{Exp9}}  \\
 \end{tabular}\\
 
@@ -289,6 +289,15 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
+{\nonterminal{Template}} & {\arrow}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{ListType1}} {\terminal{{$>$}}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{ListType1}} & {\arrow}  &{\nonterminal{Type1}}  \\
+ & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{ListType1}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
 {\nonterminal{ListItem}} & {\arrow}  &{\nonterminal{Item}}  \\
  & {\delimit}  &{\nonterminal{Item}} {\terminal{::}} {\nonterminal{ListItem}}  \\
 \end{tabular}\\
@@ -306,8 +315,7 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type1}} & {\arrow}  &{\nonterminal{Item}}  \\
- & {\delimit}  &{\terminal{int}}  \\
+{\nonterminal{Type1}} & {\arrow}  &{\terminal{int}}  \\
  & {\delimit}  &{\terminal{double}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\terminal{bool}}  \\
@@ -318,15 +326,6 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{Type}} & {\arrow}  &{\nonterminal{Type1}} {\terminal{\&}}  \\
  & {\delimit}  &{\nonterminal{Type1}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Template}} & {\arrow}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{ListType1}} {\terminal{{$>$}}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{ListType1}} & {\arrow}  &{\nonterminal{Type1}}  \\
- & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{ListType1}}  \\
 \end{tabular}\\
 
 

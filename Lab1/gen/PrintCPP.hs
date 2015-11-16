@@ -136,7 +136,7 @@ instance Print Stm where
   prt i e = case e of
    SExp exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
    SDecInit dec -> prPrec i 0 (concatD [prt 0 dec , doc (showString ";")])
-   SConst type' ids exp -> prPrec i 0 (concatD [doc (showString "const") , prt 0 type' , prt 0 ids , doc (showString "=") , prt 0 exp , doc (showString ";")])
+   SConst dec -> prPrec i 0 (concatD [doc (showString "const") , prt 0 dec , doc (showString ";")])
    SReturn exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
    SDo stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
@@ -177,12 +177,12 @@ instance Print Exp where
    ESub exp0 exp -> prPrec i 11 (concatD [prt 11 exp0 , doc (showString "-") , prt 12 exp])
    ELShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString "<<") , prt 11 exp])
    ERShift exp0 exp -> prPrec i 10 (concatD [prt 10 exp0 , doc (showString ">>") , prt 11 exp])
-   ELesser exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString "<") , prt 9 exp])
-   EGreater exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString ">") , prt 9 exp])
-   ELesserE exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString "<=") , prt 9 exp])
-   EGreatE exp0 exp -> prPrec i 9 (concatD [prt 9 exp0 , doc (showString ">=") , prt 9 exp])
-   EEquals exp0 exp -> prPrec i 8 (concatD [prt 8 exp0 , doc (showString "==") , prt 8 exp])
-   EInEqual exp0 exp -> prPrec i 8 (concatD [prt 8 exp0 , doc (showString "!=") , prt 8 exp])
+   ELesser exp0 exp -> prPrec i 9 (concatD [prt 10 exp0 , doc (showString "<") , prt 10 exp])
+   EGreater exp0 exp -> prPrec i 9 (concatD [prt 10 exp0 , doc (showString ">") , prt 10 exp])
+   ELesserE exp0 exp -> prPrec i 9 (concatD [prt 10 exp0 , doc (showString "<=") , prt 10 exp])
+   EGreatE exp0 exp -> prPrec i 9 (concatD [prt 10 exp0 , doc (showString ">=") , prt 10 exp])
+   EEquals exp0 exp -> prPrec i 8 (concatD [prt 9 exp0 , doc (showString "==") , prt 9 exp])
+   EInEqual exp0 exp -> prPrec i 8 (concatD [prt 9 exp0 , doc (showString "!=") , prt 9 exp])
    EConj exp0 exp -> prPrec i 4 (concatD [prt 4 exp0 , doc (showString "&&") , prt 5 exp])
    EDisj exp0 exp -> prPrec i 3 (concatD [prt 3 exp0 , doc (showString "||") , prt 4 exp])
    EAss exp0 exp -> prPrec i 2 (concatD [prt 3 exp0 , doc (showString "=") , prt 2 exp])
@@ -198,7 +198,7 @@ instance Print Exp where
 
 instance Print QConst where
   prt i e = case e of
-   TypeName items -> prPrec i 0 (concatD [prt 0 items])
+   QConsts items -> prPrec i 0 (concatD [prt 0 items])
 
 
 instance Print Item where
@@ -210,6 +210,11 @@ instance Print Item where
    [x] -> (concatD [prt 0 x])
    x:xs -> (concatD [prt 0 x , doc (showString "::") , prt 0 xs])
 
+instance Print Template where
+  prt i e = case e of
+   NormTemp id types -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 1 types , doc (showString ">")])
+
+
 instance Print Literal where
   prt i e = case e of
    IntL n -> prPrec i 0 (concatD [prt 0 n])
@@ -220,7 +225,6 @@ instance Print Literal where
 
 instance Print Type where
   prt i e = case e of
-   TItem item -> prPrec i 1 (concatD [prt 0 item])
    TInt  -> prPrec i 1 (concatD [doc (showString "int")])
    TDouble  -> prPrec i 1 (concatD [doc (showString "double")])
    TVoid  -> prPrec i 1 (concatD [doc (showString "void")])
@@ -231,10 +235,5 @@ instance Print Type where
   prtList es = case es of
    [x] -> (concatD [prt 1 x])
    x:xs -> (concatD [prt 1 x , doc (showString ",") , prt 1 xs])
-
-instance Print Template where
-  prt i e = case e of
-   NormTemp id types -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 1 types , doc (showString ">")])
-
 
 

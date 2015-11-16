@@ -37,7 +37,7 @@ data Arg =
 data Stm =
    SExp Exp
  | SDecInit Dec
- | SConst Type [Id] Exp
+ | SConst Dec
  | SReturn Exp
  | SWhile Exp Stm
  | SDo Stm Exp
@@ -55,7 +55,7 @@ data Else =
 
 data Exp =
    ELiteral Literal
- | EQConst QConst
+ | EQConst Type
  | EIndex Exp Exp
  | EFunc Exp [Exp]
  | EDot Exp Exp
@@ -89,12 +89,16 @@ data Exp =
   deriving (Eq,Ord,Show)
 
 data QConst =
-   TypeName [Item]
+   QConsts [Item]
   deriving (Eq,Ord,Show)
 
 data Item =
    IdItem Id
  | TypeItem Template
+  deriving (Eq,Ord,Show)
+
+data Template =
+   NormTemp Id [Type]
   deriving (Eq,Ord,Show)
 
 data Literal =
@@ -105,17 +109,11 @@ data Literal =
   deriving (Eq,Ord,Show)
 
 data Type =
-   TTemplate Template
- | TId Id
- | TInt
+   TInt
  | TDouble
  | TVoid
  | TBool
  | TQConst QConst
  | TRef Type
-  deriving (Eq,Ord,Show)
-
-data Template =
-   NormTemp Id [Type]
   deriving (Eq,Ord,Show)
 

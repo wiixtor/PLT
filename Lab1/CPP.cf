@@ -16,7 +16,7 @@ separator Arg "," ;
 terminator Dec1 ";" ;
 
 NormalDec. Dec1  ::= Type [Id] ;
-NormalInit. Dec ::= Type [Id] "=" Exp ;
+NormalInit. Dec  ::= Type [Id] "=" Exp ;
 coercions Dec 1 ;
 
 EBody. Body ::= ";" ;
@@ -26,12 +26,11 @@ TArg. Arg1   ::= Type ;
 IdArg. Arg1  ::= Type Id ;
 DArg. Arg1   ::= Type Id "=" Exp ;
 CArg. Arg    ::= "const" Arg1 ;
-
 coercions Arg 1 ;
 
 SExp. Stm     ::= Exp ";" ;
-SDecInit. Stm ::= Dec ";" ;
-SConst. Stm   ::= "const" Type [Id] "=" Exp ";" ;
+SDec. Stm     ::= Dec ";" ;
+SConst. Stm   ::= "const" Dec ";" ;
 SReturn. Stm  ::= "return" Exp ";" ;
 SWhile.  Stm  ::= "while" "(" Exp ")" Stm ;
 SDo.     Stm  ::= "do" Stm "while" "(" Exp ")" ";" ;
@@ -66,12 +65,12 @@ EAdd.     Exp11 ::= Exp11 "+" Exp12 ;
 ESub.     Exp11 ::= Exp11 "-" Exp12 ;
 ELShift.  Exp10 ::= Exp10 "<<" Exp11 ;
 ERShift.  Exp10 ::= Exp10 ">>" Exp11 ;
-ELesser.  Exp9  ::= Exp9 "<" Exp9 ;
-EGreater. Exp9  ::= Exp9 ">" Exp9 ;
-ELesserE. Exp9  ::= Exp9 "<=" Exp9 ;
-EGreatE.  Exp9  ::= Exp9 ">=" Exp9 ;
-EEquals.  Exp8  ::= Exp8 "==" Exp8 ;
-EInEqual. Exp8  ::= Exp8 "!=" Exp8 ;
+ELesser.  Exp9  ::= Exp10 "<" Exp10 ;
+EGreater. Exp9  ::= Exp10 ">" Exp10 ;
+ELesserE. Exp9  ::= Exp10 "<=" Exp10 ;
+EGreatE.  Exp9  ::= Exp10 ">=" Exp10 ;
+EEquals.  Exp8  ::= Exp9 "==" Exp9 ;
+EInEqual. Exp8  ::= Exp9 "!=" Exp9 ;
 EConj.    Exp4  ::= Exp4 "&&" Exp5 ;
 EDisj.    Exp3  ::= Exp3 "||" Exp4 ;
 EAss.     Exp2  ::= Exp3 "=" Exp2 ;
@@ -84,21 +83,18 @@ separator Exp "," ;
 
 QConsts. QConst ::= [Item] ;
 IdItem. Item     ::= Id ;
-TypeItem. Item   ::=  Template ;
-
-NormTemp. Template ::= Id "<" [Type1] ">" ;
+TypeItem. Item   ::=  Id "<" [Type1] ">" ;
 
 separator nonempty Type1 "," ;
 separator nonempty Item "::" ;
 
-IntL.    Literal ::= Integer ;
-StringL. Literal ::= [String] ;
-CharL.   Literal ::= Char ;
-FloatL.  Literal ::= Double ;
+LInt.    Literal ::= Integer ;
+LString. Literal ::= [String] ;
+LChar.   Literal ::= Char ;
+LFloat.  Literal ::= Double ;
 
 separator nonempty String "" ;
 
-TItem. Type1      ::= Item ;
 TInt. Type1       ::= "int" ;
 TDouble. Type1    ::= "double" ;
 TVoid. Type1      ::= "void" ;

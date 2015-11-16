@@ -113,13 +113,6 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{ListStm}} & {\arrow}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
- & {\delimit}  &{\emptyP} \\
- & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
 {\nonterminal{ListDec1}} & {\arrow}  &{\emptyP} \\
  & {\delimit}  &{\nonterminal{Dec1}} {\terminal{;}} {\nonterminal{ListDec1}}  \\
 \end{tabular}\\
@@ -154,7 +147,7 @@ All other symbols are terminals.\\
 \begin{tabular}{lll}
 {\nonterminal{Stm}} & {\arrow}  &{\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\nonterminal{Dec}} {\terminal{;}}  \\
- & {\delimit}  &{\terminal{const}} {\nonterminal{Type}} {\nonterminal{ListId}} {\terminal{{$=$}}} {\nonterminal{Exp}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{const}} {\nonterminal{Dec}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{return}} {\nonterminal{Exp}} {\terminal{;}}  \\
  & {\delimit}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\terminal{do}} {\nonterminal{Stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
@@ -171,13 +164,18 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
+{\nonterminal{ListStm}} & {\arrow}  &{\emptyP} \\
+ & {\delimit}  &{\nonterminal{Stm}} {\nonterminal{ListStm}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
 {\nonterminal{Else}} & {\arrow}  &{\terminal{else}} {\nonterminal{Stm}}  \\
  & {\delimit}  &{\emptyP} \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
 {\nonterminal{Exp16}} & {\arrow}  &{\nonterminal{Literal}}  \\
- & {\delimit}  &{\nonterminal{QConst}}  \\
+ & {\delimit}  &{\nonterminal{Type2}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Exp}} {\terminal{)}}  \\
 \end{tabular}\\
 
@@ -223,16 +221,16 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp9}} {\terminal{{$<$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$<$}{$=$}}} {\nonterminal{Exp9}}  \\
- & {\delimit}  &{\nonterminal{Exp9}} {\terminal{{$>$}{$=$}}} {\nonterminal{Exp9}}  \\
+{\nonterminal{Exp9}} & {\arrow}  &{\nonterminal{Exp10}} {\terminal{{$<$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$>$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$<$}{$=$}}} {\nonterminal{Exp10}}  \\
+ & {\delimit}  &{\nonterminal{Exp10}} {\terminal{{$>$}{$=$}}} {\nonterminal{Exp10}}  \\
  & {\delimit}  &{\nonterminal{Exp10}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp8}} {\terminal{{$=$}{$=$}}} {\nonterminal{Exp8}}  \\
- & {\delimit}  &{\nonterminal{Exp8}} {\terminal{!{$=$}}} {\nonterminal{Exp8}}  \\
+{\nonterminal{Exp8}} & {\arrow}  &{\nonterminal{Exp9}} {\terminal{{$=$}{$=$}}} {\nonterminal{Exp9}}  \\
+ & {\delimit}  &{\nonterminal{Exp9}} {\terminal{!{$=$}}} {\nonterminal{Exp9}}  \\
  & {\delimit}  &{\nonterminal{Exp9}}  \\
 \end{tabular}\\
 
@@ -291,6 +289,15 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
+{\nonterminal{Template}} & {\arrow}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{ListType1}} {\terminal{{$>$}}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{ListType1}} & {\arrow}  &{\nonterminal{Type1}}  \\
+ & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{ListType1}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
 {\nonterminal{ListItem}} & {\arrow}  &{\nonterminal{Item}}  \\
  & {\delimit}  &{\nonterminal{Item}} {\terminal{::}} {\nonterminal{ListItem}}  \\
 \end{tabular}\\
@@ -308,27 +315,21 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Type1}} & {\arrow}  &{\nonterminal{Item}}  \\
- & {\delimit}  &{\terminal{int}}  \\
+{\nonterminal{Type1}} & {\arrow}  &{\terminal{int}}  \\
  & {\delimit}  &{\terminal{double}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\terminal{bool}}  \\
- & {\delimit}  &{\nonterminal{QConst}}  \\
+ & {\delimit}  &{\nonterminal{Type2}}  \\
+\end{tabular}\\
+
+\begin{tabular}{lll}
+{\nonterminal{Type2}} & {\arrow}  &{\nonterminal{QConst}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
 {\nonterminal{Type}} & {\arrow}  &{\nonterminal{Type1}} {\terminal{\&}}  \\
  & {\delimit}  &{\nonterminal{Type1}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Template}} & {\arrow}  &{\nonterminal{Id}} {\terminal{{$<$}}} {\nonterminal{ListType1}} {\terminal{{$>$}}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{ListType1}} & {\arrow}  &{\nonterminal{Type1}}  \\
- & {\delimit}  &{\nonterminal{Type1}} {\terminal{,}} {\nonterminal{ListType1}}  \\
 \end{tabular}\\
 
 

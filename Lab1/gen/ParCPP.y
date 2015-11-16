@@ -42,13 +42,13 @@ import ErrM
 %name pListExp ListExp
 %name pQConst QConst
 %name pItem Item
+%name pTemplate Template
+%name pListType1 ListType1
 %name pListItem ListItem
 %name pLiteral Literal
 %name pListString ListString
 %name pType1 Type1
 %name pType Type
-%name pTemplate Template
-%name pListType1 ListType1
 
 -- no lexer declaration
 %monad { Err } { thenM } { returnM }
@@ -182,7 +182,7 @@ Arg : 'const' Arg1 { CArg $2 }
 Stm :: { Stm }
 Stm : Exp ';' { SExp $1 } 
   | Dec ';' { SDecInit $1 }
-  | 'const' Type ListId '=' Exp ';' { SConst $2 $3 $5 }
+  | 'const' Dec ';' { SConst $2 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { SDo $2 $5 }
@@ -256,16 +256,16 @@ Exp10 : Exp10 '<<' Exp11 { ELShift $1 $3 }
 
 
 Exp9 :: { Exp }
-Exp9 : Exp9 '<' Exp9 { ELesser $1 $3 } 
-  | Exp9 '>' Exp9 { EGreater $1 $3 }
-  | Exp9 '<=' Exp9 { ELesserE $1 $3 }
-  | Exp9 '>=' Exp9 { EGreatE $1 $3 }
+Exp9 : Exp10 '<' Exp10 { ELesser $1 $3 } 
+  | Exp10 '>' Exp10 { EGreater $1 $3 }
+  | Exp10 '<=' Exp10 { ELesserE $1 $3 }
+  | Exp10 '>=' Exp10 { EGreatE $1 $3 }
   | Exp10 { $1 }
 
 
 Exp8 :: { Exp }
-Exp8 : Exp8 '==' Exp8 { EEquals $1 $3 } 
-  | Exp8 '!=' Exp8 { EInEqual $1 $3 }
+Exp8 : Exp9 '==' Exp9 { EEquals $1 $3 } 
+  | Exp9 '!=' Exp9 { EInEqual $1 $3 }
   | Exp9 { $1 }
 
 
@@ -315,12 +315,21 @@ ListExp : {- empty -} { [] }
 
 
 QConst :: { QConst }
-QConst : ListItem { TypeName $1 } 
+QConst : ListItem { QConsts $1 } 
 
 
 Item :: { Item }
 Item : Id { IdItem $1 } 
   | Template { TypeItem $1 }
+
+
+Template :: { Template }
+Template : Id '<' ListType1 '>' { NormTemp $1 $3 } 
+
+
+ListType1 :: { [Type] }
+ListType1 : Type1 { (:[]) $1 } 
+  | Type1 ',' ListType1 { (:) $1 $3 }
 
 
 ListItem :: { [Item] }
@@ -341,8 +350,7 @@ ListString : String { (:[]) $1 }
 
 
 Type1 :: { Type }
-Type1 : Item { TItem $1 } 
-  | 'int' { TInt }
+Type1 : 'int' { TInt } 
   | 'double' { TDouble }
   | 'void' { TVoid }
   | 'bool' { TBool }
@@ -353,15 +361,6 @@ Type1 : Item { TItem $1 }
 Type :: { Type }
 Type : Type1 '&' { TRef $1 } 
   | Type1 { $1 }
-
-
-Template :: { Template }
-Template : Id '<' ListType1 '>' { NormTemp $1 $3 } 
-
-
-ListType1 :: { [Type] }
-ListType1 : Type1 { (:[]) $1 } 
-  | Type1 ',' ListType1 { (:) $1 $3 }
 
 
 
