@@ -73,7 +73,7 @@ transElse x = case x of
 transExp :: Exp -> Result
 transExp x = case x of
   ELiteral literal  -> failure x
-  EQConst type'  -> failure x
+  EQConst qconst  -> failure x
   EIndex exp1 exp2  -> failure x
   EFunc exp exps  -> failure x
   EDot exp1 exp2  -> failure x

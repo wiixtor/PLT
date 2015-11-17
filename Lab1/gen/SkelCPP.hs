@@ -52,7 +52,7 @@ transArg x = case x of
 transStm :: Stm -> Result
 transStm x = case x of
   SExp exp  -> failure x
-  SDecInit dec  -> failure x
+  SDec dec  -> failure x
   SConst dec  -> failure x
   SReturn exp  -> failure x
   SWhile exp stm  -> failure x
@@ -114,20 +114,15 @@ transQConst x = case x of
 transItem :: Item -> Result
 transItem x = case x of
   IdItem id  -> failure x
-  TypeItem template  -> failure x
-
-
-transTemplate :: Template -> Result
-transTemplate x = case x of
-  NormTemp id types  -> failure x
+  TypeItem id types  -> failure x
 
 
 transLiteral :: Literal -> Result
 transLiteral x = case x of
-  IntL n  -> failure x
-  StringL strs  -> failure x
-  CharL c  -> failure x
-  FloatL d  -> failure x
+  LInt n  -> failure x
+  LString strs  -> failure x
+  LChar c  -> failure x
+  LFloat d  -> failure x
 
 
 transType :: Type -> Result

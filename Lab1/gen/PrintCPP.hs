@@ -135,7 +135,7 @@ instance Print Arg where
 instance Print Stm where
   prt i e = case e of
    SExp exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
-   SDecInit dec -> prPrec i 0 (concatD [prt 0 dec , doc (showString ";")])
+   SDec dec -> prPrec i 0 (concatD [prt 0 dec , doc (showString ";")])
    SConst dec -> prPrec i 0 (concatD [doc (showString "const") , prt 0 dec , doc (showString ";")])
    SReturn exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
    SWhile exp stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 stm])
@@ -204,23 +204,18 @@ instance Print QConst where
 instance Print Item where
   prt i e = case e of
    IdItem id -> prPrec i 0 (concatD [prt 0 id])
-   TypeItem template -> prPrec i 0 (concatD [prt 0 template])
+   TypeItem id types -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 1 types , doc (showString ">")])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
    x:xs -> (concatD [prt 0 x , doc (showString "::") , prt 0 xs])
 
-instance Print Template where
-  prt i e = case e of
-   NormTemp id types -> prPrec i 0 (concatD [prt 0 id , doc (showString "<") , prt 1 types , doc (showString ">")])
-
-
 instance Print Literal where
   prt i e = case e of
-   IntL n -> prPrec i 0 (concatD [prt 0 n])
-   StringL strs -> prPrec i 0 (concatD [prt 0 strs])
-   CharL c -> prPrec i 0 (concatD [prt 0 c])
-   FloatL d -> prPrec i 0 (concatD [prt 0 d])
+   LInt n -> prPrec i 0 (concatD [prt 0 n])
+   LString strs -> prPrec i 0 (concatD [prt 0 strs])
+   LChar c -> prPrec i 0 (concatD [prt 0 c])
+   LFloat d -> prPrec i 0 (concatD [prt 0 d])
 
 
 instance Print Type where

@@ -36,7 +36,7 @@ data Arg =
 
 data Stm =
    SExp Exp
- | SDecInit Dec
+ | SDec Dec
  | SConst Dec
  | SReturn Exp
  | SWhile Exp Stm
@@ -94,18 +94,14 @@ data QConst =
 
 data Item =
    IdItem Id
- | TypeItem Template
-  deriving (Eq,Ord,Show)
-
-data Template =
-   NormTemp Id [Type]
+ | TypeItem Id [Type]
   deriving (Eq,Ord,Show)
 
 data Literal =
-   IntL Integer
- | StringL [String]
- | CharL Char
- | FloatL Double
+   LInt Integer
+ | LString [String]
+ | LChar Char
+ | LFloat Double
   deriving (Eq,Ord,Show)
 
 data Type =

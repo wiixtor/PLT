@@ -159,7 +159,7 @@ instance Print Else where
 instance Print Exp where
   prt i e = case e of
    ELiteral literal -> prPrec i 16 (concatD [prt 0 literal])
-   EQConst type' -> prPrec i 16 (concatD [prt 2 type'])
+   EQConst qconst -> prPrec i 16 (concatD [prt 0 qconst])
    EIndex exp0 exp -> prPrec i 15 (concatD [prt 15 exp0 , doc (showString "[") , prt 0 exp , doc (showString "]")])
    EFunc exp exps -> prPrec i 15 (concatD [prt 16 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
    EDot exp0 exp -> prPrec i 14 (concatD [prt 14 exp0 , doc (showString ".") , prt 15 exp])
@@ -229,7 +229,7 @@ instance Print Type where
    TDouble  -> prPrec i 1 (concatD [doc (showString "double")])
    TVoid  -> prPrec i 1 (concatD [doc (showString "void")])
    TBool  -> prPrec i 1 (concatD [doc (showString "bool")])
-   TQConst qconst -> prPrec i 2 (concatD [prt 0 qconst])
+   TQConst qconst -> prPrec i 1 (concatD [prt 0 qconst])
    TRef type' -> prPrec i 0 (concatD [prt 1 type' , doc (showString "&")])
 
   prtList es = case es of

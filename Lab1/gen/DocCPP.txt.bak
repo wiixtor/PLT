@@ -109,7 +109,7 @@ All other symbols are terminals.
   | //Else// | -> | ``else`` //Stm// 
   |  |  **|**  | **eps**
   | //Exp16// | -> | //Literal// 
-  |  |  **|**  | //Type2// 
+  |  |  **|**  | //QConst// 
   |  |  **|**  | ``(`` //Exp// ``)`` 
   | //Exp15// | -> | //Exp15// ``[`` //Exp// ``]`` 
   |  |  **|**  | //Exp16// ``(`` //[Exp]// ``)`` 
@@ -178,8 +178,7 @@ All other symbols are terminals.
   |  |  **|**  | ``double`` 
   |  |  **|**  | ``void`` 
   |  |  **|**  | ``bool`` 
-  |  |  **|**  | //Type2// 
-  | //Type2// | -> | //QConst// 
+  |  |  **|**  | //QConst// 
   |  |  **|**  | ``(`` //Type// ``)`` 
   | //Type// | -> | //Type1// ``&`` 
   |  |  **|**  | //Type1// 

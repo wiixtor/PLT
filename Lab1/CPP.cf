@@ -83,9 +83,9 @@ separator Exp "," ;
 
 QConsts. QConst ::= [Item] ;
 IdItem. Item     ::= Id ;
-TypeItem. Item   ::=  Id "<" [Type1] ">" ;
+TypeItem. Item   ::=  Id "<" [Type] ">" ;
 
-separator nonempty Type1 "," ;
+separator nonempty Type "," ;
 separator nonempty Item "::" ;
 
 LInt.    Literal ::= Integer ;
@@ -95,13 +95,11 @@ LFloat.  Literal ::= Double ;
 
 separator nonempty String "" ;
 
-TInt. Type1       ::= "int" ;
-TDouble. Type1    ::= "double" ;
-TVoid. Type1      ::= "void" ;
-TBool. Type1      ::= "bool" ;
-TQConst. Type1    ::= QConst ;
-TRef.  Type       ::= Type1 "&" ;
-
-coercions Type 1 ;
+TInt. Type       ::= "int" ;
+TDouble. Type    ::= "double" ;
+TVoid. Type      ::= "void" ;
+TBool. Type      ::= "bool" ;
+TQConst. Type    ::= QConst ;
+TRef.  Type      ::= Type "&" ;
 
 token Id (letter (letter | digit | '_')*) ;

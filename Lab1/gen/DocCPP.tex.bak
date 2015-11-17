@@ -175,7 +175,7 @@ All other symbols are terminals.\\
 
 \begin{tabular}{lll}
 {\nonterminal{Exp16}} & {\arrow}  &{\nonterminal{Literal}}  \\
- & {\delimit}  &{\nonterminal{Type2}}  \\
+ & {\delimit}  &{\nonterminal{QConst}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Exp}} {\terminal{)}}  \\
 \end{tabular}\\
 
@@ -319,11 +319,7 @@ All other symbols are terminals.\\
  & {\delimit}  &{\terminal{double}}  \\
  & {\delimit}  &{\terminal{void}}  \\
  & {\delimit}  &{\terminal{bool}}  \\
- & {\delimit}  &{\nonterminal{Type2}}  \\
-\end{tabular}\\
-
-\begin{tabular}{lll}
-{\nonterminal{Type2}} & {\arrow}  &{\nonterminal{QConst}}  \\
+ & {\delimit}  &{\nonterminal{QConst}}  \\
  & {\delimit}  &{\terminal{(}} {\nonterminal{Type}} {\terminal{)}}  \\
 \end{tabular}\\
 

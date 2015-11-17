@@ -48,7 +48,6 @@ import ErrM
 %name pLiteral Literal
 %name pListString ListString
 %name pType1 Type1
-%name pType2 Type2
 %name pType Type
 
 -- no lexer declaration
@@ -211,7 +210,7 @@ Else : 'else' Stm { RElse $2 }
 
 Exp16 :: { Exp }
 Exp16 : Literal { ELiteral $1 } 
-  | Type2 { EQConst $1 }
+  | QConst { EQConst $1 }
   | '(' Exp ')' { $2 }
 
 
@@ -355,11 +354,7 @@ Type1 : 'int' { TInt }
   | 'double' { TDouble }
   | 'void' { TVoid }
   | 'bool' { TBool }
-  | Type2 { $1 }
-
-
-Type2 :: { Type }
-Type2 : QConst { TQConst $1 } 
+  | QConst { TQConst $1 }
   | '(' Type ')' { $2 }
 
 

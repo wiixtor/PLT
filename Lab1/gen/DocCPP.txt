@@ -162,8 +162,7 @@ All other symbols are terminals.
   |  |  **|**  | //Exp// ``,`` //[Exp]// 
   | //QConst// | -> | //[Item]// 
   | //Item// | -> | //Id// 
-  |  |  **|**  | //Template// 
-  | //Template// | -> | //Id// ``<`` //[Type1]// ``>`` 
+  |  |  **|**  | //Id// ``<`` //[Type1]// ``>`` 
   | //[Type1]// | -> | //Type1// 
   |  |  **|**  | //Type1// ``,`` //[Type1]// 
   | //[Item]// | -> | //Item// 

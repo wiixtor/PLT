@@ -42,7 +42,6 @@ import ErrM
 %name pListExp ListExp
 %name pQConst QConst
 %name pItem Item
-%name pTemplate Template
 %name pListType1 ListType1
 %name pListItem ListItem
 %name pLiteral Literal
@@ -181,7 +180,7 @@ Arg : 'const' Arg1 { CArg $2 }
 
 Stm :: { Stm }
 Stm : Exp ';' { SExp $1 } 
-  | Dec ';' { SDecInit $1 }
+  | Dec ';' { SDec $1 }
   | 'const' Dec ';' { SConst $2 }
   | 'return' Exp ';' { SReturn $2 }
   | 'while' '(' Exp ')' Stm { SWhile $3 $5 }
@@ -320,11 +319,7 @@ QConst : ListItem { QConsts $1 }
 
 Item :: { Item }
 Item : Id { IdItem $1 } 
-  | Template { TypeItem $1 }
-
-
-Template :: { Template }
-Template : Id '<' ListType1 '>' { NormTemp $1 $3 } 
+  | Id '<' ListType1 '>' { TypeItem $1 $3 }
 
 
 ListType1 :: { [Type] }
@@ -338,10 +333,10 @@ ListItem : Item { (:[]) $1 }
 
 
 Literal :: { Literal }
-Literal : Integer { IntL $1 } 
-  | ListString { StringL $1 }
-  | Char { CharL $1 }
-  | Double { FloatL $1 }
+Literal : Integer { LInt $1 } 
+  | ListString { LString $1 }
+  | Char { LChar $1 }
+  | Double { LFloat $1 }
 
 
 ListString :: { [String] }

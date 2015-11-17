@@ -55,7 +55,7 @@ data Else =
 
 data Exp =
    ELiteral Literal
- | EQConst Type
+ | EQConst QConst
  | EIndex Exp Exp
  | EFunc Exp [Exp]
  | EDot Exp Exp
