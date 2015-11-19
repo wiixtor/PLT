@@ -47,6 +47,8 @@ inferExp env x = case x of
 	EId id -> lookVar env id
 	EPlus exp0 exp -> inferArithmBin env exp0 exp
 	EMinus exp0 exp -> inferArithmBin env exp0 exp
+	EDiv exp0 exp -> inferArithmBin env exp0 exp
+	ETimes exp0 exp -> inferArithmBin env exp0 exp
 
 {- 
  | EApp Id [Exp]
@@ -54,10 +56,7 @@ inferExp env x = case x of
  | EPostDecr Exp
  | EPreIncr Exp
  | EPreDecr Exp
- | ETimes Exp Exp
- | EDiv Exp Exp
- | EPlus Exp Exp
- | EMinus Exp Exp
+
  | ELt Exp Exp
  | EGt Exp Exp
  | ELtEq Exp Exp
