@@ -23,6 +23,13 @@ checkStm env val x = case x of
 		checkExp env Type_bool exp
 		checkStm env val stm
 
+{- 
+ | SInit Type Id Exp
+ | SReturn Exp
+ | 
+ | SBlock [Stm]
+ | SIfElse Exp Stm Stm -}
+
 checkExp :: Env -> Type -> Exp -> Err ()
 checkExp env typ exp = do
 	typ2 <- inferExp env exp
@@ -34,9 +41,32 @@ checkExp env typ exp = do
 inferExp :: Env -> Exp -> Err Type
 inferExp env x = case x of
 	ETrue -> return Type_bool
+	EFalse -> return Type_bool
 	EInt n -> return Type_int
+	EDouble d -> return Type_double
 	EId id -> lookVar env id
 	EPlus exp0 exp -> inferArithmBin env exp0 exp
+	EMinus exp0 exp -> inferArithmBin env exp0 exp
+
+{- 
+ | EApp Id [Exp]
+ | EPostIncr Exp
+ | EPostDecr Exp
+ | EPreIncr Exp
+ | EPreDecr Exp
+ | ETimes Exp Exp
+ | EDiv Exp Exp
+ | EPlus Exp Exp
+ | EMinus Exp Exp
+ | ELt Exp Exp
+ | EGt Exp Exp
+ | ELtEq Exp Exp
+ | EGtEq Exp Exp
+ | EEq Exp Exp
+ | ENEq Exp Exp
+ | EAnd Exp Exp
+ | EOr Exp Exp
+ | EAss Exp Exp -}
 
 inferArithmBin :: Env -> Exp -> Exp -> Err Type
 inferArithmBin env a b = do
