@@ -38,6 +38,14 @@ inferExp env x = case x of
 	EId id -> lookVar env id
 	EPlus exp0 exp -> inferArithmBin env exp0 exp
 
+inferArithmBin :: Env -> Exp -> Exp -> Err Type
+inferArithmBin env a b = do
+	typ <- inferExp env a
+	if elem typ [Type_int, Type_double] then do
+		checkExp env b typ
+	else
+		fail $ "type of expression " ++ printTree exp -- 
+
 lookVar :: Env -> Id -> Err Type
 lookVar = undefined
 
