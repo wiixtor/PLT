@@ -49,13 +49,14 @@ inferExp env x = case x of
 	EMinus exp0 exp -> inferArithmBin env exp0 exp
 	EDiv exp0 exp -> inferArithmBin env exp0 exp
 	ETimes exp0 exp -> inferArithmBin env exp0 exp
+	EPostIncr exp -> inferExp env exp
+	EPostDecr exp -> inferExp env exp
+	EPreIncr exp -> inferExp env exp
+	EPreDecr exp -> inferExp env exp
+	ELt exp0 exp -> undefined
 
 {- 
  | EApp Id [Exp]
- | EPostIncr Exp
- | EPostDecr Exp
- | EPreIncr Exp
- | EPreDecr Exp
 
  | ELt Exp Exp
  | EGt Exp Exp
