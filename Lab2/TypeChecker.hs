@@ -63,20 +63,28 @@ inferExp env x = case x of
 	EPostDecr exp -> inferExp env exp
 	EPreIncr exp -> inferExp env exp
 	EPreDecr exp -> inferExp env exp
-	ELt exp0 exp -> undefined
+	ELt exp0 exp -> inferComparison env exp0 exp
+	EGt exp0 exp -> inferComparison env exp0 exp
+	ELtEq exp0 exp -> inferComparison env exp0 exp
+	EGtEq exp0 exp -> inferComparison env exp0 exp
+	EEq  exp0 exp -> inferComparison env exp0 exp
+	ENEq exp0 exp -> inferComparison env exp0 exp
+	EAnd exp0 exp -> inferBool env exp0 exp
+	EOr exp0 exp -> inferBool env exp0 exp
+	EAss exp0 exp -> checkExp env (inferExp env exp0) exp
 
 {- 
  | EApp Id [Exp]
+-}
 
- | ELt Exp Exp
- | EGt Exp Exp
- | ELtEq Exp Exp
- | EGtEq Exp Exp
- | EEq Exp Exp
- | ENEq Exp Exp
- | EAnd Exp Exp
- | EOr Exp Exp
- | EAss Exp Exp -}
+inferBool :: Env -> Exp -> Exp -> Err Type
+inferBool env a b = do
+	typ <- inferExp env a
+	if elem typ Type_bool then do
+		checkExp env typ b
+		return typ
+	else
+		fail $ "type of expression " ++ printTree exp -- 
 
 inferArithmBin :: Env -> Exp -> Exp -> Err Type
 inferArithmBin env a b = do
