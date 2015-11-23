@@ -73,6 +73,16 @@ inferArithmBin env a b = do
 	typ <- inferExp env a
 	if elem typ [Type_int, Type_double] then do
 		checkExp env b typ
+		return typ
+	else
+		fail $ "type of expression " ++ printTree exp -- 
+
+inferComparison :: Env -> Exp -> Exp -> Err Type
+inferArithmBin env a b = do
+	typ <- inferExp env a
+	if elem typ [Type_int, Type_double, Type_bool] then do
+		checkExp env b typ
+		return typ
 	else
 		fail $ "type of expression " ++ printTree exp -- 
 
