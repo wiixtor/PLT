@@ -37,9 +37,10 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
 					Type_void -> Nothing
 					_ -> Just outtyp
 			in do
+				envprep <- newBlock globalenv
 				fbodyenv <- foldM 
 					(\env (ADecl atyp aid) -> updateVar env aid atyp)
-					(newBlock globalenv)
+					envprep
 					args
 				typcheckStms fbodyenv retType stms
 			)
@@ -66,7 +67,7 @@ typcheckStm _ (SReturn _) = fail "return wat"
 typcheckStm env (SExp exp) = do
 	_ <- inferExp env exp
 	return env
-
+-- add statements
 
 checkExp :: Env -> Type -> Exp -> Err ()
 checkExp env typ exp = do
@@ -99,7 +100,7 @@ inferExp env x = case x of
 	ENEq exp0 exp -> inferComparison env exp0 exp
 	EAnd exp0 exp -> inferBool env exp0 exp
 	EOr exp0 exp -> inferBool env exp0 exp
-	EAss exp0 exp -> checkExp env (inferExp env exp0) exp
+	EAss exp0 exp -> inferAssign env exp exp0
 	EApp fncid args -> do
 			(intyps, outtyp) <- lookFun env fncid
 			if length intyps == length args then do
@@ -110,14 +111,23 @@ inferExp env x = case x of
 			else
 				fail "something"
 
+inferAssign :: Env -> Exp -> Exp -> Err Type
+inferAssign env exp exp0 = do
+	typ <- inferExp env exp
+	typ0 <- inferExp env exp0
+	if typ == typ0 then
+		return typ
+	else
+		fail "assign"
+
 inferBool :: Env -> Exp -> Exp -> Err Type
 inferBool env a b = do
 	typ <- inferExp env a
-	if elem typ Type_bool then do
+	if typ == Type_bool then do
 		checkExp env typ b
 		return typ
 	else
-		fail $ "type of expression " ++ printTree exp -- 
+		fail $ "type of expression " -- ++ printTree exp -- 
 
 inferArithmBin :: Env -> Exp -> Exp -> Err Type
 inferArithmBin env a b = do
@@ -143,7 +153,7 @@ lookVar env varid = lookvar' (snd env) varid
   	lookvar' [] id 		= fail " variable not defined "
    	lookvar' (c:cs) id 	= 
   		case Map.lookup id c of
-  			Just typ -> Just typ
+  			Just typ -> Ok typ
   			Nothing  -> lookvar' cs id
 
 lookFun :: Env -> Id -> Err ([Type],Type)
@@ -157,18 +167,18 @@ updateVar (s, c:cs) id typ =
 	if Map.member id c then
 		fail "Already defined"
 	else 
-		return (s, Map.insert id typ : c : cs)
+		return (s, Map.insert id typ c : cs)
 --	return $ (s, (Map.insert id typ):c)
 
 updateFun :: Env -> Id -> ([Type],Type) -> Err Env
 updateFun (sig, cs) f funtyps = 
 	if Map.member f sig then
-		fail
+		fail ""
 	else 
 		return (Map.insert f funtyps sig, cs)
 
 newBlock :: Env -> Err Env
-newBlock (sig, cs) = (sig, Map.empty : cs)
+newBlock (sig, cs) = return (sig, Map.empty : cs)
 
 emptyEnv :: Env
 emptyEnv = (Map.empty, [])
