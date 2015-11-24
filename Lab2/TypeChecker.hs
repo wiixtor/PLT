@@ -3,7 +3,8 @@ module TypeChecker where
 import AbsCPP
 import PrintCPP
 import ErrM
-import Data.Map
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 type Env = (Sig, [Context])
 type Sig = Map Id ([Type], Type)
@@ -12,15 +13,52 @@ type Context = Map Id Type
 typecheck :: Program -> Err ()
 typecheck (PDefs []) = do
 	return ()
-typecheck (PDefs (d:ds)) = do
-	ok <- checkDef emptyEnv d
-	if (ok == Ok ()) then
-		typecheck (PDefs ds)
-	else 
-		fail $ "Def "-- ++ printTree d
+typecheck (PDefs p) = do
+	builtenv <- foldM
+		(\env (id, typs) -> updateFun env (ID id) typs)
+		emptyEnv
+		[("printInt", ([Type_int], Type_void))]
+	let globalenv = builtenv
+	mapM
+		(\(DFun outtyp id args _) ->
+			let 
+				retType = case outtyp of
+					Type_void -> Nothing
+					_ -> Just outtyp
+			in do
+				fbodyenv <- 
+					foldM (\env (ADecl atyp aid) ->
+						updateVar env aid atyp
+					)
+					(newBlock globalenv)
+				typcheckStms fbodyenv retType stms
+			)
+		defs
+	return ()
+
+
+typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
+typcheckStms env (Just retType) [laststm] =
+	case laststm of
+		SReturn exp -> checkExp env retType exp
+		_ -> fail "not return"
+typcheckStms env Nothing [] 	= return ()
+typcheckStms env (Just _) [] 	= fail "fail"
+typcheckStms env retType (s:ss) = do
+	env' <- typcheckStm env s
+	typcheckStms env' retType ss
+
+
+typcheckStm :: Env -> Stm -> Err Env
+typcheckStm _ (SReturn _) = fail "return wat"
+typcheckStm env (SExp exp) = do
+	_ <- inferExp env exp
+	return env
 
 checkDef :: Env -> Def -> Err ()
 checkDef env def = undefined
+
+
 
 {-checkStm :: Env -> Type -> Stm -> Err Env
 checkStm env val x = case x of
@@ -108,16 +146,52 @@ lookVar :: Env -> Id -> Err Type
 lookVar = undefined
 
 lookFun :: Env -> Id -> Err ([Type],Type)
-lookFun = undefined
+lookFun env fid = 
+	case Map.lookup fid (fst env) of 
+		Just funtyps -> return funtyps
+		Nothing -> fail "function not defined"
 
 updateVar :: Env -> Id -> Type -> Err Env
-updateVar = undefined
+updateVar (s, c:cs) id typ = 
+	if Map.member id c then
+		fail "Already defined"
+	else 
+		return (s, Map.insert id typ : c : cs)
+--	return $ (s, (Map.insert id typ):c)
 
 updateFun :: Env -> Id -> ([Type],Type) -> Err Env
-updateFun = undefined
+updateFun (sig, cs) f funtyps = 
+	if Map.member f sig then
+		fail
+	else 
+		return (Map.insert f funtyps sig, cs)
 
 newBlock :: Env -> Err Env
-newBlock = undefined
+newBlock (sig, cs) = (sig, Map.empty : cs)
 
 emptyEnv :: Env
-emptyEnv = undefined
+emptyEnv = (Map.empty, [])
+
+
+
+
+
+
+typeinfer :: Env -> Exp -> Err Type
+typeinfer env exp =
+	case exp of
+		Eplus exp1 exp2 -> do
+			checkExp env Type_int exp1
+			checkExp env Type_int exp2 -- add doubles
+			return Type_int
+		EInt _ -> 
+			return Type_int
+		EApp fncid arg -> do
+			(inttyps, outtyp) <- lookFun env fncid
+			if length inttyps == length args then do
+				mapM 
+					(\(typ, arg) -> checkExp env typ arg)
+					(zip inttyps args)
+				return outtyp
+			else
+				fail "something"
