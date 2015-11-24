@@ -88,3 +88,23 @@ typecheckExp env typ exp = do
     else 
         fail $ "expected type" ++ printTree typ ++ ", but found type " ++ printTree inftyp ++ "."
 
+
+-- Våran inferExp
+typeinfer :: Env -> Exp -> Err Type
+typeinfer env exp =
+    case exp of
+        Eplus exp1 exp2 -> do
+            checkExp env Type_int exp1
+            checkExp env Type_int exp2 -- add doubles
+            return Type_int
+        EInt _ -> 
+            return Type_int
+        EApp fncid arg -> do
+            (intyps, outtyp) <- lookFun env fncid
+            if length intyps == length args then do
+                mapM 
+                    (\(typ, arg) -> checkExp env typ arg)
+                    (zip intyps args)
+                return outtyp
+            else
+                fail "something"

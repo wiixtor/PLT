@@ -5,6 +5,7 @@ import PrintCPP
 import ErrM
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Control.Monad
 
 type Env = (Sig, [Context])
 type Sig = Map Id ([Type], Type)
@@ -13,12 +14,22 @@ type Context = Map Id Type
 typecheck :: Program -> Err ()
 typecheck (PDefs []) = do
 	return ()
-typecheck (PDefs p) = do
-	builtenv <- foldM
-		(\env (id, typs) -> updateFun env (ID id) typs)
-		emptyEnv
-		[("printInt", ([Type_int], Type_void))]
-	let globalenv = builtenv
+typecheck (PDefs [(DFun typ id arrgs stms)]) = do
+	let p = [(DFun typ id arrgs stms)]
+
+	builtInEnv <- foldM
+		(\env (id, typs) -> updateFun env (Id id) typs)
+		emptyEnv 
+		[("printInt", ([Type_int], Type_void))
+		,("printDouble", ([Type_double], Type_void))
+		,("readInt", ([], Type_int))
+		,("readDouble", ([], Type_double))]
+
+	globalenv <- foldM
+		(\env (DFun typ id args _) -> updateFun env id (argTypes args, typ))
+		builtInEnv
+		p
+
 	mapM
 		(\(DFun outtyp id args _) ->
 			let 
@@ -26,16 +37,17 @@ typecheck (PDefs p) = do
 					Type_void -> Nothing
 					_ -> Just outtyp
 			in do
-				fbodyenv <- 
-					foldM (\env (ADecl atyp aid) ->
-						updateVar env aid atyp
-					)
+				fbodyenv <- foldM 
+					(\env (ADecl atyp aid) -> updateVar env aid atyp)
 					(newBlock globalenv)
+					args
 				typcheckStms fbodyenv retType stms
 			)
-		defs
+		p
 	return ()
 
+  where
+  	argTypes args = map (\(ADecl t _) -> t) args
 
 typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
 typcheckStms env (Just retType) [laststm] =
@@ -55,28 +67,6 @@ typcheckStm env (SExp exp) = do
 	_ <- inferExp env exp
 	return env
 
-checkDef :: Env -> Def -> Err ()
-checkDef env def = undefined
-
-
-
-{-checkStm :: Env -> Type -> Stm -> Err Env
-checkStm env val x = case x of
-	SExp exp -> do
-		inferExp env exp
-		return env
-	SDecls dType x ->
-		updateVar env id dType
-	SWhile exp stm -> do
-		checkExp env Type_bool exp
-		checkStm env val stm
--}
-{- 
- | SInit Type Id Exp
- | SReturn Exp
- | 
- | SBlock [Stm]
- | SIfElse Exp Stm Stm -}
 
 checkExp :: Env -> Type -> Exp -> Err ()
 checkExp env typ exp = do
@@ -84,7 +74,7 @@ checkExp env typ exp = do
 	if (typ2 == typ) then
 		return ()
 	else
-		fail $ "type of " -- ++ printTree exp
+		fail $ "type of exp" -- ++ printTree exp
 
 inferExp :: Env -> Exp -> Err Type
 inferExp env x = case x of
@@ -110,10 +100,15 @@ inferExp env x = case x of
 	EAnd exp0 exp -> inferBool env exp0 exp
 	EOr exp0 exp -> inferBool env exp0 exp
 	EAss exp0 exp -> checkExp env (inferExp env exp0) exp
-
-{- 
- | EApp Id [Exp]
--}
+	EApp fncid args -> do
+			(intyps, outtyp) <- lookFun env fncid
+			if length intyps == length args then do
+				mapM 
+					(\(typ, arg) -> checkExp env typ arg)
+					(zip intyps args)
+				return outtyp
+			else
+				fail "something"
 
 inferBool :: Env -> Exp -> Exp -> Err Type
 inferBool env a b = do
@@ -143,7 +138,13 @@ inferComparison env a b = do
 		fail $ "type of expression " -- ++ printTree exp -- 
 
 lookVar :: Env -> Id -> Err Type
-lookVar = undefined
+lookVar env varid = lookvar' (snd env) varid
+  where
+  	lookvar' [] id 		= fail " variable not defined "
+   	lookvar' (c:cs) id 	= 
+  		case Map.lookup id c of
+  			Just typ -> Just typ
+  			Nothing  -> lookvar' cs id
 
 lookFun :: Env -> Id -> Err ([Type],Type)
 lookFun env fid = 
@@ -171,30 +172,3 @@ newBlock (sig, cs) = (sig, Map.empty : cs)
 
 emptyEnv :: Env
 emptyEnv = (Map.empty, [])
-
-typecheckExp :: Env -> Type -> Exp -> Err ()
-typecheckExp env typ exp = do
-    inftyp <- typeinfer env exp
-    if typ == inftyp then
-        return ()
-    else 
-        fail $ "expected type" ++ printTree typ ++ ", but found type " ++ printTree inftyp ++ "."
-
-typeinfer :: Env -> Exp -> Err Type
-typeinfer env exp =
-	case exp of
-		Eplus exp1 exp2 -> do
-			checkExp env Type_int exp1
-			checkExp env Type_int exp2 -- add doubles
-			return Type_int
-		EInt _ -> 
-			return Type_int
-		EApp fncid arg -> do
-			(inttyps, outtyp) <- lookFun env fncid
-			if length inttyps == length args then do
-				mapM 
-					(\(typ, arg) -> checkExp env typ arg)
-					(zip inttyps args)
-				return outtyp
-			else
-				fail "something"
