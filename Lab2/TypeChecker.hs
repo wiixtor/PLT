@@ -172,10 +172,13 @@ newBlock (sig, cs) = (sig, Map.empty : cs)
 emptyEnv :: Env
 emptyEnv = (Map.empty, [])
 
-
-
-
-
+typecheckExp :: Env -> Type -> Exp -> Err ()
+typecheckExp env typ exp = do
+    inftyp <- typeinfer env exp
+    if typ == inftyp then
+        return ()
+    else 
+        fail $ "expected type" ++ printTree typ ++ ", but found type " ++ printTree inftyp ++ "."
 
 typeinfer :: Env -> Exp -> Err Type
 typeinfer env exp =
