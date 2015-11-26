@@ -46,9 +46,10 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
 			)
 		p
 	return ()
-
   where
   	argTypes args = map (\(ADecl t _) -> t) args
+typecheck _ = return ()
+
 
 typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
 typcheckStms env (Just retType) (laststm:[]) =
