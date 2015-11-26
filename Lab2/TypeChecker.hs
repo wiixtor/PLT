@@ -51,7 +51,7 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
   	argTypes args = map (\(ADecl t _) -> t) args
 
 typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
-typcheckStms env (Just retType) [laststm] =
+typcheckStms env (Just retType) (laststm:[]) =
 	case laststm of
 		SReturn exp -> checkExp env retType exp
 		_ -> fail "not return"
@@ -67,7 +67,9 @@ typcheckStm _ (SReturn _) = fail "return wat"
 typcheckStm env (SExp exp) = do
 	_ <- inferExp env exp
 	return env
--- add statements
+typcheckStm env (SDecls typ ids) = updateVars env ids typ
+typcheckStm env (SInit typ id exp) = 
+
 
 checkExp :: Env -> Type -> Exp -> Err ()
 checkExp env typ exp = do
@@ -168,7 +170,12 @@ updateVar (s, c:cs) id typ =
 		fail "Already defined"
 	else 
 		return (s, Map.insert id typ c : cs)
---	return $ (s, (Map.insert id typ):c)
+
+updateVars :: Env -> [Id] -> Type -> Err Env
+updateVars env [] _ = return env
+updateVars env (i:is) typ = do
+	env' <- updateVar env i typ
+	updateVars env' is typ
 
 updateFun :: Env -> Id -> ([Type],Type) -> Err Env
 updateFun (sig, cs) f funtyps = 
