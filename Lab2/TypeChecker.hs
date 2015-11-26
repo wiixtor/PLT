@@ -68,7 +68,22 @@ typcheckStm env (SExp exp) = do
 	_ <- inferExp env exp
 	return env
 typcheckStm env (SDecls typ ids) = updateVars env ids typ
-typcheckStm env (SInit typ id exp) = 
+typcheckStm env (SInit typ id exp) = do
+	env' <- updateVar env id typ
+	checkExp env' typ exp
+	return env'
+typcheckStm env (SWhile exp stm) = do
+	checkExp env Type_bool exp 
+	env' <- typcheckStm env stm
+	return env'
+typcheckStm env (SBlock stms) = do
+	_ <- typcheckStms env Nothing stms
+	return env 
+typcheckStm env (SIfElse exp stm0 stm1) = do 
+	checkExp env Type_bool exp
+	env' <- typcheckStm env stm0
+	env'' <- typcheckStm env' stm1
+	return env''
 
 
 checkExp :: Env -> Type -> Exp -> Err ()
