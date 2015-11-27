@@ -55,16 +55,16 @@ typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
 typcheckStms env (Just retType) (laststm:[]) =
 	case laststm of
 		SReturn exp -> checkExp env retType exp
-		_ -> fail "not return"
+		_ -> fail "Return statment expected"
 typcheckStms env Nothing [] 	= return ()
-typcheckStms env (Just _) [] 	= fail "fail"
+typcheckStms env (Just _) [] 	= fail "Return statement expected"
 typcheckStms env retType (s:ss) = do
 	env' <- typcheckStm env s
 	typcheckStms env' retType ss
 
 
 typcheckStm :: Env -> Stm -> Err Env
-typcheckStm _ (SReturn _) = fail "return wat"
+typcheckStm _ (SReturn _) = fail "Return statment not expected here"
 typcheckStm env (SExp exp) = do
 	_ <- inferExp env exp
 	return env
@@ -78,7 +78,8 @@ typcheckStm env (SWhile exp stm) = do
 	env' <- typcheckStm env stm
 	return env'
 typcheckStm env (SBlock stms) = do
-	_ <- typcheckStms env Nothing stms
+	env' <- newBlock env
+	_ <- typcheckStms  Nothing stms
 	return env 
 typcheckStm env (SIfElse exp stm0 stm1) = do 
 	checkExp env Type_bool exp
@@ -127,7 +128,7 @@ inferExp env x = case x of
 					(zip intyps args)
 				return outtyp
 			else
-				fail "something"
+				fail "Function: Number of arguments did not match"
 
 inferAssign :: Env -> Exp -> Exp -> Err Type
 inferAssign env exp exp0 = do
@@ -136,7 +137,7 @@ inferAssign env exp exp0 = do
 	if typ == typ0 then
 		return typ
 	else
-		fail "assign"
+		fail "Assingment: Types did not match"
 
 inferBool :: Env -> Exp -> Exp -> Err Type
 inferBool env a b = do
@@ -145,7 +146,7 @@ inferBool env a b = do
 		checkExp env typ b
 		return typ
 	else
-		fail $ "type of expression " -- ++ printTree exp -- 
+		fail $ "Bools was not of type bool" -- ++ printTree exp -- 
 
 inferArithmBin :: Env -> Exp -> Exp -> Err Type
 inferArithmBin env a b = do
@@ -154,7 +155,7 @@ inferArithmBin env a b = do
 		checkExp env typ b
 		return typ
 	else
-		fail $ "type of expression "-- ++ printTree exp -- 
+		fail $ "ArithBin: Types did not match or was not correct type"-- ++ printTree exp -- 
 
 inferComparison :: Env -> Exp -> Exp -> Err Type
 inferComparison env a b = do
@@ -163,7 +164,7 @@ inferComparison env a b = do
 		checkExp env typ b
 		return typ
 	else
-		fail $ "type of expression " -- ++ printTree exp -- 
+		fail $ "tComapare: Types did not match or was not the correct type" -- ++ printTree exp -- 
 
 lookVar :: Env -> Id -> Err Type
 lookVar env varid = lookvar' (snd env) varid
@@ -196,7 +197,7 @@ updateVars env (i:is) typ = do
 updateFun :: Env -> Id -> ([Type],Type) -> Err Env
 updateFun (sig, cs) f funtyps = 
 	if Map.member f sig then
-		fail ""
+		fail "Function already defined"
 	else 
 		return (Map.insert f funtyps sig, cs)
 
