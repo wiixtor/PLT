@@ -33,6 +33,7 @@ VUndefined. Value ::= ;
 
 interpret :: Program -> IO ()
 interpret p = 	do
+	env <- 
 
 	builtInEnv <- foldM
 		(\env (id, typs) -> updateFun env (Id id) typs)
@@ -48,12 +49,13 @@ interpret p = 	do
 		p
 
 
+-- all these gotta be fix
 eval :: Env -> Exp -> (Value, Env)
 eval env x = case x of
 	ETrue -> return (VBool True, env)
-	EFalse -> return (False, env)
-	EInt n -> return (n, env)
-	EDouble d -> return (d, env)
+	EFalse -> return (VBool False, env)
+	EInt n -> return (VInt n, env)
+	EDouble d -> return (VDouble d, env)
 	EId id -> do
 		v <- lookVar env id 
 		return (v, env)
