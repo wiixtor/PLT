@@ -139,19 +139,24 @@ eval env x = case x of
 		(v0, env') <- eval env exp0
 		(v, env'') <- eval env' exp1
 		return $ (notEq v0 v, env'')
-	EAnd exp0 exp1 -> inferBool env exp0 exp1
-	EOr exp0 exp1 -> inferBool env exp0 exp1
-	EAss exp0 exp1 -> inferAssign env exp1 exp0
-	EApp fncid args -> do
-			(intyps, outtyp) <- lookFun env fncid
-			if length intyps == length args then do
-				mapM 
-					(\(typ, arg) -> checkExp env typ arg)
-					(zip intyps args)
-				return outtyp
-			else
-				fail "Function: Number of arguments did not match"
-
+	EAnd exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (vAnd v0 v, env'')
+	EOr exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (vOr v0 v, env'')
+	EAss exp0 exp1 -> do
+        (v, env') <- eval env exp1
+        (EId id) <- getID exp0
+        env'' <- updateVal env' id v 
+        return env''
+	EApp fncid args -> undefined
+        where
+            getID :: Exp -> Err Id 
+            getID (EId id) = id
+            getID _ = fail "blurb"
 
 updateFun :: Env -> Def -> Err Env
 updateFun (d, vs) (DFun typ id args stms) =
