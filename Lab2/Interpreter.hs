@@ -10,8 +10,10 @@ import qualified Data.Map as M
 type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
-data Value = VInt Integer | VDouble DOuble | VBool Bool | VVoid -- undefined?
+data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
 
+
+(VInt v) = v 
 
 {-
 VInteger. Value ::= Integer ;
@@ -47,6 +49,8 @@ interpret p = 	do
 		(\env (DFun typ id args _) -> updateFun env id (argTypes args, typ))
 		builtInEnv
 		p
+
+
 
 
 -- all these gotta be fix
