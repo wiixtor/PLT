@@ -58,4 +58,3 @@ data Type =
  | Type_double
  | Type_void
   deriving (Eq,Ord,Show)
-

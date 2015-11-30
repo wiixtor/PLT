@@ -5,15 +5,12 @@ import PrintCPP
 import ErrM
 
 import Control.Monad
-import qualified Data.Map as M
+import qualified Data.Map as Map
 
 type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
 data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
-
-
-(VInt v) = v 
 
 {-
 VInteger. Value ::= Integer ;
@@ -34,21 +31,7 @@ VUndefined. Value ::= ;
 -}
 
 interpret :: Program -> IO ()
-interpret p = 	do
-	env <- 
-
-	builtInEnv <- foldM
-		(\env (id, typs) -> updateFun env (Id id) typs)
-		emptyEnv 
-		[("printInt", ([Type_int], Type_void))
-		,("printDouble", ([Type_double], Type_void))
-		,("readInt", ([], Type_int))
-		,("readDouble", ([], Type_double))]
-
-	globalenv <- foldM
-		(\env (DFun typ id args _) -> updateFun env id (argTypes args, typ))
-		builtInEnv
-		p
+interpret p = 	undefined
 
 
 
@@ -67,7 +50,7 @@ eval env x = case x of
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp
         return (vAdd v0 v, env'')
-	EMinus exp0 exp -> do 
+	EMinus exp0 exp -> do
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp
         return (vSub v0 v, env'')
@@ -99,11 +82,26 @@ eval env x = case x of
         case v of 
             VInt i = return (vSub v (VInt 1), env')
             VDouble d = return (vSub v (VDouble 1.0), env')
-	ELt exp0 exp -> inferComparison env exp0 exp
-	EGt exp0 exp -> inferComparison env exp0 exp
-	ELtEq exp0 exp -> inferComparison env exp0 exp
-	EGtEq exp0 exp -> inferComparison env exp0 exp
-	EEq  exp0 exp -> inferComparison env exp0 exp
+	ELt exp0 exp -> do
+		(v0, env') <- eval env exp0
+		(v, env'') <- eval env' exp
+		return $ (less v0 v, env'')
+	EGt exp0 exp ->  do
+		(v0, env') <- eval env exp0
+		(v, env'') <- eval env' exp
+		return $ (more v0 v, env'')
+	ELtEq exp0 exp -> do
+		(v0, env') <- eval env exp0
+		(v, env'') <- eval env' exp
+		return $ (lessEq v0 v, env'')
+	EGtEq exp0 exp ->  do
+		(v0, env') <- eval env exp0
+		(v, env'') <- eval env' exp
+		return $ (moreEq v0 v, env'')
+	EEq  exp0 exp -> do
+		(v0, env') <- eval env exp0
+		(v, env'') <- eval env' exp
+		return $ (equals v0 v, env'')
 	ENEq exp0 exp -> inferComparison env exp0 exp
 	EAnd exp0 exp -> inferBool env exp0 exp
 	EOr exp0 exp -> inferBool env exp0 exp
@@ -137,6 +135,36 @@ vMul :: Value -> Value -> Value
 vMul (VInt i0) (VInt i) = (VInt (i0 * i))
 vMul (VDouble d0) (VDouble d) = (VDouble (d0 * d))
 vMul _ _ = undefined
+
+less :: Value -> Value -> Value
+less (VInt i0) (VInt i) = VBool (i0 < i)
+less (VDouble d0) (VDouble d) = VBool (d0 < d)
+less _ _ = undefined
+
+lessEq :: Value -> Value -> Value
+lessEq (VInt i0) (VInt i) = VBool (i0 <= i)
+lessEq (VDouble d0) (VDouble d) = VBool (d0 <= d)
+lessEq _ _ = undefined
+
+more :: Value -> Value -> Value
+more (VInt i0) (VInt i) = VBool (i0 > i)
+more (VDouble d0) (VDouble d) = VBool (d0 > d)
+more _ _ = undefined
+
+moreEq :: Value -> Value -> Value
+moreEq (VInt i0) (VInt i) = VBool (i0 >= i)
+moreEq (VDouble d0) (VDouble d) = VBool (d0 >= d)
+moreEq _ _ = undefined
+
+equals :: Value -> Value -> Value
+equals (VInt i0) (VInt i) = VBool (i0 == i)
+equals (VDouble d0) (VDouble d) = VBool (d0 == d)
+equals _ _ = undefined
+
+notEq :: Value -> Value -> Value
+notEq (VInt i0) (VInt i) = VBool (i0 /= i)
+notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
+notEq _ _ = undefined
 
 updateFun :: Env -> Def -> Err Env
 updateFun (d, vs) (DFun typ id args stms) =
