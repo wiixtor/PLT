@@ -19,7 +19,7 @@ VVoid. Value ::= ;
 VUndefined. Value ::= ;
 
 	<Value,Env> eval (Env env, Exp e)		eval
-	Env exec (Env env, Statement s)
+	Env exec (Env env, Statement s)			eval 
 	Void exec (Program p) 					interpret
 	Value look (Ident x, Env env)			lookVar
 	Fun look (Ident x, Env env)				lookFun
@@ -42,7 +42,7 @@ interpret (PDefs p) = 	do
 
 eval :: Env -> [Stm] -> Env
 eval e [] = e
-eval e s:ss = eval (eval s) ss
+eval e (s:ss) = eval (eval e s) ss
 
 eval :: Env -> Stm -> Env
 eval e s = case s of
@@ -50,9 +50,21 @@ eval e s = case s of
   	SDecls typ [id] -> e
   	SInit _ id exp1 -> updateVal e id (fst $ eval e exp1)
   	SReturn exp1 -> snd $ eval e exp1
-  	SWhile exp1 stm -> snd $ eval e exp1
+  	SWhile exp1 stm -> do
+  		(VBool b, env') <- eval e exp1
+  		if b == False then do
+  			return env'
+  		else do
+  			env'' <- eval env' stm
+  			eval env'' (SWhile exp1 stm) 
+
   	SBlock stms -> eval (newBlock e) stms
-  	SIfElse exp1 stm stm1 ->
+  	SIfElse exp1 stm stm1 -> do
+  		(VBool b, env') <- eval e exp1 
+  		if b then
+  			eval env' stm
+  		else 
+  			eval env' stm1
 
 
 
