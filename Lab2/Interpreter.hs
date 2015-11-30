@@ -63,14 +63,42 @@ eval env x = case x of
 	EId id -> do
 		v <- lookVar env id 
 		return (v, env)
-	EPlus exp0 exp -> inferArithmBin env exp0 exp
-	EMinus exp0 exp -> inferArithmBin env exp0 exp
-	EDiv exp0 exp -> inferArithmBin env exp0 exp
-	ETimes exp0 exp -> inferArithmBin env exp0 exp
-	EPostIncr exp -> inferExp env exp
-	EPostDecr exp -> inferExp env exp
-	EPreIncr exp -> inferExp env exp
-	EPreDecr exp -> inferExp env exp
+	EPlus exp0 exp -> do 
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp
+        return (vAdd v0 v, env'')
+	EMinus exp0 exp -> do 
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp
+        return (vSub v0 v, env'')
+	EDiv exp0 exp -> do 
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp
+        return (vDiv v0 v, env'')
+	ETimes exp0 exp -> do 
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp
+        return (vMul v0 v, env'')
+	EPostIncr exp -> do
+		(v, env') <- eval env exp
+        case v of 
+            VInt i = return (vAdd v (VInt 1), env')
+            VDouble d = return (vAdd v (VDouble 1.0), env')
+	EPostDecr exp -> do
+        (v, env') <- eval env exp
+        case v of 
+            VInt i = return (vSub v (VInt 1), env')
+            VDouble d = return (vSub v (VDouble 1.0), env')
+	EPreIncr exp -> do
+        (v, env') <- eval env exp
+        case v of 
+            VInt i = return (vAdd v (VInt 1), env')
+            VDouble d = return (vAdd v (VDouble 1.0), env')
+	EPreDecr exp -> do
+        (v, env') <- eval env exp
+        case v of 
+            VInt i = return (vSub v (VInt 1), env')
+            VDouble d = return (vSub v (VDouble 1.0), env')
 	ELt exp0 exp -> inferComparison env exp0 exp
 	EGt exp0 exp -> inferComparison env exp0 exp
 	ELtEq exp0 exp -> inferComparison env exp0 exp
@@ -90,6 +118,25 @@ eval env x = case x of
 			else
 				fail "Function: Number of arguments did not match"
 
+vAdd :: Value -> Value -> Value
+vAdd (VInt i0) (VInt i) = (VInt (i0 + i))
+vAdd (VDouble d0) (VDouble d) = (VDouble (d0 + d))
+vAdd _ _ = undefined
+
+vSub :: Value -> Value -> Value
+vSub (VInt i0) (VInt i) = (VInt (i0 - i))
+vSub (VDouble d0) (VDouble d) = (VDouble (d0 - d))
+vSub _ _ = undefined
+
+vDiv :: Value -> Value -> Value
+vDiv (VInt i0) (VInt i) = (VInt (i0 / i))
+vDiv (VDouble d0) (VDouble d) = (VDouble (d0 / d))
+vDiv _ _ = undefined
+
+vMul :: Value -> Value -> Value
+vMul (VInt i0) (VInt i) = (VInt (i0 * i))
+vMul (VDouble d0) (VDouble d) = (VDouble (d0 * d))
+vMul _ _ = undefined
 
 updateFun :: Env -> Def -> Err Env
 updateFun (d, vs) (DFun typ id args stms) =
