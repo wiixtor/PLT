@@ -54,7 +54,9 @@ eval env x = case x of
 	EFalse -> return (False, env)
 	EInt n -> return (n, env)
 	EDouble d -> return (d, env)
-	EId id -> lookVar env id
+	EId id -> do
+		v <- lookVar env id 
+		return (v, env)
 	EPlus exp0 exp -> inferArithmBin env exp0 exp
 	EMinus exp0 exp -> inferArithmBin env exp0 exp
 	EDiv exp0 exp -> inferArithmBin env exp0 exp
