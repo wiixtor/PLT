@@ -237,3 +237,6 @@ notEq :: Value -> Value -> Value
 notEq (VInt i0) (VInt i) = VBool (i0 /= i)
 notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
 notEq _ _ = undefined
+
+vAnd = (VDouble d0) (VDouble d) = VBool (d0 && d)
+vOr  = (VDouble d0) (VDouble d) = VBool (d0 || d)
