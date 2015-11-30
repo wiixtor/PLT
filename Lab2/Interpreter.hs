@@ -47,11 +47,11 @@ eval e s:ss = eval (eval s) ss
 eval :: Env -> Stm -> Env
 eval e s = case s of
 	SExp exp1 -> snd $ eval e exp1
-  	SDecls typ [id] -> 
+  	SDecls typ [id] -> e
   	SInit _ id exp1 -> updateVal e id (fst $ eval e exp1)
-  	SReturn exp1 -> 
-  	SWhile exp1 stm ->
-  	SBlock [stm] ->
+  	SReturn exp1 -> snd $ eval e exp1
+  	SWhile exp1 stm -> snd $ eval e exp1
+  	SBlock stms -> eval (newBlock e) stms
   	SIfElse exp1 stm stm1 ->
 
 
