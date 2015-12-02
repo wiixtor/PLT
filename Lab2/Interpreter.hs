@@ -18,27 +18,27 @@ VDouble. Value ::= Double ;
 VVoid. Value ::= ;
 VUndefined. Value ::= ;
 
-	<Value,Env> eval (Env env, Exp e)		eval
-	Env exec (Env env, Statement s)			eval 
-	Void exec (Program p) 					interpret
-	Value look (Ident x, Env env)			lookVar
-	Fun look (Ident x, Env env)				lookFun
-	Env extend (Env env, Ident x, Value v)	updateVal
-	Env extend (Env env, Definition d)		updateFun
-	Env push (Env env)						newBlock
-	Env pop (Env env)						popBlock
-	Env empty ()							emptyEnv
+    <Value,Env> eval (Env env, Exp e)       eval
+    Env exec (Env env, Statement s)         eval 
+    Void exec (Program p)                   interpret
+    Value look (Ident x, Env env)           lookVar
+    Fun look (Ident x, Env env)             lookFun
+    Env extend (Env env, Ident x, Value v)  updateVal
+    Env extend (Env env, Definition d)      updateFun
+    Env push (Env env)                      newBlock
+    Env pop (Env env)                       popBlock
+    Env empty ()                            emptyEnv
 -}
 
 interpret :: Program -> IO ()
-interpret (PDefs p) = 	do
-	env <- foldM
-		(updateFun env def)
-		emptyEnv
-		p
-	(DFun _ _ _ stms) <- lookFun env "main"
-	eval env stms
-	return ()
+interpret (PDefs p) =   do
+    env <- foldM
+        (updateFun env def)
+        emptyEnv
+        p
+    (DFun _ _ _ stms) <- lookFun env "main"
+    eval env stms
+    return ()
 
 eval :: Env -> [Stm] -> Env
 eval e [] = e
@@ -46,113 +46,113 @@ eval e (s:ss) = eval (eval e s) ss
 
 eval :: Env -> Stm -> Env
 eval e s = case s of
-	SExp exp1 -> snd $ eval e exp1
-  	SDecls typ [id] -> e
-  	SInit _ id exp1 -> updateVal e id (fst $ eval e exp1)
-  	SReturn exp1 -> snd $ eval e exp1
-  	SWhile exp1 stm -> do
-  		(VBool b, env') <- eval e exp1
-  		if b == False then do
-  			return env'
-  		else do
-  			env'' <- eval env' stm
-  			eval env'' (SWhile exp1 stm) 
+    SExp exp1 -> snd $ eval e exp1
+    SDecls typ [id] -> e
+    SInit _ id exp1 -> updateVal e id (fst $ eval e exp1)
+    SReturn exp1 -> snd $ eval e exp1
+    SWhile exp1 stm -> do
+        (VBool b, env') <- eval e exp1
+        if b == False then do
+            return env'
+        else do
+            env'' <- eval env' stm
+            eval env'' (SWhile exp1 stm) 
 
-  	SBlock stms -> eval (newBlock e) stms
-  	SIfElse exp1 stm stm1 -> do
-  		(VBool b, env') <- eval e exp1 
-  		if b then
-  			eval env' stm
-  		else 
-  			eval env' stm1
+    SBlock stms -> eval (newBlock e) stms
+    SIfElse exp1 stm stm1 -> do
+        (VBool b, env') <- eval e exp1 
+        if b then
+            eval env' stm
+        else 
+            eval env' stm1
 
 
 
 -- all these gotta be fix
 eval :: Env -> Exp -> (Value, Env)
 eval env x = case x of
-	ETrue -> return (VBool True, env)
-	EFalse -> return (VBool False, env)
-	EInt n -> return (VInt n, env)
-	EDouble d -> return (VDouble d, env)
-	EId id -> do
-		v <- lookVar env id 
-		return (v, env)
-	EPlus exp0 exp1 -> do 
+    ETrue -> return (VBool True, env)
+    EFalse -> return (VBool False, env)
+    EInt n -> return (VInt n, env)
+    EDouble d -> return (VDouble d, env)
+    EId id -> do
+        v <- lookVar env id 
+        return (v, env)
+    EPlus exp0 exp1 -> do 
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
         val <- vAdd v0 v
         return (val, env'')
-	EMinus exp0 exp1 -> do
+    EMinus exp0 exp1 -> do
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
         return (vSub v0 v, env'')
-	EDiv exp0 exp1 -> do 
+    EDiv exp0 exp1 -> do 
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
         return (vDiv v0 v, env'')
-	ETimes exp0 exp1 -> do 
+    ETimes exp0 exp1 -> do 
         (v0, env') <- eval env exp1
         (v, env'') <- eval env' exp1
         return (vMul v0 v, env'')
-	EPostIncr exp1 -> do
-		(v, env') <- eval env exp1
-        case v of 
-            VInt i = return (vAdd v (VInt 1), env')
-            VDouble d = return (vAdd v (VDouble 1.0), env')
-	EPostDecr exp1 -> do
-        (v, env') <- eval env exp1
-        case v of 
-            VInt i = return (vSub v (VInt 1), env')
-            VDouble d = return (vSub v (VDouble 1.0), env')
-	EPreIncr exp1 -> do
+    EPostIncr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
             VInt i = return (vAdd v (VInt 1), env')
             VDouble d = return (vAdd v (VDouble 1.0), env')
-	EPreDecr exp1 -> do
+    EPostDecr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
             VInt i = return (vSub v (VInt 1), env')
             VDouble d = return (vSub v (VDouble 1.0), env')
-	ELt exp0 exp1 -> do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (less v0 v, env'')
-	EGt exp0 exp1 ->  do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (more v0 v, env'')
-	ELtEq exp0 exp1 -> do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (lessEq v0 v, env'')
-	EGtEq exp0 exp1 ->  do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (moreEq v0 v, env'')
-	EEq  exp0 exp1 -> do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (equals v0 v, env'')
-	ENEq exp0 exp1 -> do
-		(v0, env') <- eval env exp0
-		(v, env'') <- eval env' exp1
-		return $ (notEq v0 v, env'')
-	EAnd exp0 exp1 -> do
+    EPreIncr exp1 -> do
+        (v, env') <- eval env exp1
+        case v of 
+            VInt i = return (vAdd v (VInt 1), env')
+            VDouble d = return (vAdd v (VDouble 1.0), env')
+    EPreDecr exp1 -> do
+        (v, env') <- eval env exp1
+        case v of 
+            VInt i = return (vSub v (VInt 1), env')
+            VDouble d = return (vSub v (VDouble 1.0), env')
+    ELt exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (less v0 v, env'')
+    EGt exp0 exp1 ->  do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (more v0 v, env'')
+    ELtEq exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (lessEq v0 v, env'')
+    EGtEq exp0 exp1 ->  do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (moreEq v0 v, env'')
+    EEq  exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (equals v0 v, env'')
+    ENEq exp0 exp1 -> do
+        (v0, env') <- eval env exp0
+        (v, env'') <- eval env' exp1
+        return $ (notEq v0 v, env'')
+    EAnd exp0 exp1 -> do
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
         return $ (vAnd v0 v, env'')
-	EOr exp0 exp1 -> do
+    EOr exp0 exp1 -> do
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
         return $ (vOr v0 v, env'')
-	EAss exp0 exp1 -> do
+    EAss exp0 exp1 -> do
         (v, env') <- eval env exp1
         (EId id) <- getID exp0
         env'' <- updateVal env' id v 
         return env''
-	EApp fncid args -> undefined
+    EApp fncid args -> undefined
         where
             getID :: Exp -> Err Id 
             getID (EId id) = id
@@ -160,26 +160,26 @@ eval env x = case x of
 
 updateFun :: Env -> Def -> Err Env
 updateFun (d, vs) (DFun typ id args stms) =
-	if Map.member id d then
-		fail "function already defined (updateFun)"
-	else
-		return (Map.insert id (DFun typ id args stms) d, vs)
+    if Map.member id d then
+        fail "function already defined (updateFun)"
+    else
+        return (Map.insert id (DFun typ id args stms) d, vs)
 
 updateVal :: Env -> Id -> Value -> Err Env
 updateVal (d, v:vs) id val = 
-	return (d, Map.insert id val v : vs)
+    return (d, Map.insert id val v : vs)
 
 lookVar :: Env -> Id -> Err Value
 lookVar env id = do
-	case Map.lookup id (snd env) of
-		Just v -> return v
-		Nothing -> fail "var not defined (lookVar)"
+    case Map.lookup id (snd env) of
+        Just v -> return v
+        Nothing -> fail "var not defined (lookVar)"
 
 lookFun :: Env -> Id -> Err Def
 lookFun env id = do
-	case Map.lookup id (fst env) of
-		Just f = return f
-		Nothing = fail "fun not defined (lookFun)"
+    case Map.lookup id (fst env) of
+        Just f = return f
+        Nothing = fail "fun not defined (lookFun)"
 
 popBlock :: Env -> Err Env
 popBlock (d, v:vs) = return (d,vs)
