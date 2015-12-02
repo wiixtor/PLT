@@ -98,23 +98,23 @@ eval env x = case x of
     EPostIncr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
-            VInt i = return (vAdd v (VInt 1), env')
-            VDouble d = return (vAdd v (VDouble 1.0), env')
+            VInt i -> return (vAdd v (VInt 1), env')
+            VDouble d -> return (vAdd v (VDouble 1.0), env')
     EPostDecr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
-            VInt i = return (vSub v (VInt 1), env')
-            VDouble d = return (vSub v (VDouble 1.0), env')
+            VInt i -> return (vSub v (VInt 1), env')
+            VDouble d -> return (vSub v (VDouble 1.0), env')
     EPreIncr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
-            VInt i = return (vAdd v (VInt 1), env')
-            VDouble d = return (vAdd v (VDouble 1.0), env')
+            VInt i -> return (vAdd v (VInt 1), env')
+            VDouble d -> return (vAdd v (VDouble 1.0), env')
     EPreDecr exp1 -> do
         (v, env') <- eval env exp1
         case v of 
-            VInt i = return (vSub v (VInt 1), env')
-            VDouble d = return (vSub v (VDouble 1.0), env')
+            VInt i -> return (vSub v (VInt 1), env')
+            VDouble d -> return (vSub v (VDouble 1.0), env')
     ELt exp0 exp1 -> do
         (v0, env') <- eval env exp0
         (v, env'') <- eval env' exp1
@@ -243,5 +243,8 @@ notEq (VInt i0) (VInt i) = VBool (i0 /= i)
 notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
 notEq _ _ = undefined
 
+vAnd :: Value -> Value -> Value
 vAnd = (VDouble d0) (VDouble d) = VBool (d0 && d)
-vOr  = (VDouble d0) (VDouble d) = VBool (d0 || d)
+
+vOr :: Value -> Value -> Value
+vOr = (VDouble d0) (VDouble d) = VBool (d0 || d)
