@@ -31,18 +31,9 @@ VUndefined. Value ::= ;
 -}
 
 interpret :: Program -> IO ()
-<<<<<<< HEAD
 interpret p = putStrLn "no interpter"
 {-
-interpret (PDefs p) = 	do
-	env <- foldM
-		(updateFun env def)
-		emptyEnv
-		p
-	(DFun _ _ _ stms) <- lookFun env "main"
-	eval env stms
-	return ()
-=======
+
 interpret (PDefs p) =   do
     env <- foldM
         (updateFun env def)
@@ -51,7 +42,6 @@ interpret (PDefs p) =   do
     (DFun _ _ _ stms) <- lookFun env "main"
     eval env stms
     return ()
->>>>>>> a0abdb49bc4dbee26cc93d50d392b038afd03cd6
 
 eval :: Env -> [Stm] -> Env
 eval e [] = e
@@ -258,16 +248,9 @@ notEq _ _ = undefined
 
 vAnd :: Value -> Value -> Value
 vAnd = (VDouble d0) (VDouble d) = VBool (d0 && d)
-<<<<<<< HEAD
-vOr  = (VDouble d0) (VDouble d) = VBool (d0 || d)
 
-
-
-
-
--}
-=======
 
 vOr :: Value -> Value -> Value
 vOr = (VDouble d0) (VDouble d) = VBool (d0 || d)
->>>>>>> a0abdb49bc4dbee26cc93d50d392b038afd03cd6
+
+-}

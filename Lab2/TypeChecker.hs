@@ -94,7 +94,7 @@ checkExp env typ exp = do
     if (typ2 == typ) then
         return ()
     else
-        fail $ "type of exp" -- ++ printTree exp
+        fail $ "type of exp " ++ printTree exp
 
 inferExp :: Env -> Exp -> Err Type
 inferExp env x = case x of
@@ -162,7 +162,7 @@ inferComparison env a b = do
     typ <- inferExp env a
     if elem typ [Type_int, Type_double, Type_bool] then do
         checkExp env typ b
-        return typ
+        return Type_bool
     else
         fail $ "tComapare: Types did not match or was not the correct type" -- ++ printTree exp -- 
 
