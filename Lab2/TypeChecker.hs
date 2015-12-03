@@ -79,7 +79,7 @@ typcheckStm env (SWhile exp stm) = do
 	return env'
 typcheckStm env (SBlock stms) = do
 	env' <- newBlock env
-	_ <- typcheckStms  Nothing stms
+	_ <- typcheckStms env' Nothing stms
 	return env 
 typcheckStm env (SIfElse exp stm0 stm1) = do 
 	checkExp env Type_bool exp

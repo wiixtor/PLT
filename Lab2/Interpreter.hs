@@ -6,12 +6,12 @@ import ErrM
 
 import Control.Monad
 import qualified Data.Map as Map
-
+{-
 type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
 data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
-
+-}
 {-
 VInteger. Value ::= Integer ;
 VDouble. Value ::= Double ;
@@ -31,6 +31,8 @@ VUndefined. Value ::= ;
 -}
 
 interpret :: Program -> IO ()
+interpret p = putStrLn "no interpter"
+{-
 interpret (PDefs p) = 	do
 	env <- foldM
 		(updateFun env def)
@@ -245,3 +247,9 @@ notEq _ _ = undefined
 
 vAnd = (VDouble d0) (VDouble d) = VBool (d0 && d)
 vOr  = (VDouble d0) (VDouble d) = VBool (d0 || d)
+
+
+
+
+
+-}
