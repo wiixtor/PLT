@@ -3,6 +3,7 @@ module TypeChecker where
 import AbsCPP
 import PrintCPP
 import ErrM
+import Data.Maybe
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Control.Monad
@@ -52,15 +53,15 @@ typecheck _ = return ()
 
 
 typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
-typcheckStms env (Just retType) (laststm:[]) =
-    case laststm of
-        SReturn exp -> checkExp env retType exp
-        _ -> fail "Return statment expected"
-typcheckStms env Nothing []     = return ()
-typcheckStms env (Just _) []    = fail "Return statement expected"
-typcheckStms env retType (s:ss) = do
-    env' <- typcheckStm env s
-    typcheckStms env' retType ss
+typcheckStms _ _ []        = return ()
+typcheckStms env retType (s:ss)     = do
+    case s of
+        SReturn exp -> checkExp env gettype exp
+        _ -> do
+            env' <- typcheckStm env s
+            typcheckStms env' retType ss
+  where
+    gettype = fromMaybe Type_bool retType
 
 
 typcheckStm :: Env -> Stm -> Err Env
@@ -78,9 +79,9 @@ typcheckStm env (SWhile exp stm) = do
     env' <- typcheckStm env stm
     return env'
 typcheckStm env (SBlock stms) = do
-	env' <- newBlock env
-	_ <- typcheckStms env' Nothing stms
-	return env 
+    env' <- newBlock env
+    _ <- typcheckStms env' Nothing stms
+    return env 
 typcheckStm env (SIfElse exp stm0 stm1) = do 
     checkExp env Type_bool exp
     env' <- typcheckStm env stm0
