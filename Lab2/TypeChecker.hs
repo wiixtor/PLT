@@ -61,7 +61,7 @@ typcheckStms env retType (s:ss)     = do
             env' <- typcheckStm env s
             typcheckStms env' retType ss
   where
-    gettype = fromMaybe Type_bool retType
+    gettype = fromMaybe Type_void retType
 
 
 typcheckStm :: Env -> Stm -> Err Env
