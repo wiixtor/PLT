@@ -44,7 +44,7 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
                     envprep
                     args
                 typcheckStms fbodyenv retType stms
-            )
+        )
         p
     return ()
   where
@@ -56,7 +56,9 @@ typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
 typcheckStms _ _ []        = return ()
 typcheckStms env retType (s:ss)     = do
     case s of
-        SReturn exp -> checkExp env gettype exp
+        SReturn exp -> do
+            checkExp env gettype exp
+            typcheckStms env retType ss
         _ -> do
             env' <- typcheckStm env s
             typcheckStms env' retType ss
@@ -108,10 +110,10 @@ inferExp env x = case x of
     EMinus exp0 exp -> inferArithmBin env exp0 exp
     EDiv exp0 exp -> inferArithmBin env exp0 exp
     ETimes exp0 exp -> inferArithmBin env exp0 exp
-    EPostIncr exp -> inferExp env exp
-    EPostDecr exp -> inferExp env exp
-    EPreIncr exp -> inferExp env exp
-    EPreDecr exp -> inferExp env exp
+    EPostIncr exp -> inferIncDec env exp
+    EPostDecr exp -> inferIncDec env exp
+    EPreIncr exp -> inferIncDec env exp
+    EPreDecr exp -> inferIncDec env exp
     ELt exp0 exp -> inferComparison env exp0 exp
     EGt exp0 exp -> inferComparison env exp0 exp
     ELtEq exp0 exp -> inferComparison env exp0 exp
@@ -130,6 +132,14 @@ inferExp env x = case x of
                 return outtyp
             else
                 fail "Function: Number of arguments did not match"
+
+inferIncDec :: Env -> Exp -> Err Type
+inferIncDec env exp = do
+    typ <- inferExp env exp
+    if elem typ [Type_double, Type_int] then
+        return typ
+    else
+        fail "Increment or decrement was not on double or int"
 
 inferAssign :: Env -> Exp -> Exp -> Err Type
 inferAssign env exp exp0 = do
