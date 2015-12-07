@@ -6,34 +6,18 @@ import ErrM
 
 import Control.Monad
 import qualified Data.Map as Map
-{-
+
 type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
 data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
--}
-{-
-VInteger. Value ::= Integer ;
-VDouble. Value ::= Double ;
-VVoid. Value ::= ;
-VUndefined. Value ::= ;
 
-    <Value,Env> eval (Env env, Exp e)       eval
-    Env exec (Env env, Statement s)         eval 
-    Void exec (Program p)                   interpret
-    Value look (Ident x, Env env)           lookVar
-    Fun look (Ident x, Env env)             lookFun
-    Env extend (Env env, Ident x, Value v)  updateVal
-    Env extend (Env env, Definition d)      updateFun
-    Env push (Env env)                      newBlock
-    Env pop (Env env)                       popBlock
-    Env empty ()                            emptyEnv
+{-
+interpret :: Program -> IO ()
+interpret p = putStrLn "no interpter"
 -}
 
 interpret :: Program -> IO ()
-interpret p = putStrLn "no interpter"
-{-
-
 interpret (PDefs p) =   do
     env <- foldM
         (updateFun env def)
@@ -181,8 +165,8 @@ lookVar env id = do
 lookFun :: Env -> Id -> Err Def
 lookFun env id = do
     case Map.lookup id (fst env) of
-        Just f = return f
-        Nothing = fail "fun not defined (lookFun)"
+        Just f -> return f
+        Nothing -> fail "fun not defined (lookFun)"
 
 popBlock :: Env -> Err Env
 popBlock (d, v:vs) = return (d,vs)
@@ -247,10 +231,7 @@ notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
 notEq _ _ = undefined
 
 vAnd :: Value -> Value -> Value
-vAnd = (VDouble d0) (VDouble d) = VBool (d0 && d)
-
+vAnd (VDouble d0) (VDouble d) = VBool (d0 && d)
 
 vOr :: Value -> Value -> Value
-vOr = (VDouble d0) (VDouble d) = VBool (d0 || d)
-
--}
+vOr (VDouble d0) (VDouble d) = VBool (d0 || d)
