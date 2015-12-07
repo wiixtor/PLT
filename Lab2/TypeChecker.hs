@@ -32,7 +32,7 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
         p
 
     mapM
-        (\(DFun outtyp id args _) ->
+        (\(DFun outtyp id args stmms) ->
             let 
                 retType = case outtyp of
                     Type_void -> Nothing
@@ -43,7 +43,7 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
                     (\env (ADecl atyp aid) -> updateVar env aid atyp)
                     envprep
                     args
-                typcheckStms fbodyenv retType stms
+                typcheckStms fbodyenv retType stmms
         )
         p
     return ()
@@ -57,8 +57,11 @@ typcheckStms _ _ []        = return ()
 typcheckStms env retType (s:ss)     = do
     case s of
         SReturn exp -> do
-            checkExp env gettype exp
-            typcheckStms env retType ss
+            if retType == Nothing then
+                fail "No return when void type"
+            else do
+                checkExp env gettype exp
+                typcheckStms env retType ss
         _ -> do
             env' <- typcheckStm env s
             typcheckStms env' retType ss
