@@ -159,8 +159,8 @@ updateVal (d, v:vs) id val =
     return (d, Map.insert id val v : vs)
 
 lookVar :: Env -> Id -> Err Value
-lookVar env id = do
-    case Map.lookup id (snd env) of
+lookVar (defs, [var]) id = do
+    case Map.lookup id var of
         Just v -> return v
         Nothing -> fail "var not defined (lookVar)"
 
