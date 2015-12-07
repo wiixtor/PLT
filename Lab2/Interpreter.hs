@@ -144,7 +144,7 @@ evalExp env x = case x of
 
   where
     getID :: Exp -> Err Id 
-    getID (EId id) = id
+    getID (EId id) = return id
     getID _ = fail "blurb"
 
 updateFun :: Env -> Def -> Err Env
