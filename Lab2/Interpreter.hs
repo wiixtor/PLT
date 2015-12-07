@@ -5,6 +5,7 @@ import PrintCPP
 import ErrM
 
 import Control.Monad
+import Data.Map
 import qualified Data.Map as Map
 
 type Env = (Defs, [Vars])
@@ -20,44 +21,44 @@ interpret p = putStrLn "no interpter"
 interpret :: Program -> IO ()
 interpret (PDefs p) =   do
     env <- foldM
-        (updateFun env def)
+        updateFun
         emptyEnv
         p
     (DFun _ _ _ stms) <- lookFun env "main"
-    eval env stms
+    evalStms env stms
     return ()
 
-eval :: Env -> [Stm] -> Env
-eval e [] = e
-eval e (s:ss) = eval (eval e s) ss
+evalStms :: Env -> [Stm] -> Env
+evalStms e [] = e
+evalStms e (s:ss) = evalStms (evalStm e s) ss
 
-eval :: Env -> Stm -> Env
-eval e s = case s of
-    SExp exp1 -> snd $ eval e exp1
+evalStm :: Env -> Stm -> Env
+evalStm e s = case s of
+    SExp exp1 -> snd $ evalExp e exp1
     SDecls typ [id] -> e
-    SInit _ id exp1 -> updateVal e id (fst $ eval e exp1)
-    SReturn exp1 -> snd $ eval e exp1
+    SInit _ id exp1 -> updateVal e id (fst $ evalExp e exp1)
+    SReturn exp1 -> snd $ evalExp e exp1
     SWhile exp1 stm -> do
-        (VBool b, env') <- eval e exp1
+        (VBool b, env') <- evalExp e exp1
         if b == False then do
             return env'
         else do
-            env'' <- eval env' stm
-            eval env'' (SWhile exp1 stm) 
+            env'' <- evalStm env' stm
+            evalStm env'' (SWhile exp1 stm) 
 
-    SBlock stms -> eval (newBlock e) stms
+    SBlock stms -> evalStms (newBlock e) stms
     SIfElse exp1 stm stm1 -> do
-        (VBool b, env') <- eval e exp1 
+        (VBool b, env') <- evalExp e exp1 
         if b then
-            eval env' stm
+            evalStm env' stm
         else 
-            eval env' stm1
+            evalStm env' stm1
 
 
 
 -- all these gotta be fix
-eval :: Env -> Exp -> (Value, Env)
-eval env x = case x of
+evalExp :: Env -> Exp -> (Value, Env)
+evalExp env x = case x of
     ETrue -> return (VBool True, env)
     EFalse -> return (VBool False, env)
     EInt n -> return (VInt n, env)
@@ -66,84 +67,85 @@ eval env x = case x of
         v <- lookVar env id 
         return (v, env)
     EPlus exp0 exp1 -> do 
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         val <- vAdd v0 v
         return (val, env'')
     EMinus exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return (vSub v0 v, env'')
     EDiv exp0 exp1 -> do 
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return (vDiv v0 v, env'')
     ETimes exp0 exp1 -> do 
-        (v0, env') <- eval env exp1
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp1
+        (v, env'') <- evalExp env' exp1
         return (vMul v0 v, env'')
     EPostIncr exp1 -> do
-        (v, env') <- eval env exp1
+        (v, env') <- evalExp env exp1
         case v of 
             VInt i -> return (vAdd v (VInt 1), env')
             VDouble d -> return (vAdd v (VDouble 1.0), env')
     EPostDecr exp1 -> do
-        (v, env') <- eval env exp1
+        (v, env') <- evalExp env exp1
         case v of 
             VInt i -> return (vSub v (VInt 1), env')
             VDouble d -> return (vSub v (VDouble 1.0), env')
     EPreIncr exp1 -> do
-        (v, env') <- eval env exp1
+        (v, env') <- evalExp env exp1
         case v of 
             VInt i -> return (vAdd v (VInt 1), env')
             VDouble d -> return (vAdd v (VDouble 1.0), env')
     EPreDecr exp1 -> do
-        (v, env') <- eval env exp1
+        (v, env') <- evalExp env exp1
         case v of 
             VInt i -> return (vSub v (VInt 1), env')
             VDouble d -> return (vSub v (VDouble 1.0), env')
     ELt exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (less v0 v, env'')
     EGt exp0 exp1 ->  do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (more v0 v, env'')
     ELtEq exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (lessEq v0 v, env'')
     EGtEq exp0 exp1 ->  do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (moreEq v0 v, env'')
     EEq  exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (equals v0 v, env'')
     ENEq exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (notEq v0 v, env'')
     EAnd exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (vAnd v0 v, env'')
     EOr exp0 exp1 -> do
-        (v0, env') <- eval env exp0
-        (v, env'') <- eval env' exp1
+        (v0, env') <- evalExp env exp0
+        (v, env'') <- evalExp env' exp1
         return $ (vOr v0 v, env'')
     EAss exp0 exp1 -> do
-        (v, env') <- eval env exp1
+        (v, env') <- evalExp env exp1
         (EId id) <- getID exp0
         env'' <- updateVal env' id v 
         return env''
     EApp fncid args -> undefined
-        where
-            getID :: Exp -> Err Id 
-            getID (EId id) = id
-            getID _ = fail "blurb"
+
+  where
+    getID :: Exp -> Err Id 
+    getID (EId id) = id
+    getID _ = fail "blurb"
 
 updateFun :: Env -> Def -> Err Env
 updateFun (d, vs) (DFun typ id args stms) =
