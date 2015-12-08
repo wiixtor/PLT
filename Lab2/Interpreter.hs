@@ -24,18 +24,22 @@ interpret (PDefs p) =   do
         updateFun
         emptyEnv
         p
-    (DFun _ _ _ stms) <- lookFun env "main"
+    (DFun _ _ _ stms) <- lookFun env (Id "main")
     evalStms env stms
     return ()
 
-evalStms :: Env -> [Stm] -> Env
-evalStms e [] = e
-evalStms e (s:ss) = evalStms (evalStm e s) ss
+evalStms :: Env -> [Stm] -> IO Env
+evalStms e [] = return e
+evalStms e (s:ss) = do
+    e' <- evalStm e s
+    evalStms e' ss
 
-evalStm :: Env -> Stm -> Env
+evalStm :: Env -> Stm -> IO Env
 evalStm e s = case s of
-    SExp exp1 -> snd $ evalExp e exp1
-    SDecls typ [id] -> e
+    SExp exp1 -> do
+        (_, e') <- evalExp e exp1
+        return e'
+    SDecls typ [id] -> return e
     SInit _ id exp1 -> updateVal e id (fst $ evalExp e exp1)
     SReturn exp1 -> snd $ evalExp e exp1
     SWhile exp1 stm -> do
@@ -57,7 +61,7 @@ evalStm e s = case s of
 
 
 -- all these gotta be fix
-evalExp :: Env -> Exp -> (Value, Env)
+evalExp :: Env -> Exp -> IO (Value, Env)
 evalExp env x = case x of
     ETrue -> return (VBool True, env)
     EFalse -> return (VBool False, env)
@@ -143,37 +147,37 @@ evalExp env x = case x of
     EApp fncid args -> undefined
 
   where
-    getID :: Exp -> Err Id 
+    getID :: Exp -> IO Id 
     getID (EId id) = return id
     getID _ = fail "blurb"
 
-updateFun :: Env -> Def -> Err Env
+updateFun :: Env -> Def -> IO Env
 updateFun (d, vs) (DFun typ id args stms) =
     if Map.member id d then
         fail "function already defined (updateFun)"
     else
         return (Map.insert id (DFun typ id args stms) d, vs)
 
-updateVal :: Env -> Id -> Value -> Err Env
+updateVal :: Env -> Id -> Value -> IO Env
 updateVal (d, v:vs) id val = 
     return (d, Map.insert id val v : vs)
 
-lookVar :: Env -> Id -> Err Value
+lookVar :: Env -> Id -> IO Value
 lookVar (defs, [var]) id = do
     case Map.lookup id var of
         Just v -> return v
         Nothing -> fail "var not defined (lookVar)"
 
-lookFun :: Env -> Id -> Err Def
+lookFun :: Env -> Id -> IO Def
 lookFun env id = do
     case Map.lookup id (fst env) of
         Just f -> return f
         Nothing -> fail "fun not defined (lookFun)"
 
-popBlock :: Env -> Err Env
+popBlock :: Env -> IO Env
 popBlock (d, v:vs) = return (d,vs)
 
-newBlock :: Env -> Err Env
+newBlock :: Env -> IO Env
 newBlock (defs, vars) = return (defs, Map.empty : vars)
 
 emptyEnv :: Env
