@@ -43,7 +43,9 @@ evalStm e s = case s of
     SInit _ id exp1 -> do
         (v, _) <- evalExp e exp1
         updateVal e id v
-    SReturn exp1 -> snd $ evalExp e exp1
+    SReturn exp1 -> do
+         (v, e') <- evalExp e exp1
+        return e'
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
         if b == False then do
