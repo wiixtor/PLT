@@ -44,7 +44,7 @@ evalStm e s = case s of
         (v, _) <- evalExp e exp1
         updateVal e id v
     SReturn exp1 -> do
-         (v, e') <- evalExp e exp1
+        (v, e') <- evalExp e exp1
         return e'
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
