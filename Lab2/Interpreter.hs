@@ -44,7 +44,7 @@ evalStm e s = case s of
         (v, _) <- evalExp e exp1
         updateVal e id v
     SReturn exp1 -> do
-         (v, e') <- evalExp e exp1
+        (v, e') <- evalExp e exp1
         return e'
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
@@ -77,8 +77,7 @@ evalExp env x = case x of
     EPlus exp0 exp1 -> do 
         (v0, env') <- evalExp env exp0
         (v, env'') <- evalExp env' exp1
-        val <- vAdd v0 v
-        return (val, env'')
+        return (vAdd v0 v, env'')
     EMinus exp0 exp1 -> do
         (v0, env') <- evalExp env exp0
         (v, env'') <- evalExp env' exp1
@@ -145,10 +144,13 @@ evalExp env x = case x of
         return $ (vOr v0 v, env'')
     EAss exp0 exp1 -> do
         (v, env') <- evalExp env exp1
-        (EId id) <- getID exp0
+        id <- getID exp0
         env'' <- updateVal env' id v 
-        return env''
-    EApp fncid args -> undefined
+        return (v, env'')
+    EApp fncid args -> do
+        env <- help args
+        (_ _ _ stms) <- lookupFun fncid
+        evalStms env stms
 
   where
     getID :: Exp -> IO Id 
@@ -181,8 +183,8 @@ lookFun env id = do
 popBlock :: Env -> IO Env
 popBlock (d, v:vs) = return (d,vs)
 
-newBlock :: Env -> IO Env
-newBlock (defs, vars) = return (defs, Map.empty : vars)
+newBlock :: Env -> Env
+newBlock (defs, vars) = (defs, Map.empty : vars)
 
 emptyEnv :: Env
 emptyEnv = (Map.empty, [])
@@ -201,7 +203,7 @@ vSub (VDouble d0) (VDouble d) = (VDouble (d0 - d))
 vSub _ _ = undefined
 
 vDiv :: Value -> Value -> Value
-vDiv (VInt i0) (VInt i) = (VInt (i0 / i))
+vDiv (VInt i0) (VInt i) = (VInt (quot i0 i))
 vDiv (VDouble d0) (VDouble d) = (VDouble (d0 / d))
 vDiv _ _ = undefined
 
