@@ -40,7 +40,9 @@ evalStm e s = case s of
         (_, e') <- evalExp e exp1
         return e'
     SDecls typ [id] -> return e
-    SInit _ id exp1 -> updateVal e id (fst $ evalExp e exp1)
+    SInit _ id exp1 -> do
+        (v, _) <- evalExp e exp1
+        updateVal e id v
     SReturn exp1 -> snd $ evalExp e exp1
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
