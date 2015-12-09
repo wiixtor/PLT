@@ -32,18 +32,19 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
         p
 
     mapM
-        (\(DFun outtyp id args stmms) ->
+        (\(DFun outtyp id args stmms) -> {-
             let 
-                retType = case outtyp of
-                    Type_void -> Nothing
-                    _ -> Just outtyp
-            in do
+                realOut = case id of
+                    (Id "main") -> Type_void
+                    _ -> outtyp
+            in -}
+              do
                 envprep <- newBlock globalenv
                 fbodyenv <- foldM 
                     (\env (ADecl atyp aid) -> updateVar env aid atyp)
                     envprep
                     args
-                typcheckStms fbodyenv retType stmms
+                typcheckStms fbodyenv outtyp stmms
         )
         p
     return ()
@@ -52,22 +53,25 @@ typecheck (PDefs [(DFun typ id arrgs stms)]) = do
 typecheck _ = return ()
 
 
-typcheckStms :: Env -> Maybe Type -> [Stm] -> Err ()
-typcheckStms _ _ []        = return ()
-typcheckStms env retType (s:ss)     = do
+typcheckStms :: Env -> Type -> [Stm] -> Err ()
+typcheckStms _ _ [] = return ()
+typcheckStms env retType (lastStm:[]) = 
+    if retType /= Type_void then
+        case lastStm of
+            SReturn e -> checkExp env retType e
+            _ -> fail "no return statement"
+    else do
+        typcheckStm env lastStm
+        return ()
+typcheckStms env retType (s:ss) = do
     case s of
         SReturn exp -> do
-            if retType == Nothing then
-                fail "No return when void type"
-            else do
-                checkExp env gettype exp
-                typcheckStms env retType ss
+            case retType of 
+                 Type_void -> fail "No return when void type"
+                 _ -> checkExp env retType exp
         _ -> do
             env' <- typcheckStm env s
             typcheckStms env' retType ss
-  where
-    gettype = fromMaybe Type_void retType
-
 
 typcheckStm :: Env -> Stm -> Err Env
 typcheckStm _ (SReturn _) = fail "Return statment not expected here"
@@ -85,7 +89,7 @@ typcheckStm env (SWhile exp stm) = do
     return env'
 typcheckStm env (SBlock stms) = do
     env' <- newBlock env
-    _ <- typcheckStms env' Nothing stms
+    _ <- typcheckStms env' Type_void stms
     env'' <- popBlock env'
     return env''
 typcheckStm env (SIfElse exp stm0 stm1) = do 
@@ -199,7 +203,7 @@ lookFun env fid =
 updateVar :: Env -> Id -> Type -> Err Env
 updateVar (s, c:cs) id typ = 
     if Map.member id c then
-        fail "Already defined"
+        fail "Variable already defined"
     else 
         return (s, Map.insert id typ c : cs)
 
