@@ -91,7 +91,7 @@ typcheckStm env (SWhile exp stm) = do
     return env'
 typcheckStm env (SBlock stms) = do
     env' <- newBlock env
-    _ <- typcheckStms env' Type_void stms
+    _ <- typcheckStms env' Type_void stms -- nånting konstigt här
     env'' <- popBlock env'
     return env''
 typcheckStm env (SIfElse exp stm0 stm1) = do 
