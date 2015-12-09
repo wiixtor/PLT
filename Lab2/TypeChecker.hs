@@ -55,6 +55,7 @@ typecheck _ = return ()
 
 typcheckStms :: Env -> Type -> [Stm] -> Err ()
 typcheckStms _ _ [] = return ()
+{-
 typcheckStms env retType (lastStm:[]) = 
     if retType /= Type_void then
         case lastStm of
@@ -63,6 +64,7 @@ typcheckStms env retType (lastStm:[]) =
     else do
         typcheckStm env lastStm
         return ()
+-}
 typcheckStms env retType (s:ss) = do
     case s of
         SReturn exp -> do
