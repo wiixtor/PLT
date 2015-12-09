@@ -148,14 +148,48 @@ evalExp env x = case x of
         env'' <- updateVal env' id v 
         return (v, env'')
     EApp fncid args -> do
-        env <- help args
-        (_ _ _ stms) <- lookupFun fncid
-        evalStms env stms
+        case fncid of
+            (Id "printInt") -> do
+                (VInt i, env') <- evalExp env (head args)
+                putStrLn(show i)
+                return ((VInt i), env')
+            (Id "printDouble") -> do
+                (VDouble d, env') <- evalExp env (head args)
+                putStrLn(show d)
+                return ((VDouble d), env')
+            (Id "readInt") -> do
+                i <- readAInt
+                return (VInt i, env)
+            (Id "readDouble") -> do
+                d <- readADouble
+                return (VDouble d, env)
+            _ -> do
+                env' <- halp args env
+                (DFun _ _ _ stms) <- lookFun env' fncid
+                evalFun env' stms
 
   where
     getID :: Exp -> IO Id 
     getID (EId id) = return id
     getID _ = fail "blurb"
+
+    readAInt :: IO Integer
+    readAInt = readLn
+    readADouble :: IO Double
+    readADouble = readLn
+
+    halp :: [Exp] -> Env -> IO Env
+    halp [] env = return env
+    halp (e:es) env = do
+        (v, e') <- evalExp env e
+        halp es e'
+
+evalFun :: Env -> [Stm] -> IO (Value, Env)
+evalFun e [] = return (VVoid, e)
+evalFun e ((SReturn ex):ss) = evalExp e ex
+evalFun e (s:ss) = do
+    e' <- evalStm e s
+    evalFun e' ss
 
 updateFun :: Env -> Def -> IO Env
 updateFun (d, vs) (DFun typ id args stms) =

@@ -86,7 +86,8 @@ typcheckStm env (SWhile exp stm) = do
 typcheckStm env (SBlock stms) = do
     env' <- newBlock env
     _ <- typcheckStms env' Nothing stms
-    return env 
+    env'' <- popBlock env'
+    return env''
 typcheckStm env (SIfElse exp stm0 stm1) = do 
     checkExp env Type_bool exp
     env' <- typcheckStm env stm0
@@ -217,6 +218,9 @@ updateFun (sig, cs) f funtyps =
 
 newBlock :: Env -> Err Env
 newBlock (sig, cs) = return (sig, Map.empty : cs)
+
+popBlock :: Env -> Err Env
+popBlock (sig, c:cs) = return (sig, cs)
 
 emptyEnv :: Env
 emptyEnv = (Map.empty, [])
