@@ -15,8 +15,7 @@ type Context = Map Id Type
 typecheck :: Program -> Err ()
 typecheck (PDefs []) = do
     return ()
-typecheck (PDefs [(DFun typ id arrgs stms)]) = do
-    let p = [(DFun typ id arrgs stms)]
+typecheck (PDefs p) = do
 
     builtInEnv <- foldM
         (\env (id, typs) -> updateFun env (Id id) typs)
@@ -72,32 +71,32 @@ typcheckStms env retType (s:ss) = do
                  Type_void -> fail "No return when void type"
                  _ -> checkExp env retType exp
         _ -> do
-            env' <- typcheckStm env s
+            env' <- typcheckStm env retType s
             typcheckStms env' retType ss
 
-typcheckStm :: Env -> Stm -> Err Env
-typcheckStm _ (SReturn _) = fail "Return statment not expected here"
-typcheckStm env (SExp exp) = do
+typcheckStm :: Env -> Type -> Stm -> Err Env
+typcheckStm _ _ (SReturn _) = fail "Return statment not expected here"
+typcheckStm env _ (SExp exp) = do
     _ <- inferExp env exp
     return env
-typcheckStm env (SDecls typ ids) = updateVars env ids typ
-typcheckStm env (SInit typ id exp) = do
+typcheckStm env _ (SDecls typ ids) = updateVars env ids typ
+typcheckStm env _ (SInit typ id exp) = do
     env' <- updateVar env id typ
     checkExp env' typ exp
     return env'
-typcheckStm env (SWhile exp stm) = do
+typcheckStm env t (SWhile exp stm) = do
     checkExp env Type_bool exp 
-    env' <- typcheckStm env stm
+    env' <- typcheckStm env t stm
     return env'
-typcheckStm env (SBlock stms) = do
+typcheckStm env t (SBlock stms) = do
     env' <- newBlock env
-    _ <- typcheckStms env' Type_void stms -- nånting konstigt här
+    _ <- typcheckStms env' t stms -- nånting konstigt här
     env'' <- popBlock env'
     return env''
-typcheckStm env (SIfElse exp stm0 stm1) = do 
+typcheckStm env t (SIfElse exp stm0 stm1) = do 
     checkExp env Type_bool exp
-    env' <- typcheckStm env stm0
-    env'' <- typcheckStm env' stm1
+    env' <- typcheckStm env t stm0
+    env'' <- typcheckStm env' t stm1
     return env''
 
 
