@@ -12,6 +12,7 @@ type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
 data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
+ deriving Eq
 
 {-
 interpret :: Program -> IO ()
@@ -28,47 +29,54 @@ interpret (PDefs p) =   do
     evalStms env stms
     return ()
 
-evalStms :: Env -> [Stm] -> IO Env
-evalStms e [] = return e
+evalStms :: Env -> [Stm] -> IO (Env, Bool)
+evalStms e [] = return (e, False)
 evalStms e (s:ss) = do
-    e' <- evalStm e s
-    evalStms e' ss
+    (e', b) <- evalStm e s
+    if b then
+        return (e', b)
+    else
+        evalStms e' ss
 
-evalStm :: Env -> Stm -> IO Env
+evalStm :: Env -> Stm -> IO (Env, Bool) -- Bool (is return?)
 evalStm e s = case s of
     SExp exp1 -> do
         (_, e') <- evalExp e exp1
-        return e'
+        return (e', False)
     SDecls typ ids -> do
         e' <- case typ of
             Type_int -> decl e ids $ VInt 0
             Type_bool -> decl e ids $ VBool False
             Type_double -> decl e ids $ VDouble 0.0
-        return e'
+        return (e', False)
     SInit _ id exp1 -> do
         (v, _) <- evalExp e exp1
-        updateVal e id v
+        e' <- newVal e id v
+        return (e', False)
     SReturn exp1 -> do
         (v, e') <- evalExp e exp1
-        return e'
+        return (e', True)
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
-        if b == False then do
-            return env'
+        if b then do
+            (env'', _) <- evalStm env' stm
+            (env''', _) <- evalStm env'' (SWhile exp1 stm)
+            return (env''', False)
         else do
-            env'' <- evalStm env' stm
-            evalStm env'' (SWhile exp1 stm) 
+            return (env', False)
     SBlock stms -> do
         env' <- newBlock e
-        env'' <- evalStms env' stms
-        env''' <- popBlock env''
-        return env'''
+        (e, b) <- evalStms env' stms
+        e' <- popBlock e
+        return (e', b)
     SIfElse exp1 stm stm1 -> do
         (VBool b, env') <- evalExp e exp1 
-        if b then
-            evalStm env' stm
-        else 
-            evalStm env' stm1
+        if b then do
+            (env'', _) <- evalStm env' stm
+            return (env'', False)
+        else do
+            (env'', _) <- evalStm env' stm1
+            return (env'', False)
   where 
     decl :: Env -> [Id] -> Value -> IO Env
     decl e [] val = return e
@@ -165,7 +173,7 @@ evalExp env x = case x of
         ((VBool v0), env') <- evalExp env exp0
         if v0 then do
             (v, env'') <- evalExp env' exp1
-            return $ (vOr (VBool v0) v, env'')
+            return $ (v, env'')
         else do
             return $ ((VBool v0), env') 
     EOr exp0 exp1 -> do
@@ -174,20 +182,20 @@ evalExp env x = case x of
             return $ ((VBool v0), env') 
         else do
             (v, env'') <- evalExp env' exp1
-            return $ (vOr (VBool v0) v, env'')
+            return $ (v, env'')
     EAss exp0 exp1 -> do
         (v, env') <- evalExp env exp1
         id <- getID exp0
         env'' <- updateVal env' id v 
         return (v, env'')
-    EApp fncid args -> do
+    EApp fncid argVals -> do
         case fncid of
             (Id "printInt") -> do
-                (VInt i, env') <- evalExp env (head args)
+                (VInt i, env') <- evalExp env (head argVals)
                 putStrLn(show i)
                 return ((VInt i), env')
             (Id "printDouble") -> do
-                (VDouble d, env') <- evalExp env (head args)
+                (VDouble d, env') <- evalExp env (head argVals)
                 putStrLn(show d)
                 return ((VDouble d), env')
             (Id "readInt") -> do
@@ -197,8 +205,8 @@ evalExp env x = case x of
                 d <- readADouble
                 return (VDouble d, env)
             _ -> do
-                env' <- halp args env
-                (DFun _ _ _ stms) <- lookFun env' fncid
+                (DFun _ _ argIds stms) <- lookFun env fncid
+                env' <- halp argIds argVals env
                 evalFun env' stms
 
   where
@@ -211,18 +219,33 @@ evalExp env x = case x of
     readADouble :: IO Double
     readADouble = readLn
 
-    halp :: [Exp] -> Env -> IO Env
-    halp [] env = return env
-    halp (e:es) env = do
+    halp :: [Arg] -> [Exp] -> Env -> IO Env
+    halp [] [] env = return env
+    halp (ADecl _ id :as) (e:es) env = do
         (v, e') <- evalExp env e
-        halp es e'
+        e'' <- newVal e' id v
+        halp as es e''
 
 evalFun :: Env -> [Stm] -> IO (Value, Env)
 evalFun e [] = return (VVoid, e)
 evalFun e ((SReturn ex):ss) = evalExp e ex
+evalFun e ((SBlock stms):ss) = do
+    env' <- newBlock e
+    (v, e) <- evalFun env' stms
+    e' <- popBlock e
+    if v == VVoid then
+        evalFun e' ss
+    else
+        return (v, e')
 evalFun e (s:ss) = do
-    e' <- evalStm e s
-    evalFun e' ss
+    (e', b) <- evalStm e s
+    if b then do
+        (SReturn exp) <- return s
+        (v, env) <- evalExp e' exp
+        return (v, e')
+    else
+        evalFun e' ss
+
 
 updateFun :: Env -> Def -> IO Env
 updateFun (d, vs) (DFun typ id args stms) =
@@ -245,7 +268,7 @@ updateVal (d, v:vs) id val =
         return (d, v : vars)
 
 lookVar :: Env -> Id -> IO Value
-lookVar (defs, []) id = fail "var not defined (lookVar)"
+lookVar (defs, []) id = fail $ "var not defined (lookVar) " ++ printTree (EId id)
 lookVar (defs, v:vs) id = do
     case Map.lookup id v of
         Just val -> return val
@@ -319,6 +342,7 @@ notEq (VInt i0) (VInt i) = VBool (i0 /= i)
 notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
 notEq _ _ = undefined
 
+{-
 vAnd :: Value -> Value -> Value
 vAnd (VBool b0) (VBool b) = VBool (b0 && b)
 vAnd _ _ = undefined
@@ -326,3 +350,4 @@ vAnd _ _ = undefined
 vOr :: Value -> Value -> Value
 vOr (VBool b0) (VBool b) = VBool (b0 || b)
 vOr _ _ = undefined
+-}
