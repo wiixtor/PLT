@@ -232,11 +232,13 @@ updateFun (d, vs) (DFun typ id args stms) =
         return (Map.insert id (DFun typ id args stms) d, vs)
 
 updateVal :: Env -> Id -> Value -> IO Env
-updateVal (d, []) id val = fail $ "something wrong updateVal, id: " ++ printTree (EId id)
-updateVal (d, v:vs) id val = do
-    case Map.lookup id v of
-        Just val -> return (d, Map.insert id val v :vs)
-        Nothing -> updateVal (d, vs) id val
+updateVal (d, []) id val = fail $ " updateVal " ++ printTree (EId id)
+updateVal (d, v:vs) id val =
+    if Map.member id v then
+        return (d, Map.insert id val v : vs)
+    else do
+        (d, vars) <- updateVal (d, vs) id val
+        return (d, v : vars)
 
 lookVar :: Env -> Id -> IO Value
 lookVar (defs, []) id = fail "var not defined (lookVar)"
