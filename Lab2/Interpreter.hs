@@ -73,7 +73,7 @@ evalStm e s = case s of
     decl :: Env -> [Id] -> Value -> IO Env
     decl e [] val = return e
     decl e (id:ids) val = do
-        e' <- updateVal e id val
+        e' <- newVal e id val
         decl e' ids val
 
 -- all these gotta be fix
@@ -230,6 +230,10 @@ updateFun (d, vs) (DFun typ id args stms) =
         fail "function already defined (updateFun)"
     else
         return (Map.insert id (DFun typ id args stms) d, vs)
+
+newVal :: Env -> Id -> Value -> IO Env
+newVal (d, v:vs) id val =
+    return (d, Map.insert id val v : vs)
 
 updateVal :: Env -> Id -> Value -> IO Env
 updateVal (d, []) id val = fail $ " updateVal " ++ printTree (EId id)
