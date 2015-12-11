@@ -39,7 +39,12 @@ evalStm e s = case s of
     SExp exp1 -> do
         (_, e') <- evalExp e exp1
         return e'
-    SDecls typ [id] -> return e
+    SDecls typ ids -> do
+        e' <- case typ of
+            Type_int -> decl e ids $ VInt 0
+            Type_bool -> decl e ids $ VBool False
+            Type_double -> decl e ids $ VDouble 0.0
+        return e'
     SInit _ id exp1 -> do
         (v, _) <- evalExp e exp1
         updateVal e id v
@@ -53,16 +58,23 @@ evalStm e s = case s of
         else do
             env'' <- evalStm env' stm
             evalStm env'' (SWhile exp1 stm) 
-
-    SBlock stms -> evalStms (newBlock e) stms
+    SBlock stms -> do
+        env' <- newBlock e
+        env'' <- evalStms env' stms
+        env''' <- popBlock env''
+        return env'''
     SIfElse exp1 stm stm1 -> do
         (VBool b, env') <- evalExp e exp1 
         if b then
             evalStm env' stm
         else 
             evalStm env' stm1
-
-
+  where 
+    decl :: Env -> [Id] -> Value -> IO Env
+    decl e [] val = return e
+    decl e (id:ids) val = do
+        e' <- updateVal e id val
+        decl e' ids val
 
 -- all these gotta be fix
 evalExp :: Env -> Exp -> IO (Value, Env)
@@ -72,7 +84,7 @@ evalExp env x = case x of
     EInt n -> return (VInt n, env)
     EDouble d -> return (VDouble d, env)
     EId id -> do
-        v <- lookVar env id 
+        v <- lookVar env id
         return (v, env)
     EPlus exp0 exp1 -> do 
         (v0, env') <- evalExp env exp0
@@ -91,25 +103,40 @@ evalExp env x = case x of
         (v, env'') <- evalExp env' exp1
         return (vMul v0 v, env'')
     EPostIncr exp1 -> do
+        id <- getID exp1
         (v, env') <- evalExp env exp1
-        case v of 
-            VInt i -> return (vAdd v (VInt 1), env')
-            VDouble d -> return (vAdd v (VDouble 1.0), env')
+        env'' <- case v of 
+            VInt i -> updateVal env' id (vAdd v (VInt 1))
+            VDouble d -> updateVal env' id (vAdd v (VDouble 1.0))
+        return (v, env'')
     EPostDecr exp1 -> do
+        id <- getID exp1
         (v, env') <- evalExp env exp1
-        case v of 
-            VInt i -> return (vSub v (VInt 1), env')
-            VDouble d -> return (vSub v (VDouble 1.0), env')
+        env'' <- case v of 
+            VInt i -> updateVal env' id (vSub v (VInt 1))
+            VDouble d -> updateVal env' id (vSub v (VDouble 1.0))
+        return (v, env'')
+
     EPreIncr exp1 -> do
+        id <- getID exp1
         (v, env') <- evalExp env exp1
         case v of 
-            VInt i -> return (vAdd v (VInt 1), env')
-            VDouble d -> return (vAdd v (VDouble 1.0), env')
+            VInt i -> do
+                env'' <- updateVal env' id (vAdd v (VInt 1))
+                return (vAdd v (VInt 1), env'')
+            VDouble d -> do
+                env'' <- updateVal env' id (vAdd v (VDouble 1.0))
+                return (vAdd v (VDouble 1.0), env'')
     EPreDecr exp1 -> do
+        id <- getID exp1
         (v, env') <- evalExp env exp1
         case v of 
-            VInt i -> return (vSub v (VInt 1), env')
-            VDouble d -> return (vSub v (VDouble 1.0), env')
+            VInt i -> do
+                env'' <- updateVal env' id (vSub v (VInt 1))
+                return (vSub v (VInt 1), env'')
+            VDouble d -> do
+                env'' <- updateVal env' id (vSub v (VDouble 1.0))
+                return (vSub v (VDouble 1.0), env'')
     ELt exp0 exp1 -> do
         (v0, env') <- evalExp env exp0
         (v, env'') <- evalExp env' exp1
@@ -135,13 +162,19 @@ evalExp env x = case x of
         (v, env'') <- evalExp env' exp1
         return $ (notEq v0 v, env'')
     EAnd exp0 exp1 -> do
-        (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
-        return $ (vAnd v0 v, env'')
+        ((VBool v0), env') <- evalExp env exp0
+        if v0 then do
+            (v, env'') <- evalExp env' exp1
+            return $ (vOr (VBool v0) v, env'')
+        else do
+            return $ ((VBool v0), env') 
     EOr exp0 exp1 -> do
-        (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
-        return $ (vOr v0 v, env'')
+        ((VBool v0), env') <- evalExp env exp0
+        if v0 then 
+            return $ ((VBool v0), env') 
+        else do
+            (v, env'') <- evalExp env' exp1
+            return $ (vOr (VBool v0) v, env'')
     EAss exp0 exp1 -> do
         (v, env') <- evalExp env exp1
         id <- getID exp0
@@ -199,14 +232,18 @@ updateFun (d, vs) (DFun typ id args stms) =
         return (Map.insert id (DFun typ id args stms) d, vs)
 
 updateVal :: Env -> Id -> Value -> IO Env
-updateVal (d, v:vs) id val = 
-    return (d, Map.insert id val v : vs)
+updateVal (d, []) id val = fail $ "something wrong updateVal, id: " ++ printTree (EId id)
+updateVal (d, v:vs) id val = do
+    case Map.lookup id v of
+        Just val -> return (d, Map.insert id val v :vs)
+        Nothing -> updateVal (d, vs) id val
 
 lookVar :: Env -> Id -> IO Value
-lookVar (defs, [var]) id = do
-    case Map.lookup id var of
-        Just v -> return v
-        Nothing -> fail "var not defined (lookVar)"
+lookVar (defs, []) id = fail "var not defined (lookVar)"
+lookVar (defs, v:vs) id = do
+    case Map.lookup id v of
+        Just val -> return val
+        Nothing -> lookVar (defs, vs) id
 
 lookFun :: Env -> Id -> IO Def
 lookFun env id = do
@@ -217,11 +254,11 @@ lookFun env id = do
 popBlock :: Env -> IO Env
 popBlock (d, v:vs) = return (d,vs)
 
-newBlock :: Env -> Env
-newBlock (defs, vars) = (defs, Map.empty : vars)
+newBlock :: Env -> IO Env
+newBlock (defs, vars) = return (defs, Map.empty : vars)
 
 emptyEnv :: Env
-emptyEnv = (Map.empty, [])
+emptyEnv = (Map.empty, [Map.empty])
 
 
 
