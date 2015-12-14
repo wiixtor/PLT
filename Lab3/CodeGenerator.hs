@@ -25,6 +25,17 @@ data Env = Env
 --state transformer monad
 type M a = StateT Env IO
 
+{-
+Address look (Ident x)
+FunType look (Ident f)
+Void extend (Ident x, Size s)
+Void extend (Definition d)
+Void push () // new context when entering block
+Void pop () // exit from block, discard new context
+Void empty () // discard all variables
+Label label () // get fresh code label
+-}
+
 updateFun :: String -> FunSig -> M ()
 updateFun id sig = do
     env <- get 
@@ -85,5 +96,29 @@ generateExp (EApp (Id fcnid) args) = do
         emit "bipush 0"
     else
         return () 
-
---emit "return " somewheqre
+--emit "return " somewhere
+{-
+   ETrue
+ | EFalse
+ | EInt Integer
+ | EDouble Double
+ | EId Id
+ | EApp Id [Exp]
+ | EPostIncr Exp
+ | EPostDecr Exp
+ | EPreIncr Exp
+ | EPreDecr Exp
+ | ETimes Exp Exp
+ | EDiv Exp Exp
+ | EPlus Exp Exp
+ | EMinus Exp Exp
+ | ELt Exp Exp
+ | EGt Exp Exp
+ | ELtEq Exp Exp
+ | EGtEq Exp Exp
+ | EEq Exp Exp
+ | ENEq Exp Exp
+ | EAnd Exp Exp
+ | EOr Exp Exp
+ | EAss Exp Exp
+-}
