@@ -29,54 +29,54 @@ interpret (PDefs p) =   do
     evalStms env stms
     return ()
 
-evalStms :: Env -> [Stm] -> IO (Env, Bool)
-evalStms e [] = return (e, False)
+evalStms :: Env -> [Stm] -> IO (Env, Bool, Value)
+evalStms e [] = return (e, False, VVoid)
 evalStms e (s:ss) = do
-    (e', b) <- evalStm e s
+    (e', b, v) <- evalStm e s
     if b then
-        return (e', b)
+        return (e', b, v)
     else
         evalStms e' ss
 
-evalStm :: Env -> Stm -> IO (Env, Bool) -- Bool (is return?)
+evalStm :: Env -> Stm -> IO (Env, Bool, Value) -- Bool (is return?)
 evalStm e s = case s of
     SExp exp1 -> do
         (_, e') <- evalExp e exp1
-        return (e', False)
+        return (e', False, VVoid)
     SDecls typ ids -> do
         e' <- case typ of
             Type_int -> decl e ids $ VInt 0
             Type_bool -> decl e ids $ VBool False
             Type_double -> decl e ids $ VDouble 0.0
-        return (e', False)
+        return (e', False, VVoid)
     SInit _ id exp1 -> do
         (v, _) <- evalExp e exp1
         e' <- newVal e id v
-        return (e', False)
+        return (e', False, VVoid)
     SReturn exp1 -> do
         (v, e') <- evalExp e exp1
-        return (e', True)
+        return (e', True, v)
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
-        if b then do
-            (env'', _) <- evalStm env' stm
-            (env''', _) <- evalStm env'' (SWhile exp1 stm)
-            return (env''', False)
+        if b then do -- Maybe something wrong here
+            (env'', _, _) <- evalStm env' stm
+            (env''', _, v) <- evalStm env'' (SWhile exp1 stm)
+            return (env''', False, v)
         else do
-            return (env', False)
+            return (env', False, VVoid)
     SBlock stms -> do
         env' <- newBlock e
-        (e, b) <- evalStms env' stms
+        (e, b, v) <- evalStms env' stms
         e' <- popBlock e
-        return (e', b)
+        return (e', b, v)
     SIfElse exp1 stm stm1 -> do
         (VBool b, env') <- evalExp e exp1 
         if b then do
-            (env'', b) <- evalStm env' stm
-            return (env'', b)
+            (env'', b, v) <- evalStm env' stm
+            return (env'', b, v)
         else do
-            (env'', b) <- evalStm env' stm1
-            return (env'', b)
+            (env'', b, v) <- evalStm env' stm1
+            return (env'', b, v)
   where 
     decl :: Env -> [Id] -> Value -> IO Env
     decl e [] val = return e
@@ -107,7 +107,7 @@ evalExp env x = case x of
         (v, env'') <- evalExp env' exp1
         return (vDiv v0 v, env'')
     ETimes exp0 exp1 -> do 
-        (v0, env') <- evalExp env exp1
+        (v0, env') <- evalExp env exp0
         (v, env'') <- evalExp env' exp1
         return (vMul v0 v, env'')
     EPostIncr exp1 -> do
@@ -207,7 +207,8 @@ evalExp env x = case x of
             _ -> do
                 (DFun _ _ argIds stms) <- lookFun env fncid
                 env' <- halp argIds argVals env
-                evalFun env' stms
+                (e', b, v) <- evalStms env' stms
+                return (v, e')
 
   where
     getID :: Exp -> IO Id 
@@ -225,29 +226,6 @@ evalExp env x = case x of
         (v, e') <- evalExp env e
         e'' <- newVal e' id v
         halp as es e''
-
-
-evalFun :: Env -> [Stm] -> IO (Value, Env)
-evalFun e [] = return (VVoid, e)
-evalFun e ((SReturn ex):ss) = evalExp e ex
-evalFun e ((SBlock stms):ss) = do
-    env' <- newBlock e
-    (v, e) <- evalFun env' stms
-    e' <- popBlock e
-    if v == VVoid then
-        evalFun e' ss
-    else
-        return (v, e')
-evalFun e (s:ss) = do
-    (e', b) <- evalStm e s -- tappar valuen här, eftersom returnen ligger i ett block
-    if b then do -- man kanske ska lägga till att evalStm returnerar value, men då kanske
-        -- man inte behöver evalFun över huvud taget
-        (SReturn exp) <- return s -- här blir det fel, s är IfElse
-        (v, env) <- evalExp e' exp
-        return (v, e')
-    else
-        evalFun e' ss
-
 
 updateFun :: Env -> Def -> IO Env
 updateFun (d, vs) (DFun typ id args stms) =
@@ -317,32 +295,33 @@ vMul _ _ = undefined
 less :: Value -> Value -> Value
 less (VInt i0) (VInt i) = VBool (i0 < i)
 less (VDouble d0) (VDouble d) = VBool (d0 < d)
-less _ _ = undefined
 
 lessEq :: Value -> Value -> Value
 lessEq (VInt i0) (VInt i) = VBool (i0 <= i)
 lessEq (VDouble d0) (VDouble d) = VBool (d0 <= d)
-lessEq _ _ = undefined
 
 more :: Value -> Value -> Value
 more (VInt i0) (VInt i) = VBool (i0 > i)
 more (VDouble d0) (VDouble d) = VBool (d0 > d)
-more _ _ = undefined
 
 moreEq :: Value -> Value -> Value
 moreEq (VInt i0) (VInt i) = VBool (i0 >= i)
 moreEq (VDouble d0) (VDouble d) = VBool (d0 >= d)
-moreEq _ _ = undefined
 
 equals :: Value -> Value -> Value
-equals (VInt i0) (VInt i) = VBool (i0 == i)
-equals (VDouble d0) (VDouble d) = VBool (d0 == d)
-equals _ _ = undefined
+equals v0 v = VBool ((get v0) == (get v))
+  where
+    get (VDouble d) = d
+    get (VInt i) = fromIntegral i
+    get (VBool b) = -10.0 -- wat
+
+
+-- equals (VInt i0) (VInt i) = VBool (i0 == i)
+-- equals (VDouble d0) (VDouble d) = VBool (d0 == d)
 
 notEq :: Value -> Value -> Value
 notEq (VInt i0) (VInt i) = VBool (i0 /= i)
 notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
-notEq _ _ = undefined
 
 {-
 vAnd :: Value -> Value -> Value
