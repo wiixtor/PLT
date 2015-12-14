@@ -80,14 +80,54 @@ generateStm :: Stm -> M ()
 generateStm (SExp exp) = do
     generateExp exp
     emit "pop"
+generateStm (SDecls typ ids) = undefined
+generateStm (SReturn exp) = do
+    generateExp exp
+    emit "return"
+generateStm (SWhile exp stm) = do
+    generateExp exp
+    generateStm stm
+    -- something
+generateStm (SBlock stms) = do
+    generateStms stms
+generateStm (SIfElse exp stm1 stm2) = undefined
 
 generateExp :: Exp -> M ()
+generateExp (ETrue) = undefined
+generateExp (EFalse) = undefined
 generateExp (EInt int) = do
     emit $ "ldc " ++ show int
+generateExp (EDouble double) = undefined -- Not in lab
+generateExp (EId id) = undefined
+generateExp (EPostIncr exp) = undefined
+generateExp (EPostDecr exp) = undefined
+generateExp (EPreIncr exp) = undefined
+generateExp (EPreDecr exp) = undefined
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
     emit $ "iadd"
+generateExp (ETimes exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "imul" -- dunno if right
+generateExp (EDiv exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "idiv" -- dunno if right
+generateExp (EMinus exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "isub" -- dunno if right
+generateExp (ELt exp1 exp2) = undefined
+generateExp (EGt exp1 exp2) = undefined
+generateExp (ELtEq exp1 exp2) = undefined
+generateExp (EGtEq exp1 exp2) = undefined
+generateExp (EEq exp1 exp2) = undefined
+generateExp (ENEq exp1 exp2) = undefined
+generateExp (EAnd exp1 exp2) = undefined
+generateExp (EOr exp1 exp2) = undefined
+generateExp (EAss exp1 exp2) = undefined
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
@@ -97,28 +137,3 @@ generateExp (EApp (Id fcnid) args) = do
     else
         return () 
 --emit "return " somewhere
-{-
-   ETrue
- | EFalse
- | EInt Integer
- | EDouble Double
- | EId Id
- | EApp Id [Exp]
- | EPostIncr Exp
- | EPostDecr Exp
- | EPreIncr Exp
- | EPreDecr Exp
- | ETimes Exp Exp
- | EDiv Exp Exp
- | EPlus Exp Exp
- | EMinus Exp Exp
- | ELt Exp Exp
- | EGt Exp Exp
- | ELtEq Exp Exp
- | EGtEq Exp Exp
- | EEq Exp Exp
- | ENEq Exp Exp
- | EAnd Exp Exp
- | EOr Exp Exp
- | EAss Exp Exp
--}
