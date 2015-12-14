@@ -31,13 +31,7 @@ typecheck (PDefs p) = do
         p
 
     mapM
-        (\(DFun outtyp id args stmms) -> {-
-            let 
-                realOut = case id of
-                    (Id "main") -> Type_void
-                    _ -> outtyp
-            in -}
-              do
+        (\(DFun outtyp id args stmms) -> do
                 envprep <- newBlock globalenv
                 fbodyenv <- foldM 
                     (\env (ADecl atyp aid) -> updateVar env aid atyp)
@@ -54,22 +48,10 @@ typecheck _ = return ()
 
 typcheckStms :: Env -> Type -> [Stm] -> Err ()
 typcheckStms _ _ [] = return ()
-{-
-typcheckStms env retType (lastStm:[]) = 
-    if retType /= Type_void then
-        case lastStm of
-            SReturn e -> checkExp env retType e
-            _ -> fail "no return statement"
-    else do
-        typcheckStm env lastStm
-        return ()
--}
 typcheckStms env retType (s:ss) = do
     case s of
         SReturn exp -> do
-            case retType of 
-                 Type_void -> fail "No return when void type"
-                 _ -> checkExp env retType exp
+            checkExp env retType exp
         _ -> do
             env' <- typcheckStm env retType s
             typcheckStms env' retType ss

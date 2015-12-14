@@ -72,11 +72,11 @@ evalStm e s = case s of
     SIfElse exp1 stm stm1 -> do
         (VBool b, env') <- evalExp e exp1 
         if b then do
-            (env'', _) <- evalStm env' stm
-            return (env'', False)
+            (env'', b) <- evalStm env' stm
+            return (env'', b)
         else do
-            (env'', _) <- evalStm env' stm1
-            return (env'', False)
+            (env'', b) <- evalStm env' stm1
+            return (env'', b)
   where 
     decl :: Env -> [Id] -> Value -> IO Env
     decl e [] val = return e
@@ -226,6 +226,7 @@ evalExp env x = case x of
         e'' <- newVal e' id v
         halp as es e''
 
+
 evalFun :: Env -> [Stm] -> IO (Value, Env)
 evalFun e [] = return (VVoid, e)
 evalFun e ((SReturn ex):ss) = evalExp e ex
@@ -238,9 +239,10 @@ evalFun e ((SBlock stms):ss) = do
     else
         return (v, e')
 evalFun e (s:ss) = do
-    (e', b) <- evalStm e s
-    if b then do
-        (SReturn exp) <- return s
+    (e', b) <- evalStm e s -- tappar valuen här, eftersom returnen ligger i ett block
+    if b then do -- man kanske ska lägga till att evalStm returnerar value, men då kanske
+        -- man inte behöver evalFun över huvud taget
+        (SReturn exp) <- return s -- här blir det fel, s är IfElse
         (v, env) <- evalExp e' exp
         return (v, e')
     else
