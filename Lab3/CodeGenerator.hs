@@ -125,12 +125,27 @@ generateExp (EMinus exp1 exp2) = do
 generateExp (ELt exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    -- emit comparison
-generateExp (EGt exp1 exp2) = undefined
-generateExp (ELtEq exp1 exp2) = undefined
-generateExp (EGtEq exp1 exp2) = undefined
-generateExp (EEq exp1 exp2) = undefined
-generateExp (ENEq exp1 exp2) = undefined
+    emit $ "if_icmplt" -- something more maybe
+generateExp (EGt exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmpgt" 
+generateExp (ELtEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmple" 
+generateExp (EGtEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmpge" 
+generateExp (EEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_acmpeq"
+generateExp (ENEq exp1 exp2) = do    
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_acmpne"
 generateExp (EAnd exp1 exp2) = undefined
 generateExp (EOr exp1 exp2) = undefined
 generateExp (EAss exp1 exp2) = undefined
