@@ -10,13 +10,9 @@ import qualified Data.Map as Map
 type Env = (Defs, [Vars])
 type Defs = Map Id Def
 type Vars = Map Id Value
-data Value = VInt Integer | VDouble Double | VBool Bool | VVoid -- undefined?
+data Value = VInt Integer | VDouble Double | VBool Bool | VVoid
  deriving Eq
 
-{-
-interpret :: Program -> IO ()
-interpret p = putStrLn "no interpter"
--}
 
 interpret :: Program -> IO ()
 interpret (PDefs p) =   do
@@ -37,14 +33,15 @@ evalStms e (s:ss) = do
     else
         evalStms e' ss
 
-evalStm :: Env -> Stm -> IO (Env, Bool, Value) -- Bool (is return?)
+
+evalStm :: Env -> Stm -> IO (Env, Bool, Value)
 evalStm e s = case s of
     SExp exp1 -> do
         (_, e') <- evalExp e exp1
         return (e', False, VVoid)
     SDecls typ ids -> do
         e' <- case typ of
-            Type_int -> decl e ids $ VInt 0
+            Type_int -> decl e ids $ VInt 1
             Type_bool -> decl e ids $ VBool False
             Type_double -> decl e ids $ VDouble 0.0
         return (e', False, VVoid)
@@ -57,7 +54,7 @@ evalStm e s = case s of
         return (e', True, v)
     SWhile exp1 stm -> do
         (VBool b, env') <- evalExp e exp1
-        if b then do -- Maybe something wrong here
+        if b then do
             (env'', _, _) <- evalStm env' stm
             (env''', _, v) <- evalStm env'' (SWhile exp1 stm)
             return (env''', False, v)
@@ -83,7 +80,6 @@ evalStm e s = case s of
         e' <- newVal e id val
         decl e' ids val
 
--- all these gotta be fix
 evalExp :: Env -> Exp -> IO (Value, Env)
 evalExp env x = case x of
     ETrue -> return (VBool True, env)
@@ -211,9 +207,11 @@ evalExp env x = case x of
                 return (VDouble d, env)
             _ -> do
                 (DFun _ _ argIds stms) <- lookFun env fncid
-                env' <- halp argIds argVals env
-                (e', b, v) <- evalStms env' stms
-                return (v, e')
+                env' <- newBlock env
+                e <- halp argIds argVals env'
+                (e', b, v) <- evalStms e stms
+                e'' <- popBlock e'
+                return (v, e'')
 
   where
     getID :: Exp -> IO Id 
@@ -318,22 +316,8 @@ equals v0 v = VBool ((get v0) == (get v))
   where
     get (VDouble d) = d
     get (VInt i) = fromIntegral i
-    get (VBool b) = -10.0 -- wat
-
-
--- equals (VInt i0) (VInt i) = VBool (i0 == i)
--- equals (VDouble d0) (VDouble d) = VBool (d0 == d)
+    get (VBool b) = -10.0 -- if this is removed, we fail. don't know why
 
 notEq :: Value -> Value -> Value
 notEq (VInt i0) (VInt i) = VBool (i0 /= i)
 notEq (VDouble d0) (VDouble d) = VBool (d0 /= d)
-
-{-
-vAnd :: Value -> Value -> Value
-vAnd (VBool b0) (VBool b) = VBool (b0 && b)
-vAnd _ _ = undefined
-
-vOr :: Value -> Value -> Value
-vOr (VBool b0) (VBool b) = VBool (b0 || b)
-vOr _ _ = undefined
--}

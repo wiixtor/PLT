@@ -72,7 +72,7 @@ typcheckStm env t (SWhile exp stm) = do
     return env'
 typcheckStm env t (SBlock stms) = do
     env' <- newBlock env
-    _ <- typcheckStms env' t stms -- nånting konstigt här
+    _ <- typcheckStms env' t stms
     env'' <- popBlock env'
     return env''
 typcheckStm env t (SIfElse exp stm0 stm1) = do 
