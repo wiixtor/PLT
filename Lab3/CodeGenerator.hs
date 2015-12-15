@@ -60,6 +60,12 @@ emit :: String -> M ()
 emit line = 
     lift $ putStr line
 
+push :: Env -> IO Env
+push envsigs = undefined -- return $ Map.empty : envsigs
+
+pop :: Env -> IO Env
+pop envsigs = undefined
+
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
     env <- emptyEnv
@@ -84,15 +90,24 @@ generateStm (SExp exp) = do
     generateExp exp
     emitLn "pop"
 generateStm (SDecls typ ids) = undefined
+generateStm (SInit typ id exp) = do
+    generateExp exp
+    if (typ == Type_int) do
+        emitLn "istore " ++ id
+    else do
+        emitLn "astore " ++ id
+    -- emitLn "pop"
 generateStm (SReturn exp) = do
     generateExp exp
-    emitLn "return"
+    emitLn "return" -- return void atm
 generateStm (SWhile exp stm) = do
     generateExp exp
     generateStm stm
     -- something
 generateStm (SBlock stms) = do
+    push
     generateStms stms
+    pop
 generateStm (SIfElse exp stm1 stm2) = undefined
 
 generateExp :: Exp -> M ()
@@ -125,12 +140,27 @@ generateExp (EMinus exp1 exp2) = do
 generateExp (ELt exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    -- emit comparison
-generateExp (EGt exp1 exp2) = undefined
-generateExp (ELtEq exp1 exp2) = undefined
-generateExp (EGtEq exp1 exp2) = undefined
-generateExp (EEq exp1 exp2) = undefined
-generateExp (ENEq exp1 exp2) = undefined
+    emit $ "if_icmplt" -- something more maybe
+generateExp (EGt exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmpgt" 
+generateExp (ELtEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmple" 
+generateExp (EGtEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_icmpge" 
+generateExp (EEq exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_acmpeq"
+generateExp (ENEq exp1 exp2) = do    
+    generateExp exp1
+    generateExp exp2
+    emit $ "if_acmpne"
 generateExp (EAnd exp1 exp2) = undefined
 generateExp (EOr exp1 exp2) = undefined
 generateExp (EAss exp1 exp2) = undefined
