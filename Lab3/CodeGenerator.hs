@@ -53,9 +53,12 @@ emptyEnv =
         envSignature = Map.empty
     }
 
+emitLn :: String -> M ()
+emitLn line = lift $ putStrLn line
+
 emit :: String -> M ()
 emit line = 
-    lift $ putStrLn line
+    lift $ putStr line
 
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
@@ -79,11 +82,11 @@ generateStms stms = do
 generateStm :: Stm -> M ()
 generateStm (SExp exp) = do
     generateExp exp
-    emit "pop"
+    emitLn "pop"
 generateStm (SDecls typ ids) = undefined
 generateStm (SReturn exp) = do
     generateExp exp
-    emit "return"
+    emitLn "return"
 generateStm (SWhile exp stm) = do
     generateExp exp
     generateStm stm
@@ -96,7 +99,7 @@ generateExp :: Exp -> M ()
 generateExp (ETrue) = undefined
 generateExp (EFalse) = undefined
 generateExp (EInt int) = do
-    emit $ "ldc " ++ show int
+    emitLn $ "ldc " ++ show int
 generateExp (EDouble double) = undefined -- Not in lab
 generateExp (EId id) = undefined
 generateExp (EPostIncr exp) = undefined
@@ -106,19 +109,19 @@ generateExp (EPreDecr exp) = undefined
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "iadd"
+    emitLn $ "iadd"
 generateExp (ETimes exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "imul" 
+    emitLn $ "imul" 
 generateExp (EDiv exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "idiv" 
+    emitLn $ "idiv" 
 generateExp (EMinus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "isub" 
+    emitLn $ "isub" 
 generateExp (ELt exp1 exp2) = do
     generateExp exp1
     generateExp exp2

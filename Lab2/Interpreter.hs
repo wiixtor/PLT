@@ -2,7 +2,6 @@ module Interpreter where
 
 import AbsCPP
 import PrintCPP
-import ErrM
 
 import Control.Monad
 import Data.Map
