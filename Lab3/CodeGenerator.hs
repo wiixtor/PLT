@@ -60,6 +60,12 @@ emit :: String -> M ()
 emit line = 
     lift $ putStr line
 
+push :: Env -> IO Env
+push envsigs = undefined -- return $ Map.empty : envsigs
+
+pop :: Env -> IO Env
+pop envsigs = undefined
+
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
     env <- emptyEnv
@@ -84,15 +90,24 @@ generateStm (SExp exp) = do
     generateExp exp
     emitLn "pop"
 generateStm (SDecls typ ids) = undefined
+generateStm (SInit typ id exp) = do
+    generateExp exp
+    if (typ == Type_int) do
+        emitLn "istore " ++ id
+    else do
+        emitLn "astore " ++ id
+    -- emitLn "pop"
 generateStm (SReturn exp) = do
     generateExp exp
-    emitLn "return"
+    emitLn "return" -- return void atm
 generateStm (SWhile exp stm) = do
     generateExp exp
     generateStm stm
     -- something
 generateStm (SBlock stms) = do
+    push
     generateStms stms
+    pop
 generateStm (SIfElse exp stm1 stm2) = undefined
 
 generateExp :: Exp -> M ()
