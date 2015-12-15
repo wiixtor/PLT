@@ -94,20 +94,26 @@ evalExp env x = case x of
         v <- lookVar env id
         return (v, env)
     EPlus exp0 exp1 -> do 
+        -- get both values from old environment, but update the
+        -- environment with both expressions
         (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
+        (_, env'') <- evalExp env' exp1
+        (v, _) <- evalExp env exp1
         return (vAdd v0 v, env'')
     EMinus exp0 exp1 -> do
         (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
+        (_, env'') <- evalExp env' exp1
+        (v, _) <- evalExp env exp1
         return (vSub v0 v, env'')
     EDiv exp0 exp1 -> do 
         (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
+        (_, env'') <- evalExp env' exp1
+        (v, _) <- evalExp env exp1
         return (vDiv v0 v, env'')
     ETimes exp0 exp1 -> do 
         (v0, env') <- evalExp env exp0
-        (v, env'') <- evalExp env' exp1
+        (_, env'') <- evalExp env' exp1
+        (v, _) <- evalExp env exp1
         return (vMul v0 v, env'')
     EPostIncr exp1 -> do
         id <- getID exp1
