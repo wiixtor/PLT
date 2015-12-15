@@ -36,6 +36,6 @@ eval genv clos = ev clos
   				CallByValue ->
   					let a' = ev (Clos a sub)
   					in ev (Clos fbody (Map.insert v a' sub'))
-        		CallByName ->
+        	  CallByName ->
 
         			ev (Clos fbody (Map.insert v (Clos a sub) sub'))

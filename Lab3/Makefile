@@ -1,3 +1,5 @@
+change to suit lab3 pls
+
 all:
 	bnfc CPP.cf
 	happy -gca ParCPP.y
