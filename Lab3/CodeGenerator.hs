@@ -110,16 +110,19 @@ generateExp (EPlus exp1 exp2) = do
 generateExp (ETimes exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "imul" -- dunno if right
+    emit $ "imul" 
 generateExp (EDiv exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "idiv" -- dunno if right
+    emit $ "idiv" 
 generateExp (EMinus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    emit $ "isub" -- dunno if right
-generateExp (ELt exp1 exp2) = undefined
+    emit $ "isub" 
+generateExp (ELt exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    -- emit comparison
 generateExp (EGt exp1 exp2) = undefined
 generateExp (ELtEq exp1 exp2) = undefined
 generateExp (EGtEq exp1 exp2) = undefined
