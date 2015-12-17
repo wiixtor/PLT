@@ -26,7 +26,7 @@ data FunSig = FunSig
 data Env = Env 
     {
         envSignature :: Map String FunSig,
-        envVariables :: Map String Address
+        envVariables :: [Map String Address]
     }
 
 --state transformer monad
@@ -63,6 +63,7 @@ emptyEnv =
     Env 
     {
         envSignature = Map.empty
+        envVariables = Map.empty
     }
 
 emitLn :: String -> M ()
@@ -72,11 +73,16 @@ emit :: String -> M ()
 emit line = 
     lift $ putStr line
 
-push :: Env -> M Env
-push envsigs = undefined -- return $ Map.empty : envsigs
+push :: M ()
+push envsigs = do
+    env <- get
+    Map.insert Map.empty (envVariables env)
 
-pop :: Env -> M Env
-pop envsigs = undefined
+pop :: M ()
+pop envsigs = do
+    env <- get
+    Map.deleteAt (Map.size (envVariables env)) (envVariables env)
+
 
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
