@@ -12,18 +12,18 @@ import qualified Data.Map as Map
 import Control.Monad.State
 
 data FunSig = FunSig 
-{
-    fsIntyps :: [Type],
-    fsOuttyp :: Type
-}
+    {
+        fsIntyps :: [Type],
+        fsOuttyp :: Type
+    }
 
 data Env = Env 
-{
-    envSignature :: Map String FunSig   
-}
+    {
+        envSignature :: Map String FunSig   
+    }
 
 --state transformer monad
-type M a = StateT Env IO
+type M a = StateT Env IO a
 
 {-
 Address look (Ident x)
@@ -60,22 +60,21 @@ emit :: String -> M ()
 emit line = 
     lift $ putStr line
 
-push :: Env -> IO Env
+push :: Env -> M Env
 push envsigs = undefined -- return $ Map.empty : envsigs
 
-pop :: Env -> IO Env
+pop :: Env -> M Env
 pop envsigs = undefined
 
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
-    env <- emptyEnv
-    evalStateT f env -- Monad function
+    evalStateT f emptyEnv -- Monad function
     return ()
     where 
         f = do
-            updateFun "printInt"  (FunSig {fsIntyps = [Type_int], fsOuttyp = void})
+            updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
             -- skipping adding user defined functions to signature
-            mapM (\DFun outtyp id args stms) -> do 
+            mapM (\(DFun outtyp id args stms) -> do 
                 -- skipping adding new local context and functino arguments
                 generateStms stms )
                 defs
@@ -90,12 +89,12 @@ generateStm (SExp exp) = do
     generateExp exp
     emitLn "pop"
 generateStm (SDecls typ ids) = undefined
-generateStm (SInit typ id exp) = do
+generateStm (SInit typ (Id id) exp) = do
     generateExp exp
-    if (typ == Type_int) do
-        emitLn "istore " ++ id
+    if (typ == Type_int) then do
+        emitLn $ "istore " ++ id
     else do
-        emitLn "astore " ++ id
+        emitLn $ "astore " ++ id
     -- emitLn "pop"
 generateStm (SReturn exp) = do
     generateExp exp
@@ -105,9 +104,12 @@ generateStm (SWhile exp stm) = do
     generateStm stm
     -- something
 generateStm (SBlock stms) = do
-    push
+    env <- get
+    env' <- push env
     generateStms stms
-    pop
+    e <- get
+    pop e
+    return ()
 generateStm (SIfElse exp stm1 stm2) = undefined
 
 generateExp :: Exp -> M ()
