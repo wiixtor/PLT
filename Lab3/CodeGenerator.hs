@@ -56,14 +56,14 @@ lookupFun id = do
 lookupVar :: String -> M Address
 lookupVar id = do
     env <- get
-    return $ envVariables env Map.! id
+    return $ (head $ envVariables env) Map.! id
 
 emptyEnv :: Env 
 emptyEnv =
     Env 
     {
-        envSignature = Map.empty
-        envVariables = Map.empty
+        envSignature = Map.empty,
+        envVariables = [Map.empty]
     }
 
 emitLn :: String -> M ()
@@ -74,14 +74,17 @@ emit line =
     lift $ putStr line
 
 push :: M ()
-push envsigs = do
+push = do
     env <- get
-    Map.insert Map.empty (envVariables env)
+    put $ env { envVariables = (Map.empty : (envVariables env)) }
+    return ()
 
 pop :: M ()
-pop envsigs = do
+pop = do
     env <- get
-    Map.deleteAt (Map.size (envVariables env)) (envVariables env)
+    put $ env {envVariables = (tail $ envVariables env)}
+  --  Map.deleteAt (Map.size (envVariables env)) (envVariables env)
+    return ()
 
 
 generateCode :: Program -> IO()
@@ -127,11 +130,9 @@ generateStm (SWhile exp stm) = do
     -- emitLn "goto" ++ start
     -- emitLn end ++ :
 generateStm (SBlock stms) = do
-    env <- get
-    env' <- push env
+    push
     generateStms stms
-    e <- get
-    pop e
+    pop
     return ()
 generateStm (SIfElse exp stm1 stm2) = do
     -- else = genLabel()
