@@ -11,6 +11,11 @@ import qualified Data.Map as Map
 
 import Control.Monad.State
 
+data Address = Address
+{
+    address :: String
+}
+
 data FunSig = FunSig 
 {
     fsIntyps :: [Type],
@@ -19,7 +24,8 @@ data FunSig = FunSig
 
 data Env = Env 
 {
-    envSignature :: Map String FunSig   
+    envSignature :: Map String FunSig
+    envVariables :: Map String Address
 }
 
 --state transformer monad
@@ -45,6 +51,11 @@ lookupFun :: String -> M FunSig
 lookupFun id = do
     env <- get
     return $ envSignature env Map.! id 
+
+lookupVar :: String -> Address
+lookupVar id = do
+    env <- get
+    return $ envVariables env Map.! id
 
 emptyEnv :: Env 
 emptyEnv =
@@ -101,14 +112,28 @@ generateStm (SReturn exp) = do
     generateExp exp
     emitLn "return" -- return void atm
 generateStm (SWhile exp stm) = do
+    -- start = genLabel()
+    -- end = genLabel()
+    -- emitLn start ++ ":"
     generateExp exp
+    -- emitLn "ifeq" ++ end
     generateStm stm
-    -- something
+    -- emitLn "goto" ++ start
+    -- emitLn end ++ :
 generateStm (SBlock stms) = do
     push
     generateStms stms
     pop
-generateStm (SIfElse exp stm1 stm2) = undefined
+generateStm (SIfElse exp stm1 stm2) = do
+    -- else = genLabel()
+    -- end = genLabel()
+    generateExp exp
+    -- emitLn "ifeq" ++ else
+    generateStm stm1
+    -- emitLn "goto" ++ end
+    -- emitLn else ++ :
+    generateStm stm2
+    -- emitLn end ++ ":"
 
 generateExp :: Exp -> M ()
 generateExp (ETrue) = undefined
@@ -116,10 +141,17 @@ generateExp (EFalse) = undefined
 generateExp (EInt int) = do
     emitLn $ "ldc " ++ show int
 generateExp (EDouble double) = undefined -- Not in lab
-generateExp (EId id) = undefined
+generateExp (EId (Id adrId)) = do
+    p <- lookupVar(adrId)
+    emitLn $ "iload" ++ p
 generateExp (EPostIncr exp) = undefined
 generateExp (EPostDecr exp) = undefined
-generateExp (EPreIncr exp) = undefined
+generateExp (EPreIncr exp) = do 
+    generateExp exp
+    emitLn $ "ldc" ++ 1
+    emitLn $ "iadd"
+    emitLn $ "dup"
+    emitLn $ "iStore" -- the address
 generateExp (EPreDecr exp) = undefined
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
