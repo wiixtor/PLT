@@ -26,8 +26,10 @@ data FunSig = FunSig
 data Env = Env 
     {
         envSignature :: Map String FunSig,
-        envVariables :: [Map String Address]
+        envVariables :: [Map String Address],
+        labelCounter :: Int
     }
+
 
 --state transformer monad
 type M a = StateT Env IO a
@@ -42,6 +44,13 @@ Void pop () // exit from block, discard new context
 Void empty () // discard all variables
 Label label () // get fresh code label
 -}
+
+genLabel :: M String
+genLabel = do
+    label <- gets labelCounter
+    modify (\env -> env {labelCounter = (labelCounter env) + 1})
+    return $ "label" ++ (show label)
+
 
 updateFun :: String -> FunSig -> M ()
 updateFun id sig = do
@@ -63,7 +72,8 @@ emptyEnv =
     Env 
     {
         envSignature = Map.empty,
-        envVariables = [Map.empty]
+        envVariables = [Map.empty],
+        labelCounter = 0
     }
 
 emitLn :: String -> M ()
@@ -121,29 +131,29 @@ generateStm (SReturn exp) = do
     generateExp exp
     emitLn "return" -- return void atm
 generateStm (SWhile exp stm) = do
-    -- start = genLabel()
-    -- end = genLabel()
-    -- emitLn start ++ ":"
+    start <- genLabel
+    end <- genLabel
+    emitLn $ start ++ ":"
     generateExp exp
-    -- emitLn "ifeq" ++ end
+    emitLn $ "ifeq" ++ end
     generateStm stm
-    -- emitLn "goto" ++ start
-    -- emitLn end ++ :
+    emitLn $ "goto" ++ start
+    emitLn $ end ++ ":"
 generateStm (SBlock stms) = do
     push
     generateStms stms
     pop
     return ()
 generateStm (SIfElse exp stm1 stm2) = do
-    -- else = genLabel()
-    -- end = genLabel()
+    els <- genLabel
+    end <- genLabel
     generateExp exp
-    -- emitLn "ifeq" ++ else
+    emitLn $ "ifeq" ++ els
     generateStm stm1
-    -- emitLn "goto" ++ end
-    -- emitLn else ++ :
+    emitLn $ "goto" ++ end
+    emitLn $ els ++ ":"
     generateStm stm2
-    -- emitLn end ++ ":"
+    emitLn $ end ++ ":"
 
 generateExp :: Exp -> M ()
 generateExp (ETrue) = undefined
