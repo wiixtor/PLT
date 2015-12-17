@@ -1,10 +1,9 @@
-change to suit lab3 pls
 
 all:
 	bnfc CPP.cf
 	happy -gca ParCPP.y
 	alex -g LexCPP.x
-	ghc --make lab2.hs -o lab2
+	ghc CodeGenerator.hs
 
 clean:
 	-rm -f lab2
