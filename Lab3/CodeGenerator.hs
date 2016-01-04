@@ -104,6 +104,7 @@ generateCode (PDefs defs) = do
     where 
         f = do
             updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
+            updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
             -- skipping adding user defined functions to signature
             mapM (\(DFun outtyp id args stms) -> do 
                 -- skipping adding new local context and functino arguments
@@ -130,7 +131,7 @@ generateStm (SInit typ (Id id) exp) = do
     -- emitLn "pop"
 generateStm (SReturn exp) = do
     generateExp exp
-    emitLn "return" -- return void atm
+    emitL n "return" -- return void atm
 generateStm (SWhile exp stm) = do
     start <- genLabel
     end <- genLabel
@@ -164,7 +165,7 @@ generateExp (EInt int) = do
 generateExp (EDouble double) = undefined -- Not needed in lab
 generateExp (EId (Id adrId)) = do
     p <- lookupVar(adrId)
-    emitLn $ "iload" ++ (show p)
+    emitLn $ "iload" ++ (show p)2
 generateExp (EPostIncr exp) = undefined
 generateExp (EPostDecr exp) = undefined
 generateExp (EPreIncr exp) = do 
