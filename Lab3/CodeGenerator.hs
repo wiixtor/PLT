@@ -222,7 +222,7 @@ generateExp (EApp (Id fcnid) args) = do
     mapM generateExp args
     fsig <- lookupFun fcnid
     if (null fsIntyps fsig) 
-        emit $ "invokestatic runtime/readInt()V"
+        emit $ "invokestatic runtime/readInt()I"
     else 
         emit $ "invokestatic runtime/printInt(I)V"
     if (fsOuttyp fsig == Type_void) then
