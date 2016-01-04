@@ -28,7 +28,7 @@ data Env = Env
         envSignature :: Map String FunSig,
         envVariables :: [Map String Address],
         labelCounter :: Int
-        envAddress      :: Int
+        envAddress   :: Int
     }
 
 
@@ -80,7 +80,7 @@ emptyEnv =
         envSignature = Map.empty,
         envVariables = [Map.empty],
         labelCounter = 0,
-        envAddress      = 0
+        envAddress   = 0
     }
 
 emitLn :: String -> M ()
