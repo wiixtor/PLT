@@ -51,6 +51,10 @@ genLabel = do
     modify (\env -> env {labelCounter = (labelCounter env) + 1})
     return $ "label" ++ (show label)
 
+updateVar :: String -> Address -> M ()
+updateVar id adr = do
+    env <- get
+    put $ env { envVariables = Map.insert id adr (head $ (envVariables env)) } -- I dunno how to lists
 
 updateFun :: String -> FunSig -> M ()
 updateFun id sig = do
