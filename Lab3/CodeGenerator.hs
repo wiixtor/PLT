@@ -136,9 +136,9 @@ generateStm (SWhile exp stm) = do
     end <- genLabel
     emitLn $ start ++ ":"
     generateExp exp
-    emitLn $ "ifeq" ++ end
+    emitLn $ "ifeq " ++ end
     generateStm stm
-    emitLn $ "goto" ++ start
+    emitLn $ "goto " ++ start
     emitLn $ end ++ ":"
 generateStm (SBlock stms) = do
     push
@@ -149,9 +149,9 @@ generateStm (SIfElse exp stm1 stm2) = do
     els <- genLabel
     end <- genLabel
     generateExp exp
-    emitLn $ "ifeq" ++ els
+    emitLn $ "ifeq " ++ els
     generateStm stm1
-    emitLn $ "goto" ++ end
+    emitLn $ "goto " ++ end
     emitLn $ els ++ ":"
     generateStm stm2
     emitLn $ end ++ ":"
@@ -164,28 +164,28 @@ generateExp (EInt int) = do
 generateExp (EDouble double) = undefined -- Not needed in lab
 generateExp (EId (Id adrId)) = do
     p <- lookupVar(adrId)
-    emitLn $ "iload" ++ (show p)
+    emitLn $ "iload " ++ (show p)
 generateExp (EPostIncr exp) = 
     generateExp exp
     emitLn $ "dup"
-    emitLn $ "ldc" ++ "1"
+    emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
     emitLn $ "istore" -- the address
 generateExp (EPostDecr exp) = 
     generateExp exp
     emitLn $ "dup"
-    emitLn $ "ldc" ++ "1"
+    emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
     emitLn $ "istore" -- the address
 generateExp (EPreIncr exp) = do 
     generateExp exp
-    emitLn $ "ldc" ++ "1"
+    emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
     emitLn $ "dup"
     emitLn $ "istore" -- the address
 generateExp (EPreDecr exp) = 
     generateExp exp
-    emitLn $ "ldc" ++ "1"
+    emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
     emitLn $ "dup"
     emitLn $ "istore" -- the address
