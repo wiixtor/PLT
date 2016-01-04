@@ -28,6 +28,7 @@ data Env = Env
         envSignature :: Map String FunSig,
         envVariables :: [Map String Address],
         labelCounter :: Int
+        envAddress      :: Int
     }
 
 
@@ -51,10 +52,11 @@ genLabel = do
     modify (\env -> env {labelCounter = (labelCounter env) + 1})
     return $ "label" ++ (show label)
 
-updateVar :: String -> Address -> M ()
-updateVar id adr = do
+updateVar :: String -> Int -> M ()
+updateVar id size = do
     env <- get
-    put $ env { envVariables = Map.insert id adr (head $ (envVariables env)) } -- I dunno how to lists
+    put $ env { envVariables = Map.insert id (envAddress env) (head $ (envVariables env)) }
+    put $ env { envAddress = (envAddress env) + size }
 
 updateFun :: String -> FunSig -> M ()
 updateFun id sig = do
@@ -77,7 +79,8 @@ emptyEnv =
     {
         envSignature = Map.empty,
         envVariables = [Map.empty],
-        labelCounter = 0
+        labelCounter = 0,
+        envAddress      = 0
     }
 
 emitLn :: String -> M ()
@@ -125,14 +128,16 @@ generateStm :: Stm -> M ()
 generateStm (SExp exp) = do
     generateExp exp
     emitLn "pop"
-generateStm (SDecls typ ids) = undefined
+generateStm (SDecls typ ids) = do
+    env <- get
+    mapM (\(Id id) -> do
+        updateVar id 1) -- no doubles so size always 1
+        ids
 generateStm (SInit typ (Id id) exp) = do
     generateExp exp
-    if (typ == Type_int) then do
-        emitLn $ "istore " ++ id
-    else do
-        emitLn $ "astore " ++ id
-    -- emitLn "pop"
+    env <- get
+    emitLn $ "istore " ++ (envAddress env)
+    updateVar id 1
 generateStm (SReturn exp) = do
     generateExp exp
     emitLn "return" -- return void atm
@@ -177,25 +182,29 @@ generateExp (EPostIncr exp) = do
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
-    emitLn $ "istore" -- the address
+    (EId id) <- exp
+    emitLn $ "istore " ++ lookupVar id 
 generateExp (EPostDecr exp) = do
     generateExp exp
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
-    emitLn $ "istore" -- the address
+    (EId id) <- exp
+    emitLn $ "istore " ++ lookupVar id 
 generateExp (EPreIncr exp) = do 
     generateExp exp
     emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
     emitLn $ "dup"
-    emitLn $ "istore" -- the address
+    (EId id) <- exp
+    emitLn $ "istore " ++ lookupVar id 
 generateExp (EPreDecr exp) = do
     generateExp exp
     emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
     emitLn $ "dup"
-    emitLn $ "istore" -- the address
+    (EId id) <- exp
+    emitLn $ "istore " ++ lookupVar id 
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
@@ -247,6 +256,8 @@ generateExp (EOr exp1 exp2) = do
 generateExp (EAss exp1 exp2) = do
     generateExp exp1
     generateExp exp2
+    (EId id) <- exp1
+    emitLn $ "istore " ++ lookupVar id 
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
