@@ -221,9 +221,11 @@ generateExp (EAss exp1 exp2) = undefined
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
-    emit $ "invokestatic runtime/printInt(I)V" -- assuming always calling printInt (Lecture running out of time)
+    if (null fsIntyps fsig) 
+        emit $ "invokestatic runtime/readInt()V"
+    else 
+        emit $ "invokestatic runtime/printInt(I)V"
     if (fsOuttyp fsig == Type_void) then
         emit "bipush 0"
     else
         return () 
---emit "return " somewhere
