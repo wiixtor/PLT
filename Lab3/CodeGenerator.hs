@@ -110,6 +110,7 @@ generateCode (PDefs defs) = do
                 generateStms stms )
                 defs
             return ()
+
 generateStms :: [Stm] -> M ()
 generateStms stms = do
     mapM generateStm stms 
@@ -160,7 +161,7 @@ generateExp (ETrue) = undefined
 generateExp (EFalse) = undefined
 generateExp (EInt int) = do
     emitLn $ "ldc " ++ show int
-generateExp (EDouble double) = undefined -- Not in lab
+generateExp (EDouble double) = undefined -- Not needed in lab
 generateExp (EId (Id adrId)) = do
     p <- lookupVar(adrId)
     emitLn $ "iload" ++ (show p)
@@ -171,7 +172,7 @@ generateExp (EPreIncr exp) = do
     emitLn $ "ldc" ++ "1"
     emitLn $ "iadd"
     emitLn $ "dup"
-    emitLn $ "iStore" -- the address
+    emitLn $ "istore" -- the address
 generateExp (EPreDecr exp) = undefined
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
