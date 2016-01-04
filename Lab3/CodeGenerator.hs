@@ -106,8 +106,8 @@ generateCode (PDefs defs) = do
             updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
             updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
             -- skipping adding user defined functions to signature
-            mapM (\(DFun outtyp id args stms) -> do 
-                updateFun id (FunSig {fsIntyps = args, fsOuttyp = outtyp})
+            mapM (\(DFun outtyp (Id id) args stms) -> do 
+                updateFun id (FunSig {fsIntyps = map (\(ADecl t _) -> t) args, fsOuttyp = outtyp})
                 generateStms stms )
                 defs
             return ()
@@ -131,7 +131,7 @@ generateStm (SInit typ (Id id) exp) = do
     -- emitLn "pop"
 generateStm (SReturn exp) = do
     generateExp exp
-    emitL n "return" -- return void atm
+    emitLn "return" -- return void atm
 generateStm (SWhile exp stm) = do
     start <- genLabel
     end <- genLabel
@@ -166,13 +166,13 @@ generateExp (EDouble double) = undefined -- Not needed in lab
 generateExp (EId (Id adrId)) = do
     p <- lookupVar(adrId)
     emitLn $ "iload " ++ (show p)
-generateExp (EPostIncr exp) = 
+generateExp (EPostIncr exp) = do
     generateExp exp
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
     emitLn $ "istore" -- the address
-generateExp (EPostDecr exp) = 
+generateExp (EPostDecr exp) = do
     generateExp exp
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
@@ -184,7 +184,7 @@ generateExp (EPreIncr exp) = do
     emitLn $ "iadd"
     emitLn $ "dup"
     emitLn $ "istore" -- the address
-generateExp (EPreDecr exp) = 
+generateExp (EPreDecr exp) = do
     generateExp exp
     emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
@@ -236,7 +236,7 @@ generateExp (EAss exp1 exp2) = undefined
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
-    if (null fsIntyps fsig) 
+    if (null $ fsIntyps fsig) then
         emit $ "invokestatic runtime/readInt()I"
     else 
         emit $ "invokestatic runtime/printInt(I)V"
