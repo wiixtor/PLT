@@ -107,7 +107,7 @@ generateCode (PDefs defs) = do
             updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
             -- skipping adding user defined functions to signature
             mapM (\(DFun outtyp id args stms) -> do 
-                -- skipping adding new local context and functino arguments
+                updateFun id (FunSig {fsIntyps = args, fsOuttyp = outtyp})
                 generateStms stms )
                 defs
             return ()
