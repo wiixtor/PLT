@@ -165,15 +165,30 @@ generateExp (EDouble double) = undefined -- Not needed in lab
 generateExp (EId (Id adrId)) = do
     p <- lookupVar(adrId)
     emitLn $ "iload" ++ (show p)
-generateExp (EPostIncr exp) = undefined
-generateExp (EPostDecr exp) = undefined
+generateExp (EPostIncr exp) = 
+    generateExp exp
+    emitLn $ "dup"
+    emitLn $ "ldc" ++ "1"
+    emitLn $ "iadd"
+    emitLn $ "istore" -- the address
+generateExp (EPostDecr exp) = 
+    generateExp exp
+    emitLn $ "dup"
+    emitLn $ "ldc" ++ "1"
+    emitLn $ "isub"
+    emitLn $ "istore" -- the address
 generateExp (EPreIncr exp) = do 
     generateExp exp
     emitLn $ "ldc" ++ "1"
     emitLn $ "iadd"
     emitLn $ "dup"
     emitLn $ "istore" -- the address
-generateExp (EPreDecr exp) = undefined
+generateExp (EPreDecr exp) = 
+    generateExp exp
+    emitLn $ "ldc" ++ "1"
+    emitLn $ "isub"
+    emitLn $ "dup"
+    emitLn $ "istore" -- the address
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
