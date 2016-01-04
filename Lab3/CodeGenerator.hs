@@ -13,7 +13,7 @@ import Control.Monad.State
 
 data Address = Address
     {
-        address :: String
+        address :: Int
     }
     deriving Show
 
@@ -27,7 +27,7 @@ data Env = Env
     {
         envSignature :: Map String FunSig,
         envVariables :: [Map String Address],
-        labelCounter :: Int
+        labelCounter :: Int,
         envAddress   :: Int
     }
 
@@ -55,7 +55,7 @@ genLabel = do
 updateVar :: String -> Int -> M ()
 updateVar id size = do
     env <- get
-    put $ env { envVariables = (Map.insert id (envAddress env) (head $ (envVariables env))) : (tail (envVariables env) )}
+    put $ env { envVariables = (Map.insert id (Address $ envAddress env) (head $ (envVariables env))) : (tail (envVariables env) )}
     put $ env { envAddress = (envAddress env) + size }
 
 updateFun :: String -> FunSig -> M ()
@@ -133,10 +133,11 @@ generateStm (SDecls typ ids) = do
     mapM (\(Id id) -> do
         updateVar id 1) -- no doubles so size always 1
         ids
+    return ()
 generateStm (SInit typ (Id id) exp) = do
     generateExp exp
     env <- get
-    emitLn $ "istore " ++ (envAddress env)
+    emitLn $ "istore " ++ (show $ envAddress env)
     updateVar id 1
 generateStm (SReturn exp) = do
     generateExp exp
@@ -182,29 +183,33 @@ generateExp (EPostIncr exp) = do
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
-    (EId id) <- exp
-    emitLn $ "istore " ++ lookupVar id 
+    let (EId (Id id)) = exp
+    a <- lookupVar id
+    emitLn $ "istore " ++ (show a)
 generateExp (EPostDecr exp) = do
     generateExp exp
     emitLn $ "dup"
     emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
-    (EId id) <- exp
-    emitLn $ "istore " ++ lookupVar id 
+    let (EId (Id id)) = exp
+    a <- lookupVar id
+    emitLn $ "istore " ++ (show a)
 generateExp (EPreIncr exp) = do 
     generateExp exp
     emitLn $ "ldc " ++ "1"
     emitLn $ "iadd"
     emitLn $ "dup"
-    (EId id) <- exp
-    emitLn $ "istore " ++ lookupVar id 
+    let (EId (Id id)) = exp
+    a <- lookupVar id
+    emitLn $ "istore " ++ (show a)
 generateExp (EPreDecr exp) = do
     generateExp exp
     emitLn $ "ldc " ++ "1"
     emitLn $ "isub"
     emitLn $ "dup"
-    (EId id) <- exp
-    emitLn $ "istore " ++ lookupVar id 
+    let (EId (Id id)) = exp
+    a <- lookupVar id
+    emitLn $ "istore " ++ (show a)
 generateExp (EPlus exp1 exp2) = do
     generateExp exp1
     generateExp exp2
@@ -256,8 +261,9 @@ generateExp (EOr exp1 exp2) = do
 generateExp (EAss exp1 exp2) = do
     generateExp exp1
     generateExp exp2
-    (EId id) <- exp1
-    emitLn $ "istore " ++ lookupVar id 
+    let (EId (Id id)) = exp1
+    a <- lookupVar id
+    emitLn $ "istore " ++ (show a)
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
