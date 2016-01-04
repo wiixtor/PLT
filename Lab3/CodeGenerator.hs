@@ -162,8 +162,10 @@ generateStm (SIfElse exp stm1 stm2) = do
     emitLn $ end ++ ":"
 
 generateExp :: Exp -> M ()
-generateExp (ETrue) = undefined
-generateExp (EFalse) = undefined
+generateExp (ETrue) = do
+    emitLn $ "ldc 1"
+generateExp (EFalse) = do
+    emitLn $ "ldc 0"
 generateExp (EInt int) = do
     emitLn $ "ldc " ++ show int
 generateExp (EDouble double) = undefined -- Not needed in lab
@@ -234,9 +236,17 @@ generateExp (ENEq exp1 exp2) = do
     generateExp exp1
     generateExp exp2
     emit $ "if_acmpne"
-generateExp (EAnd exp1 exp2) = undefined
-generateExp (EOr exp1 exp2) = undefined
-generateExp (EAss exp1 exp2) = undefined
+generateExp (EAnd exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
+    emit $ "iand"
+generateExp (EOr exp1 exp2) = do    
+    generateExp exp1
+    generateExp exp2
+    emit $ "ior"
+generateExp (EAss exp1 exp2) = do
+    generateExp exp1
+    generateExp exp2
 generateExp (EApp (Id fcnid) args) = do 
     mapM generateExp args
     fsig <- lookupFun fcnid
