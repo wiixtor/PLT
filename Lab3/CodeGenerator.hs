@@ -54,8 +54,8 @@ genLabel = do
 updateVar :: String -> Address -> M ()
 updateVar id adr = do
     env <- get
-    put $ env { envVariables = Map.insert id adr (head $ (envVariables env)) } -- I dunno how to lists
-
+    put $ env { envVariables = (Map.insert id adr (head $ (envVariables env))) : (tail (envVariables env) )}
+    
 updateFun :: String -> FunSig -> M ()
 updateFun id sig = do
     env <- get 
