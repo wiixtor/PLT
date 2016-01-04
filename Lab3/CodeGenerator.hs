@@ -55,7 +55,7 @@ genLabel = do
 updateVar :: String -> Int -> M ()
 updateVar id size = do
     env <- get
-    put $ env { envVariables = Map.insert id (envAddress env) (head $ (envVariables env)) }
+    put $ env { envVariables = (Map.insert id (envAddress env) (head $ (envVariables env))) : (tail (envVariables env) )}
     put $ env { envAddress = (envAddress env) + size }
 
 updateFun :: String -> FunSig -> M ()
