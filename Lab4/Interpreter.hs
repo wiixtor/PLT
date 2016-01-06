@@ -7,9 +7,9 @@ import AbsFun
 
 data EvStrat = CallByValue | CallByName
 
-data GlobEnv = GlobEnv {
-	genvEvStrat :: EvStrat,
-	genvFcns :: Map String Exp
+data Env = Env {
+	envStrat :: EvStrat,
+	envFuns :: Map String Exp
 
 }
 
@@ -22,20 +22,35 @@ type Substitution = Map String Closure
 
 
 interpret :: EvStrat -> Program -> IO ()
-interpret evstrat (Prog defs) = undefined
+interpret evstrat (Prog defs) = do
+    newenv <- emptyEnv
+    env <- foldM
+        updateFun
+        emptyEnv
+        p
+    (DDef _ _ Exp) <- lookFun env (Ident "main")
+    evalExp env exp
+    return ()
 
 
-eval :: GlobEnv -> Closure -> Closure
+eval :: Env -> Closure -> Closure
 eval genv clos = ev clos
   where
   	ev :: Closure -> Closure
   	ev = case clos of
   		EApp f a ->
   			let Clos (Eabs (Ident v) fbody) sub' = ev (Clos f sub)
-  			in case genvEvStrat genv of
+  			in case envStrat genv of
   				CallByValue ->
   					let a' = ev (Clos a sub)
   					in ev (Clos fbody (Map.insert v a' sub'))
-        	  CallByName ->
-
+        	    CallByName ->
         			ev (Clos fbody (Map.insert v (Clos a sub) sub'))
+
+
+
+emptyEnv :: IO Env
+emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
+
+updateFun :: Env -> Def -> IO Env
+updateFun env (DDef funid args exp) = 
