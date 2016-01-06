@@ -71,7 +71,14 @@ lookupFun id = do
 lookupVar :: String -> M Address
 lookupVar id = do
     env <- get
-    return $ (head $ envVariables env) Map.! id
+    return help (envVariables env) id -- $ (head $ envVariables env) Map.! id
+ where 
+    help :: [Map String Address] -> String -> Address
+    help [] id = error "no variable found"
+    help (v:vs) id =
+        case (Map.lookup id v) of
+            Nothing -> help vs id
+            Just x -> x
 
 emptyEnv :: Env 
 emptyEnv =
