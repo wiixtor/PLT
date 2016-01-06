@@ -28,7 +28,7 @@ interpret evstrat (Prog defs) = do
         updateFun
         emptyEnv
         p
-    (DDef _ _ Exp) <- lookFun env (Ident "main")
+    (DDef _ _ exp) <- lookFun env (Ident "main")
     evalExp env exp
     return ()
 
@@ -52,11 +52,14 @@ eval genv clos = ev clos
 emptyEnv :: IO Env
 emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
 
+lookFun :: Env -> Ident -> IO Exp
+lookFun env (Ident id) = undefined
+
 updateFun :: Env -> Def -> IO Env
 updateFun env (DDef funid args exp) = undefined
 
-lookupVal :: Ident -> Env -> Value
+lookupVal :: Ident -> Env -> IO Value
 lookupVal = undefined
 
-updateVal :: Env -> Ident -> Value -> Env
+updateVal :: Env -> Ident -> Value -> IO Env
 updateVal = undefined
