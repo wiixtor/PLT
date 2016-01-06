@@ -8,9 +8,9 @@ import AbsFun
 data EvStrat = CallByValue | CallByName
 
 data Env = Env {
-	envStrat :: EvStrat,
-	envFuns :: Map String Exp
-
+    envStrat :: EvStrat,
+    envFuns :: Map String Exp
+    envValues :: [Map String Value]
 }
 
 data Value = VInt Integer | VAbs String Exp Substitution
@@ -36,30 +36,40 @@ interpret evstrat (Prog defs) = do
 eval :: Env -> Closure -> Closure
 eval genv clos = ev clos
   where
-  	ev :: Closure -> Closure
-  	ev = case clos of
-  		EApp f a ->
-  			let Clos (Eabs (Ident v) fbody) sub' = ev (Clos f sub)
-  			in case envStrat genv of
-  				CallByValue ->
-  					let a' = ev (Clos a sub)
-  					in ev (Clos fbody (Map.insert v a' sub'))
-        	    CallByName ->
-        			ev (Clos fbody (Map.insert v (Clos a sub) sub'))
+    ev :: Closure -> Closure
+    ev = case clos of
+        EApp f a ->
+            let Clos (Eabs (Ident v) fbody) sub' = ev (Clos f sub)
+            in case envStrat genv of
+                CallByValue ->
+                    let a' = ev (Clos a sub)
+                    in ev (Clos fbody (Map.insert v a' sub'))
+                CallByName ->
+                    ev (Clos fbody (Map.insert v (Clos a sub) sub'))
 
+push :: Env -> IO Env 
+push env = do
+    put $ env { envValues = (Map.empty : (envValues env)) } }
 
+pop :: Env -> IO Env
+pop env = do
+    put $ env {envValues = (tail $ envValues env)}
 
 emptyEnv :: IO Env
 emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
 
 lookFun :: Env -> Ident -> IO Exp
-lookFun env (Ident id) = undefined
+lookFun env (Ident id) = do
+    return $ envFuns env Map.! id 
 
 updateFun :: Env -> Def -> IO Env
-updateFun env (DDef funid args exp) = undefined
+updateFun env (DDef funid args exp) = do
+    put $ env { envFuns = Map.insert funid exp (envFuns env) }
 
-lookupVal :: Ident -> Env -> IO Value
-lookupVal = undefined
+lookVal :: Ident -> Env -> IO Value
+lookVal (Ident id) env = do
+    return $ head $ envValues env Map.! id 
 
 updateVal :: Env -> Ident -> Value -> IO Env
-updateVal = undefined
+updateVal env (Ident id) val = do
+    put $ env { envValues = (Map.insert id val (head $ (envValues env))) : (tail (envValues env) )}
