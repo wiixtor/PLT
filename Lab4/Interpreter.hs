@@ -38,6 +38,13 @@ eval genv clos = ev clos
   where
     ev :: Closure -> Closure
     ev = case clos of
+        EVar id -> undefined
+        EInt int -> undefined -- Clos (Eint int) sub
+        EAdd exp1 exp2 -> undefined
+        ESub exp1 exp2 -> undefined
+        ELt exp1 exp2 -> undefined
+        EIf exp1 exp2 exp3 -> undefined
+        EAbs id exp -> undefined
         EApp f a ->
             let Clos (Eabs (Ident v) fbody) sub' = ev (Clos f sub)
             in case envStrat genv of
