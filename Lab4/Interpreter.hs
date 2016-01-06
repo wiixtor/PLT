@@ -3,13 +3,15 @@ module Interpreter where
 import Data.Map (Map)
 import qualified Data.Map as Map
 
+import Control.Monad
+import Control.Monad.State
 import AbsFun
 
 data EvStrat = CallByValue | CallByName
 
 data Env = Env {
     envStrat :: EvStrat,
-    envFuns :: Map String Exp
+    envFuns :: Map String Exp,
     envValues :: [Map String Value]
 }
 
@@ -19,18 +21,22 @@ data Closure = Clos Exp Substitution
 
 type Substitution = Map String Closure
 
+--state transformer monad
+type M a = StateT Env IO a
 
-
-interpret :: EvStrat -> Program -> IO ()
+interpret :: EvStrat -> Program -> M ()
 interpret evstrat (Prog defs) = do
-    newenv <- emptyEnv
-    env <- foldM
-        updateFun
-        emptyEnv
-        p
-    (DDef _ _ exp) <- lookFun env (Ident "main")
-    evalExp env exp
+    evalStateT f emptyEnv
     return ()
+  where
+    f = do
+        mapM
+            updateFun
+            emptyEnv
+            defs
+        (DDef _ _ exp) <- lookFun (Ident "main")
+        evalExp exp
+        return ()
 
 
 eval :: Env -> Closure -> Closure
@@ -54,29 +60,35 @@ eval genv clos = ev clos
                 CallByName ->
                     ev (Clos fbody (Map.insert v (Clos a sub) sub'))
 
-push :: Env -> IO Env 
-push env = do
-    put $ env { envValues = (Map.empty : (envValues env)) } }
+push :: M ()
+push = do
+    env <- get
+    put $ Env { envValues = (Map.empty : (envValues env)) }
 
-pop :: Env -> IO Env
-pop env = do
-    put $ env {envValues = (tail $ envValues env)}
+pop :: M ()
+pop = do
+    env <- get
+    put $ Env {envValues = (tail $ envValues env)}
 
-emptyEnv :: IO Env
+emptyEnv :: M ()
 emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
 
-lookFun :: Env -> Ident -> IO Exp
-lookFun env (Ident id) = do
+lookFun :: Ident -> M Exp
+lookFun (Ident id) = do
+    env <- get
     return $ envFuns env Map.! id 
 
-updateFun :: Env -> Def -> IO Env
-updateFun env (DDef funid args exp) = do
+updateFun :: Def -> M ()
+updateFun (DDef funid args exp) = do
+    env <- get
     put $ env { envFuns = Map.insert funid exp (envFuns env) }
 
-lookVal :: Ident -> Env -> IO Value
-lookVal (Ident id) env = do
+lookVal :: Ident -> M Value
+lookVal (Ident id) = do
+    env <- get
     return $ head $ envValues env Map.! id 
 
-updateVal :: Env -> Ident -> Value -> IO Env
-updateVal env (Ident id) val = do
+updateVal :: Ident -> Value -> M ()
+updateVal (Ident id) val = do
+    env <- get
     put $ env { envValues = (Map.insert id val (head $ (envValues env))) : (tail (envValues env) )}
