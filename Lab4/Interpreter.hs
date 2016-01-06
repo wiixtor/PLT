@@ -13,7 +13,7 @@ data GlobEnv = GlobEnv {
 
 }
 
--- data Value = VInt Integer | VAbs String Exp Substitution
+data Value = VInt Integer | VAbs String Exp Substitution
 
 data Closure = Clos Exp Substitution
 
@@ -39,3 +39,9 @@ eval genv clos = ev clos
         	  CallByName ->
 
         			ev (Clos fbody (Map.insert v (Clos a sub) sub'))
+
+lookupVal :: Ident -> Env -> Value
+lookupVal = undefined
+
+updateVal :: Env -> Ident -> Value -> Env
+updateVal = undefined
