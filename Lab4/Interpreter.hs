@@ -13,7 +13,7 @@ data Env = Env {
 
 }
 
--- data Value = VInt Integer | VAbs String Exp Substitution
+data Value = VInt Integer | VAbs String Exp Substitution
 
 data Closure = Clos Exp Substitution
 
@@ -53,4 +53,10 @@ emptyEnv :: IO Env
 emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
 
 updateFun :: Env -> Def -> IO Env
-updateFun env (DDef funid args exp) = 
+updateFun env (DDef funid args exp) = undefined
+
+lookupVal :: Ident -> Env -> Value
+lookupVal = undefined
+
+updateVal :: Env -> Ident -> Value -> Env
+updateVal = undefined
