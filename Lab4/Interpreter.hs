@@ -29,6 +29,7 @@ interpret evstrat (Prog defs) = do
         newenv
         defs
     exp <- lookFun e (Ident "main")
+    eval e (Clos exp Map.empty)
     return ()
  
 
@@ -39,7 +40,9 @@ eval (strat, funs, vals) (Clos e s) = ev (Clos e s)
     ev = case e of
         EVar id -> undefined
         EInt int -> undefined -- Clos (Eint int) sueb
-        EAdd exp1 exp2 -> undefined
+        EAdd exp1 exp2 -> do
+             (Clos e' s') <- ev (Clos exp1 s)
+             return (Clos e' s')
         ESub exp1 exp2 -> undefined
         ELt exp1 exp2 -> undefined
         EIf exp1 exp2 exp3 -> undefined
@@ -89,7 +92,7 @@ updateVal (a, b, (v:vs)) (Ident id) val = do
 
 
 
-
+{-
 
 main :: IO ()
 main = do
@@ -98,3 +101,4 @@ main = do
                     "-v" -> CallByValue
                     "-n" -> CallByName
     interpret strat (last args)
+    -}
