@@ -29,23 +29,23 @@ interpret evstrat (Prog defs) = do
     evalStateT f emptyEnv
     return ()
   where
+    f :: M ()
     f = do
         mapM
             updateFun
-            emptyEnv
             defs
-        (DDef _ _ exp) <- lookFun (Ident "main")
-        evalExp exp
+        exp <- lookFun (Ident "main")
+       -- eva lexp
         return ()
 
 
-eval :: Env -> Closure -> Closure
+{- eval :: Env -> Closure -> Closure
 eval genv clos = ev clos
   where
     ev :: Closure -> Closure
     ev = case clos of
         EVar id -> undefined
-        EInt int -> undefined -- Clos (Eint int) sub
+        EInt int -> undefined -- Clos (Eint int) sueb
         EAdd exp1 exp2 -> undefined
         ESub exp1 exp2 -> undefined
         ELt exp1 exp2 -> undefined
@@ -59,7 +59,7 @@ eval genv clos = ev clos
                     in ev (Clos fbody (Map.insert v a' sub'))
                 CallByName ->
                     ev (Clos fbody (Map.insert v (Clos a sub) sub'))
-
+-}
 push :: M ()
 push = do
     env <- get
@@ -70,7 +70,7 @@ pop = do
     env <- get
     put $ Env {envValues = (tail $ envValues env)}
 
-emptyEnv :: M ()
+emptyEnv :: Env
 emptyEnv = Env {envStrat = CallByValue, envFuns = Map.empty}
 
 lookFun :: Ident -> M Exp
@@ -79,14 +79,14 @@ lookFun (Ident id) = do
     return $ envFuns env Map.! id 
 
 updateFun :: Def -> M ()
-updateFun (DDef funid args exp) = do
+updateFun (DDef (Ident funid) args exp) = do
     env <- get
     put $ env { envFuns = Map.insert funid exp (envFuns env) }
 
 lookVal :: Ident -> M Value
 lookVal (Ident id) = do
     env <- get
-    return $ head $ envValues env Map.! id 
+    return $ (head $ envValues env) Map.! id 
 
 updateVal :: Ident -> Value -> M ()
 updateVal (Ident id) val = do
