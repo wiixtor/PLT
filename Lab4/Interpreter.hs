@@ -5,8 +5,16 @@ import qualified Data.Map as Map
 
 import Control.Monad
 import Control.Monad.State
+
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
+
 import AbsFun
-import System.Environment
+import LexFun
+import ParFun
+import ErrM
+
+
 
 data EvStrat = CallByValue | CallByName
 
@@ -92,15 +100,22 @@ updateVal e (Ident id) val = return $ Map.insert id val e
 
 
 
+-- driver
 
-
-{-
+check :: String -> IO ()
+check s = do
+  case pProgram (myLexer s) of
+    Bad err  -> do
+      putStrLn "SYNTAX ERROR"
+      exitFailure
+    Ok  tree -> do
+      interpret CallByValue tree
 
 main :: IO ()
 main = do
-    args <- getArgs
-    let strat = case head args of
-                    "-v" -> CallByValue
-                    "-n" -> CallByName
-    interpret strat (last args)
-    -}
+  args <- getArgs
+  case last args of
+    file -> readFile file >>= check
+    _    -> do
+      putStrLn "Usage: lab2 <SourceFile>"
+      exitFailure
