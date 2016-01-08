@@ -49,9 +49,13 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             (VInt i1) <- ev (Clos exp1 env)
             (VInt i2) <- ev (Clos exp2 env)
             case (i1<i2) of 
-                True -> 1
-                False -> 0
-        EIf exp1 exp2 exp3 -> undefined
+                True -> return 1
+                False -> return 0
+        EIf exp1 exp2 exp3 -> do
+            (VInt i1) <- ev (Clos exp1 env)
+            case i1 of
+                1 -> return ev (VClos (Clos exp2 env))
+                0 -> return ev (VClos (Clos exp3 env))
         EAbs id exp -> undefined
         EApp f a -> undefined 
 
