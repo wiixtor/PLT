@@ -58,26 +58,14 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                 0 -> return ev (Clos exp3 env)
         EAbs id exp -> do
             return (VClos (Clos id (Map.insert id exp env)))
-        EApp f a -> undefined 
-
-
-        {-do
-            Clos (EAbs (Ident v) fbody) sub' <- ev (Clos f s)
+        EApp f a -> do
+            Clos (EAbs (Ident v) fbody) env' <- ev (Clos f env)
             case strat of
                 CallByValue -> do
-                    a' <- ev (Clos a s)
-                    ev (Clos fbody (Map.insert v a' sub'))
+                    a' <- ev (Clos a env)
+                    ev (Clos fbody (Map.insert v a' env'))
                 CallByName ->
-                    ev (Clos fbody (Map.insert v (Clos a s) sub'))
-
-push :: Env -> IO Env
-push (a, b, v) = do
-    return $ (a, b, Map.empty : v)
-
-pop :: Env -> IO Env
-pop (a, b, (v:vs)) = do
-    return $ (a, b, vs)
--}
+                    ev (Clos fbody (Map.insert v (Clos a env) env'))
 
 emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
