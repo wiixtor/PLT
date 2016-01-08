@@ -30,13 +30,13 @@ interpret evstrat (Prog defs) = do
     return ()
  
 
-eval :: GEnv -> Closure -> IO Closure
+eval :: GEnv -> Closure -> IO Value
 eval (strat, funs) (Clos e env) = ev (Clos e env)
   where
     ev :: Closure -> IO Value
     ev (Clos e env) = case e of
-        EVar id -> (VClos (Clos (EVar id) env))
-        EInt int -> (Vint int) -- Clos (Eint int) sueb
+        EVar id -> return (VClos (Clos (EVar id) env))
+        EInt int -> return (VInt int) -- Clos (Eint int) sueb
         EAdd exp1 exp2 -> do
             (VInt i1) <- ev (Clos exp1 env)
             (VInt i2) <- ev (Clos exp2 env)
