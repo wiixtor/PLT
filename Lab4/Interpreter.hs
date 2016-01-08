@@ -102,8 +102,8 @@ updateVal e (Ident id) val = return $ Map.insert id val e
 
 -- driver
 
-check :: String -> IO ()
-check s m = do
+check :: EvStrat ->  String -> IO ()
+check m s = do
   case pProgram (myLexer s) of
     Bad err  -> do
       putStrLn "SYNTAX ERROR"
@@ -115,6 +115,6 @@ main :: IO ()
 main = do
   args <- getArgs
   let mode = case head args of
-    "-v" -> CallByValue
-    "-n" -> CallByName
-  readFile file >>= check mode
+                "-v" -> CallByValue
+                "-n" -> CallByName
+  readFile (last args) >>= check mode
