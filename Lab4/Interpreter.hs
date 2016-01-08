@@ -36,15 +36,21 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
     ev :: Closure -> IO Value
     ev (Clos e env) = case e of
         EVar id -> return (VClos (Clos (EVar id) env))
-        EInt int -> return (VInt int) -- Clos (Eint int) sueb
+        EInt int -> return (VInt int)
         EAdd exp1 exp2 -> do
             (VInt i1) <- ev (Clos exp1 env)
             (VInt i2) <- ev (Clos exp2 env)
             return (VInt (i1+i2))
---             (Clos e' s') <- ev (Clos exp1 env)
---             return (Clos e' s')
-        ESub exp1 exp2 -> undefined
-        ELt exp1 exp2 -> undefined
+        ESub exp1 exp2 -> do
+            (VInt i1) <- ev (Clos exp1 env)
+            (VInt i2) <- ev (Clos exp2 env)
+            return (VInt (i1-i2))
+        ELt exp1 exp2 -> do
+            (VInt i1) <- ev (Clos exp1 env)
+            (VInt i2) <- ev (Clos exp2 env)
+            case (i1<i2) of 
+                True -> 1
+                False -> 0
         EIf exp1 exp2 exp3 -> undefined
         EAbs id exp -> undefined
         EApp f a -> undefined 
