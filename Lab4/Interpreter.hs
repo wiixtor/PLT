@@ -26,8 +26,8 @@ interpret evstrat (Prog defs) = do
         newGenv
         defs
     exp <- lookFun e (Ident "main")
-    eval e (Clos exp Map.empty)
-    return ()
+    (VInt v)<- eval e (Clos exp Map.empty)
+    print v
  
 
 eval :: GEnv -> Closure -> IO Value
