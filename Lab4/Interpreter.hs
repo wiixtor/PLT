@@ -31,15 +31,15 @@ interpret evstrat (Prog defs) = do
  
 
 eval :: GEnv -> Closure -> IO Closure
-eval (strat, funs) (Clos exp env) = ev (Clos exp env)
+eval (strat, funs) (Clos e env) = ev (Clos e env)
   where
     ev :: Closure -> IO Closure
     ev = case e of
         EVar id -> undefined
         EInt int -> undefined -- Clos (Eint int) sueb
-        EAdd exp1 exp2 -> do
-             (Clos e' s') <- ev (Clos exp1 s)
-             return (Clos e' s')
+        EAdd exp1 exp2 -> undefined
+--             (Clos e' s') <- ev (Clos exp1 env)
+--             return (Clos e' s')
         ESub exp1 exp2 -> undefined
         ELt exp1 exp2 -> undefined
         EIf exp1 exp2 exp3 -> undefined
@@ -66,27 +66,21 @@ pop (a, b, (v:vs)) = do
 -}
 
 emptyGEnv :: IO GEnv
-emptyEnv = return (CallByValue, Map.empty)
+emptyGEnv = return (CallByValue, Map.empty)
 
 lookFun :: GEnv -> Ident -> IO Exp
 lookFun (_, f) (Ident id) = do
     return $ f Map.! id 
 
-updateFun :: GEnv -> Def -> IO Env
+updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
     return (a, Map.insert funid exp f)
 
 lookVal :: Env -> Ident -> IO Value
-lookVal (vs) (Ident id) 
-    | null vs   = fail "value unfound" 
-    | otherwise =
-        case Map.lookup id (head vs) of
-            Nothing -> lookVal (tail vs) (Ident id)
-            Just x  -> return x
+lookVal e (Ident i) = return $ (Map.!) e i 
 
 updateVal :: Env -> Ident -> Value -> IO Env
-updateVal (v:vs) (Ident id) val = do
-    return Map.insert id val v : vs
+updateVal e (Ident id) val = return $ Map.insert id val e
 
 
 
