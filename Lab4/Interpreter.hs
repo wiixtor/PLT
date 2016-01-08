@@ -56,7 +56,8 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             case i1 of
                 1 -> return ev (Clos exp2 env)
                 0 -> return ev (Clos exp3 env)
-        EAbs id exp -> undefined
+        EAbs id exp -> do
+            return (VClos (Clos id (Map.insert id exp env)))
         EApp f a -> undefined 
 
 
