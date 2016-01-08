@@ -1,4 +1,4 @@
-module Interpreter where
+module Main where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -103,19 +103,18 @@ updateVal e (Ident id) val = return $ Map.insert id val e
 -- driver
 
 check :: String -> IO ()
-check s = do
+check s m = do
   case pProgram (myLexer s) of
     Bad err  -> do
       putStrLn "SYNTAX ERROR"
       exitFailure
     Ok  tree -> do
-      interpret CallByValue tree
+      interpret m tree
 
 main :: IO ()
 main = do
   args <- getArgs
-  case last args of
-    file -> readFile file >>= check
-    _    -> do
-      putStrLn "Usage: lab2 <SourceFile>"
-      exitFailure
+  let mode = case head args of
+    "-v" -> CallByValue
+    "-n" -> CallByName
+  readFile file >>= check mode
