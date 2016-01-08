@@ -54,11 +54,15 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
         EIf exp1 exp2 exp3 -> do
             (VInt i1) <- ev (Clos exp1 env)
             case i1 of
-                1 -> return ev (Clos exp2 env)
-                0 -> return ev (Clos exp3 env)
+                1 -> do
+                    c <- ev (Clos exp2 env)
+                    return c
+                0 -> do
+                    c <- ev (Clos exp3 env)
+                    return c
         EAbs (Ident id) exp -> do
             val <- ev (Clos exp env)
-            return (VClos (Clos id (Map.insert id val env)))
+            return (VClos (Clos (EVar (Ident id)) (Map.insert id val env)))
         EApp f a -> do
             VClos (Clos (EAbs (Ident v) fbody) env') <- ev (Clos f env)
             case strat of
