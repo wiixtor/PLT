@@ -70,7 +70,8 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                     return c
         EAbs (Ident id) exp -> do
             val <- ev (Clos exp env)
-            return (VClos (Clos (EVar (Ident id)) (Map.insert id val env)))
+            return (VClos (Clos (EAbs (Ident id) exp) (Map.insert id val env)))
+            -- return (VClos (Clos (EVar (Ident id)) (Map.insert id val env)))
         EApp f a -> do
             VClos (Clos (EAbs (Ident v) fbody) env') <- ev (Clos f env)
             case strat of
