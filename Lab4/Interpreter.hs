@@ -64,11 +64,11 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
         EIf exp1 exp2 exp3 -> do
             (VInt i1) <- ev (Clos exp1 env)
             case i1 of
-                1 -> do
-                    c <- ev (Clos exp2 env)
-                    return c
                 0 -> do
                     c <- ev (Clos exp3 env)
+                    return c
+                _ -> do
+                    c <- ev (Clos exp2 env)
                     return c
         -- EAbs borde aldrig kallas tror jag
         -- EAbs (Ident id) exp -> do
