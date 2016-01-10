@@ -44,7 +44,7 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
     ev :: Closure -> IO Value
     ev (Clos e env) = case e of
         EVar id -> do
-            x <- lookVal env id
+            x <- lookVal env funs id
             return x
         EInt int -> return (VInt int)
         EAdd exp1 exp2 -> do
@@ -98,8 +98,14 @@ updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
     return (a, Map.insert funid exp f)
 
-lookVal :: Env -> Ident -> IO Value
-lookVal e (Ident i) = return $ (Map.!) e i 
+lookVal :: Env -> Functions -> Ident -> IO Value
+lookVal e funs (Ident i) = 
+    case Map.lookup e i of
+        Just v = return v
+        Nothing = return Map.! funs i
+
+
+    --return $ (Map.!) e i 
 
 updateVal :: Env -> Ident -> Value -> IO Env
 updateVal e (Ident id) val = return $ Map.insert id val e
