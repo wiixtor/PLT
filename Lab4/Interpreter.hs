@@ -77,7 +77,8 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             -- return (VClos (Clos (EVar (Ident id)) (Map.insert id val env)))
         EApp (EAbs x exp) a -> do
             --VClos (Clos (EAbs (Ident v) fbody) env') <- ev (Clos f env)
-            env' <- updateVal env x (ev (Clos a env))
+            v <- ev (Clos a env)
+            env' <- updateVal env x v
             case strat of
                 CallByValue -> do
                     a' <- ev (Clos a env)
@@ -86,6 +87,7 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                 CallByName -> do
                     e' <- (updateVal env' x (VClos (Clos a env)))
                     ev (Clos exp e')
+        _ -> fail "EAbs fail"
 
 emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
