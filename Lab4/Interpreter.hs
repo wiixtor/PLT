@@ -72,7 +72,7 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                     return c
         EAbs id exp -> do
           --  val <- ev (Clos exp env)
-            return (VClos (Clos (EAbs id) exp) env)
+            return (VClos (Clos (EAbs id exp) env))
         EApp (EAbs x exp) a -> do
             --VClos (Clos (EAbs (Ident v) fbody) env') <- ev (Clos f env)
             v <- ev (Clos a env)
