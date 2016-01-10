@@ -70,13 +70,14 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                 0 -> do
                     c <- ev (Clos exp3 env)
                     return c
-        EAbs (Ident id) exp -> do
-            val <- ev (Clos exp env)
-            return (VClos (Clos (EAbs (Ident id) exp) (Map.insert id val env)))
+        -- EAbs borde aldrig kallas tror jag
+        -- EAbs (Ident id) exp -> do
+          --  val <- ev (Clos exp env)
+            -- return (VClos (Clos (EAbs (Ident id) exp) (Map.insert id val env)))
             -- return (VClos (Clos (EVar (Ident id)) (Map.insert id val env)))
         EApp (EAbs x exp) a -> do
             --VClos (Clos (EAbs (Ident v) fbody) env') <- ev (Clos f env)
-            env' <- updateVal env x (ev a env)
+            env' <- updateVal env x (ev (Clos a env))
             case strat of
                 CallByValue -> do
                     a' <- ev (Clos a env)
