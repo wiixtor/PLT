@@ -43,7 +43,9 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
   where
     ev :: Closure -> IO Value
     ev (Clos e env) = case e of
-        EVar id -> return lookVal env id
+        EVar id -> do
+            x <- lookVal env id
+            return x
         EInt int -> return (VInt int)
         EAdd exp1 exp2 -> do
             (VInt i1) <- ev (Clos exp1 env)
@@ -78,9 +80,11 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             case strat of
                 CallByValue -> do
                     a' <- ev (Clos a env)
-                    ev (Clos fbody (Map.insert v a' env'))
-                CallByName ->
-                    ev (Clos fbody (Map.insert v (VClos (Clos a env)) env'))
+                    e' <- updateVal env' x a'
+                    ev (Clos exp e')
+                CallByName -> do
+                    e' <- (updateVal env' x (VClos (Clos a env)))
+                    ev (Clos exp e')
 
 emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
