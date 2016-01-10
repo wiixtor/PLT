@@ -96,7 +96,7 @@ lookFun (_, f) (Ident id) = do
 
 updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
-    exp' <- constructFun args exp
+    let exp' = constructFun args exp
     return (a, Map.insert funid exp' f)
 
 constructFun :: [Ident] -> Exp -> Exp
