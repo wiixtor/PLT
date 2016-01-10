@@ -100,9 +100,9 @@ updateFun (a, f) (DDef (Ident funid) args exp) = do
 
 lookVal :: Env -> Functions -> Ident -> IO Value
 lookVal e funs (Ident i) = 
-    case Map.lookup e i of
-        Just v = return v
-        Nothing = return Map.! funs i
+    case Map.lookup i e of
+        Just v -> return v
+        Nothing -> return $ (VClos (Clos ((Map.!) funs i) e))
 
 
     --return $ (Map.!) e i 
