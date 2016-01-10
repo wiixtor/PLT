@@ -73,18 +73,18 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
         EAbs id exp -> do
           --  val <- ev (Clos exp env)
             return (VClos (Clos (EAbs id exp) env))
-        EApp f a -> do
-            VClos (Clos (EAbs x exp) e) <- ev (Clos f env)
-            v <- ev (Clos a env)
-            env' <- updateVal env x v
+        EApp funcid args -> do
+            VClos (Clos (EAbs funcid' exp) env') <- ev (Clos funcid env)
+            --argvalue <- ev (Clos args env)
+            --env' <- updateVal env funcid' argvalue
             case strat of
                 CallByValue -> do
-                    a' <- ev (Clos a env)
-                    e' <- updateVal env' x a'
-                    ev (Clos exp e')
+                    argvalue' <- ev (Clos args env')
+                    env'' <- updateVal e funcid' argvalue'
+                    ev (Clos exp env'')
                 CallByName -> do
-                    e' <- (updateVal env' x (VClos (Clos a env)))
-                    ev (Clos exp e')
+                    env'' <- (updateVal env' funcid' (VClos (Clos args env')))
+                    ev (Clos exp env'')
         _ -> fail "EAbs fail"
 
 emptyGEnv :: IO GEnv
