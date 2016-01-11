@@ -49,7 +49,11 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
     ev (Clos e env) = case e of
         EVar id -> do
             x <- lookVal env funs id
-            return x
+            case x of 
+                VClos (Clos exp env') -> do 
+                    val <- ev x
+                    return val
+                VInt v -> return x
         EInt int -> return (VInt int)
         EAdd exp1 exp2 -> do
             (VInt i1) <- ev (Clos exp1 env)
