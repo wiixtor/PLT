@@ -34,8 +34,10 @@ interpret evstrat (Prog defs) = do
         newGenv
         defs
     exp <- lookFun e (Ident "main")
-    (VInt v)<- eval e (Clos exp Map.empty)
-    print v
+    val <- eval e (Clos exp Map.empty)
+    case val of
+        (VInt v) -> print v
+        (VClos (Clos ex en)) -> fail "dosomethin else? dunno what"
  
 
 eval :: GEnv -> Closure -> IO Value
@@ -85,7 +87,6 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                 CallByName -> do
                     env'' <- (updateVal env' funcid' (VClos (Clos args env')))
                     ev (Clos exp env'')
-        _ -> fail "EAbs fail"
 
 emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
