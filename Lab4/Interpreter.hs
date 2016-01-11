@@ -114,7 +114,7 @@ lookVal e funs (Ident i) =
         Just v -> return v
         Nothing -> 
             case Map.lookup i funs of
-                Just exp -> return $ VClos (Clos exp e)
+                Just exp -> return exp
                 Nothing -> fail $ "variable not exist: " ++ i ++ " Env: " ++ (show e) ++ " GEnv: " ++ (show funs)
 
     --return $ (Map.!) e i 
