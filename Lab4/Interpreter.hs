@@ -80,7 +80,7 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             case strat of
                 CallByValue -> do
                     argvalue' <- ev (Clos args env')
-                    env'' <- updateVal e funcid' argvalue'
+                    env'' <- updateVal env' funcid' argvalue'
                     ev (Clos exp env'')
                 CallByName -> do
                     env'' <- (updateVal env' funcid' (VClos (Clos args env')))
