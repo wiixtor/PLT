@@ -23,8 +23,10 @@ type Functions = Map String Exp
 type Env = Map String Value
 
 data Value = VInt Integer | VClos Closure
+  deriving Show
 
 data Closure = Clos Exp Env
+  deriving Show
 
 interpret :: EvStrat -> Program -> IO ()
 interpret evstrat (Prog defs) = do
@@ -37,7 +39,7 @@ interpret evstrat (Prog defs) = do
     val <- eval e (Clos exp Map.empty)
     case val of
         (VInt v) -> print v
-        (VClos (Clos ex en)) -> fail "dosomethin else? dunno what"
+        (VClos (Clos ex en)) -> fail "main returns closure"
  
 
 eval :: GEnv -> Closure -> IO Value
@@ -95,7 +97,7 @@ lookFun :: GEnv -> Ident -> IO Exp
 lookFun (_, f) (Ident id) = 
     case Map.lookup id f of
         Just e -> return e
-        Nothing -> fail "function doesn't exist"
+        Nothing -> fail $ "function doesn't exist: " ++ id ++ " in: " ++ (show f)
 
 updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
@@ -113,7 +115,7 @@ lookVal e funs (Ident i) =
         Nothing -> 
             case Map.lookup i funs of
                 Just exp -> return $ VClos (Clos exp e)
-                Nothing -> fail "variable not exist" 
+                Nothing -> fail $ "variable not exist: " ++ i ++ " Env: " ++ (show e) ++ " GEnv: " ++ (show funs)
 
     --return $ (Map.!) e i 
 
