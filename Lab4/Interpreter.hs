@@ -92,8 +92,10 @@ emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
 
 lookFun :: GEnv -> Ident -> IO Exp
-lookFun (_, f) (Ident id) = do
-    return $ f Map.! id 
+lookFun (_, f) (Ident id) = 
+    case Map.lookup id f of
+        Just e -> return e
+        Nothing -> fail "function doesn't exist"
 
 updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
@@ -108,8 +110,10 @@ lookVal :: Env -> Functions -> Ident -> IO Value
 lookVal e funs (Ident i) = 
     case Map.lookup i e of
         Just v -> return v
-        Nothing -> return $ (VClos (Clos ((Map.!) funs i) e))
-
+        Nothing -> 
+            case Map.lookup i funs of
+                Just exp -> return $ VClos (Clos exp e)
+                Nothing -> fail "variable not exist" 
 
     --return $ (Map.!) e i 
 
