@@ -51,7 +51,7 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             x <- lookVal env funs id
             case x of 
                 VClos (Clos exp env') -> do 
-                    val <- ev x env'
+                    val <- ev x
                     return val
                 VInt v -> return x
         EInt int -> return (VInt int)
