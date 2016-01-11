@@ -35,8 +35,8 @@ interpret evstrat (Prog defs) = do
         updateFun
         newGenv
         defs
-    exp <- lookFun e (Ident "main")
-    val <- eval e exp
+    (VClos clos) <- lookFun e (Ident "main")
+    val <- eval e clos
     case val of
         (VInt v) -> print v
         (VClos (Clos ex en)) -> fail "main returns closure"
@@ -102,7 +102,7 @@ lookFun (_, f) (Ident id) =
 updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
     let exp' = constructFun args exp
-    return (a, Map.insert funid (VClos (Clos exp' Map.empty)) f))
+    return (a, Map.insert funid (VClos (Clos exp' Map.empty)) f)
 
 constructFun :: [Ident] -> Exp -> Exp
 constructFun [] e = e
