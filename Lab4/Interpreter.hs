@@ -19,7 +19,7 @@ import ErrM
 data EvStrat = CallByValue | CallByName
 
 type GEnv = (EvStrat, Functions)
-type Functions = Map String Exp
+type Functions = Map String Value
 type Env = Map String Value
 
 data Value = VInt Integer | VClos Closure
@@ -36,7 +36,7 @@ interpret evstrat (Prog defs) = do
         newGenv
         defs
     exp <- lookFun e (Ident "main")
-    val <- eval e (Clos exp Map.empty)
+    val <- eval e exp
     case val of
         (VInt v) -> print v
         (VClos (Clos ex en)) -> fail "main returns closure"
@@ -93,16 +93,16 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
 emptyGEnv :: IO GEnv
 emptyGEnv = return (CallByValue, Map.empty)
 
-lookFun :: GEnv -> Ident -> IO Exp
+lookFun :: GEnv -> Ident -> IO Value
 lookFun (_, f) (Ident id) = 
     case Map.lookup id f of
-        Just e -> return e
+        Just v -> return v
         Nothing -> fail $ "function doesn't exist: " ++ id ++ " in: " ++ (show f)
 
 updateFun :: GEnv -> Def -> IO GEnv
 updateFun (a, f) (DDef (Ident funid) args exp) = do
     let exp' = constructFun args exp
-    return (a, Map.insert funid exp' f)
+    return (a, Map.insert funid (VClos (Clos exp' Map.empty)) f))
 
 constructFun :: [Ident] -> Exp -> Exp
 constructFun [] e = e
