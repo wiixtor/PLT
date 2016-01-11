@@ -30,7 +30,7 @@ data Closure = Clos Exp Env
 
 interpret :: EvStrat -> Program -> IO ()
 interpret evstrat (Prog defs) = do
-    newGenv <- emptyGEnv
+    newGenv <- emptyGEnv evStrat
     e <- foldM
         updateFun
         newGenv
@@ -90,8 +90,8 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
                     env'' <- (updateVal env' funcid' (VClos (Clos args env)))
                     ev (Clos exp env'')
 
-emptyGEnv :: IO GEnv
-emptyGEnv = return (CallByValue, Map.empty)
+emptyGEnv :: EvStrat -> IO GEnv
+emptyGEnv strat = return (strat, Map.empty)
 
 lookFun :: GEnv -> Ident -> IO Value
 lookFun (_, f) (Ident id) = 
