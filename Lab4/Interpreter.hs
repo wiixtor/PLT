@@ -83,11 +83,11 @@ eval (strat, funs) (Clos e env) = ev (Clos e env)
             --env' <- updateVal env funcid' argvalue
             case strat of
                 CallByValue -> do
-                    argvalue' <- ev (Clos args env')
+                    argvalue' <- ev (Clos args env)
                     env'' <- updateVal env' funcid' argvalue'
                     ev (Clos exp env'')
                 CallByName -> do
-                    env'' <- (updateVal env' funcid' (VClos (Clos args env')))
+                    env'' <- (updateVal env' funcid' (VClos (Clos args env)))
                     ev (Clos exp env'')
 
 emptyGEnv :: IO GEnv
