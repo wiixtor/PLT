@@ -30,7 +30,7 @@ data Closure = Clos Exp Env
 
 interpret :: EvStrat -> Program -> IO ()
 interpret evstrat (Prog defs) = do
-    newGenv <- emptyGEnv evStrat
+    newGenv <- emptyGEnv evstrat
     e <- foldM
         updateFun
         newGenv
