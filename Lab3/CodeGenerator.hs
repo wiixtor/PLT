@@ -36,7 +36,8 @@ data Env = Env
         envSignature :: Map String FunSig,
         envVariables :: [Map String Address],
         labelCounter :: Int,
-        envAddress   :: Int
+        envAddress   :: Int,
+        code         :: String
     }
 
 
@@ -95,15 +96,19 @@ emptyEnv =
         envSignature = Map.empty,
         envVariables = [Map.empty],
         labelCounter = 0,
-        envAddress   = 0
+        envAddress   = 0,
+        code         = ""
     }
 
 emitLn :: String -> M ()
-emitLn line = lift $ putStrLn line
+emitLn line = do
+    env <- get
+    put $ env { code = line ++ "\n" ++ (code env)) }
 
 emit :: String -> M ()
-emit line = 
-    lift $ putStr line
+emit line = do
+    env <- get
+    put $ env { code = line ++ (code env)) }
 
 push :: M ()
 push = do
@@ -122,6 +127,8 @@ pop = do
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
     evalStateT f emptyEnv -- Monad function
+    env <- get
+    writeFile test (code env)
     return ()
     where 
         f = do
