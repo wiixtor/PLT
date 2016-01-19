@@ -1,4 +1,4 @@
-module CodeGenerator where 
+module Main where 
 
 import AbsCPP
 import PrintCPP
@@ -10,6 +10,14 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 
 import Control.Monad.State
+
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
+
+import LexCPP
+import ParCPP
+
+import TypeChecker (typecheck)
 
 data Address = Address
     {
@@ -71,7 +79,7 @@ lookupFun id = do
 lookupVar :: String -> M Address
 lookupVar id = do
     env <- get
-    return help (envVariables env) id -- $ (head $ envVariables env) Map.! id
+    return $ help (envVariables env) id -- $ (head $ envVariables env) Map.! id
  where 
     help :: [Map String Address] -> String -> Address
     help [] id = error "no variable found"
@@ -282,3 +290,32 @@ generateExp (EApp (Id fcnid) args) = do
         emit "bipush 0"
     else
         return () 
+
+
+
+
+-- driver
+
+check :: String -> IO ()
+check s = do
+  case pProgram (myLexer s) of
+    Bad err  -> do
+      putStrLn "SYNTAX ERROR"
+      putStrLn err
+      exitFailure
+    Ok  tree -> do
+      case typecheck tree of
+        Bad err -> do
+          putStrLn "TYPE ERROR"
+          putStrLn err
+          exitFailure
+        Ok _ -> generateCode tree
+
+main :: IO ()
+main = do
+  args <- getArgs
+  case args of
+    [file] -> readFile file >>= check
+    _      -> do
+      putStrLn "Usage: lab2 <SourceFile>"
+      exitFailure
