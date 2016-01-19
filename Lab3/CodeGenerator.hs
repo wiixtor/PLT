@@ -127,24 +127,24 @@ pop = do
 generateCode :: Program -> IO()
 generateCode (PDefs defs) = do
     evalStateT f emptyEnv -- Monad function
-    env <- get
-    writeFile test (code env)
     return ()
     where 
         f = do
             updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
             updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
             -- skipping adding user defined functions to signature
-            mapM (\(DFun outtyp (Id id) args stms) -> do 
+            out <- mapM (\(DFun outtyp (Id id) args stms) -> do 
                 updateFun id (FunSig {fsIntyps = map (\(ADecl t _) -> t) args, fsOuttyp = outtyp})
                 generateStms stms )
                 defs
+            -- do something with out
             return ()
 
-generateStms :: [Stm] -> M ()
+generateStms :: [Stm] -> M String ()
 generateStms stms = do
-    mapM generateStm stms 
-    return ()
+    mapM generateStm stms     
+    env <- get
+    return (code env)
 
 generateStm :: Stm -> M ()
 generateStm (SExp exp) = do
