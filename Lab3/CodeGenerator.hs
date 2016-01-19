@@ -103,12 +103,12 @@ emptyEnv =
 emitLn :: String -> M ()
 emitLn line = do
     env <- get
-    put $ env { code = line ++ "\n" ++ (code env)) }
+    put $ env { code = line ++ "\n" ++ (code env) }
 
 emit :: String -> M ()
 emit line = do
     env <- get
-    put $ env { code = line ++ (code env)) }
+    put $ env { code = line ++ (code env) }
 
 push :: M ()
 push = do
@@ -124,11 +124,11 @@ pop = do
     return ()
 
 
-generateCode :: Program -> IO()
+generateCode :: Program ->  M ()
 generateCode (PDefs defs) = do
     evalStateT f emptyEnv -- Monad function
     env <- get
-    writeFile test (code env)
+    lift $ writeFile "test" (code env)
     return ()
     where 
         f = do
