@@ -138,7 +138,6 @@ generateCode (PDefs defs) = do
                 updateFun id (FunSig {fsIntyps = map (\(ADecl t _) -> t) args, fsOuttyp = outtyp})
                 generateStms stms )
                 defs
-            -- do something with out
             return ()
 
 generateStms :: [Stm] -> M ()
@@ -207,8 +206,7 @@ generateExp (EPostIncr exp) = do
     emitLn $ "iadd"
     let (EId (Id id)) = exp
     a <- lookupVar id
-    emitLn $ 
-    "istore " ++ (show a)
+    emitLn $ "istore " ++ (show a)
 generateExp (EPostDecr exp) = do
     generateExp exp
     emitLn $ "dup"
@@ -318,7 +316,11 @@ check s = do
           putStrLn err
           exitFailure
         Ok _ -> do
-            let x = extract $ generateCode tree
+            let iotree = return tree
+            x <- liftM generateCode iotree
+            putStrLn x
+
+
 
 main :: IO ()
 main = do
