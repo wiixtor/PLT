@@ -272,24 +272,25 @@ generateExp env (EAss exp1 exp2) = do
 generateExp env (EApp (Id fcnid) args) = do
     e <- emptyEnv 
     return e
-{-    env' <- foldM
+    env' <- foldM
         generateExp 
         env
         args
-    fsig <- lookupFun fcnid env
 
-    if (null $ fst fsig) then do
-        env'' <- emit "invokestatic runtime/readInt()I" env'
-    else do
-        env'' <- emit "invokestatic runtime/printInt(I)V" env'
-    if (snd fsig == Type_void) then do
-        env''' <- emit "bipush 0" env''
-        return env'''
-    else
-        return env''
-
--}
-
+    (intyps, outtyp) <- lookupFun fcnid env'
+    intypstring <- help intyps
+    case outtyp of
+        Type_void -> do
+            env'' <- emit ("invokestatic runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
+            env''' <- emit "bipush 0" env''
+            return env'''
+        Type_int -> do
+            env'' <- emit ("invokestatic runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
+            return env''
+  where 
+    help :: [Type] -> IO String
+    help [] = return ""
+    help t:ts = return "I" ++ help ts
 
 -- driver
 
