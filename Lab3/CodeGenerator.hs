@@ -19,68 +19,29 @@ import ParCPP
 
 import TypeChecker (typecheck)
 
-data Address = Address
-    {
-        address :: Int
-    }
-    deriving Show
+type Env = (EnvSignature, EnvVariables, LabelCounter, EnvAddress, Code)
+type EnvSignature = Map String FunSig
+type EnvVariables = [Map String Address]
+type LabelCounter = Int
+type EnvAddress = Int
+type Code = String
+type Address = String
+type FunSig = ([Type], Type) -- ([intyps],outtyp)
 
-data FunSig = FunSig 
-    {
-        fsIntyps :: [Type],
-        fsOuttyp :: Type
-    }
+genLabel :: Env -> (Env, M String)
+genLabel (s,v,l,a,c) = return ((s,v,l+1,a,c), ("label" ++ (show l)))
 
-data Env = Env 
-    {
-        envSignature :: Map String FunSig,
-        envVariables :: [Map String Address],
-        labelCounter :: Int,
-        envAddress   :: Int,
-        code         :: String
-    }
+updateVar :: String -> Int -> Env -> IO Env
+updateVar id size (s,v,l,a,c) = return (s, Map.insert id a v, l, a+size, c)
 
+updateFun ::  Env -> Def -> IO Env
+updateFun (s,v,l,a,c) (t, id, args, _) = (Map.insert id (args,t) s,v,l,a,c)
 
---state transformer monad
-type M a = StateT Env IO a
+lookupFun :: String -> Env -> IO FunSig
+lookupFun id (s,v,l,a,c) = return s Map.! id
 
-{-
-Address look (Ident x)
-FunType look (Ident f)
-Void extend (Ident x, Size s)
-Void extend (Definition d)
-Void push () // new context when entering block
-Void pop () // exit from block, discard new context
-Void empty () // discard all variables
-Label label () // get fresh code label
--}
-
-genLabel :: M String
-genLabel = do
-    label <- gets labelCounter
-    modify (\env -> env {labelCounter = (labelCounter env) + 1})
-    return $ "label" ++ (show label)
-
-updateVar :: String -> Int -> M ()
-updateVar id size = do
-    env <- get
-    put $ env { envVariables = (Map.insert id (Address $ envAddress env) (head $ (envVariables env))) : (tail (envVariables env) )}
-    put $ env { envAddress = (envAddress env) + size }
-
-updateFun :: String -> FunSig -> M ()
-updateFun id sig = do
-    env <- get 
-    put $ env { envSignature = Map.insert id sig (envSignature env) }
-
-lookupFun :: String -> M FunSig
-lookupFun id = do
-    env <- get
-    return $ envSignature env Map.! id 
-
-lookupVar :: String -> M Address
-lookupVar id = do
-    env <- get
-    return $ help (envVariables env) id -- $ (head $ envVariables env) Map.! id
+lookupVar :: String -> Env -> IO Address
+lookupVar id (s,v,l,a,c) = return help v id
  where 
     help :: [Map String Address] -> String -> Address
     help [] id = error "no variable found"
@@ -90,214 +51,222 @@ lookupVar id = do
             Just x -> x
 
 emptyEnv :: Env 
-emptyEnv =
-    Env 
-    {
-        envSignature = Map.empty,
-        envVariables = [Map.empty],
-        labelCounter = 0,
-        envAddress   = 0,
-        code         = ""
-    }
+emptyEnv = return (Map.empty, [Map.empty], 0, 0, "")
 
-emitLn :: String -> M ()
-emitLn line = do
-    env <- get
-    put $ env { code = (code env) ++ line ++ "\n" }
+emitLn :: String -> Env -> IO Env
+emitLn line (s,v,l,a,c) = return (s,v,l,a, c ++ line ++ "\n")
 
-emit :: String -> M ()
-emit line = do
-    env <- get
-    put $ env { code = (code env) ++ line }
+emit :: String -> Env -> IO Env
+emit line (s,v,l,a,c) = return (s,v,l,a, c ++ line)
 
-push :: M ()
-push = do
-    env <- get
-    put $ env { envVariables = (Map.empty : (envVariables env)) }
-    return ()
+push :: Env -> IO Env
+push (s,v,l,a,c) = return (s, Map.empty : v,l,a,c)
 
-pop :: M ()
-pop = do
-    env <- get
-    put $ env {envVariables = (tail $ envVariables env)}
-  --  Map.deleteAt (Map.size (envVariables env)) (envVariables env)
-    return ()
+pop :: Env -> IO Env
+pop (s,(v:vs),l,a,c) = return (s,vs,l,a,c)
 
 
-generateCode :: Program ->  M String
+generateCode :: Program -> IO String
 generateCode (PDefs defs) = do
-    evalStateT f emptyEnv -- Monad function
-    env <- get
-    return (code env)
-    where 
-        f = do
-            updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
-            updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
-            -- skipping adding user defined functions to signature
-            mapM (\(DFun outtyp (Id id) args stms) -> do 
-                updateFun id (FunSig {fsIntyps = map (\(ADecl t _) -> t) args, fsOuttyp = outtyp})
-                generateStms stms )
-                defs
-            -- do something with out
-            return ()
+    env <- emptyEnv
+    env' <- updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void}) env
+    env'' <- updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int}) env
+        -- skipping adding user defined functions to signature
+    env''' <- foldM
+        updateFun
+        env''
+        defs
+    env'''' <- foldM
+        (\(Def _ _ _ stms) -> generateStms stms)
+        env'''
+        defs
+    return code env''''
 
-generateStms :: [Stm] -> M ()
-generateStms stms = do
-    mapM generateStm stms     
+code :: Env -> Code
+code (s,v,l,a,c) = c
+
+generateStms :: Env -> [Stm] -> IO Env
+generateStms env stms = do
+    env' <- foldM 
+        generateStm 
+        env 
+        stms
     return ()
 
-generateStm :: Stm -> M ()
-generateStm (SExp exp) = do
-    generateExp exp
-    emitLn "pop"
-generateStm (SDecls typ ids) = do
-    env <- get
+generateStm :: Env -> Stm -> IO Env
+generateStm env (SExp exp) = do
+    generateExp env exp
+    emitLn "pop" env
+    return env
+generateStm env (SDecls typ ids) = do
     mapM (\(Id id) -> do
-        updateVar id 1) -- no doubles so size always 1
+        updateVar id 1 env) -- no doubles so size always 1
         ids
-    return ()
-generateStm (SInit typ (Id id) exp) = do
-    generateExp exp
-    env <- get
-    emitLn $ "istore " ++ (show $ envAddress env)
-    updateVar id 1
-generateStm (SReturn exp) = do
-    generateExp exp
-    emitLn "return" -- return void atm
-generateStm (SWhile exp stm) = do
-    start <- genLabel
-    end <- genLabel
-    emitLn $ start ++ ":"
-    generateExp exp
-    emitLn $ "ifeq " ++ end
-    generateStm stm
-    emitLn $ "goto " ++ start
-    emitLn $ end ++ ":"
-generateStm (SBlock stms) = do
-    push
-    generateStms stms
-    pop
-    return ()
-generateStm (SIfElse exp stm1 stm2) = do
-    els <- genLabel
-    end <- genLabel
-    generateExp exp
-    emitLn $ "ifeq " ++ els
-    generateStm stm1
-    emitLn $ "goto " ++ end
-    emitLn $ els ++ ":"
-    generateStm stm2
-    emitLn $ end ++ ":"
+    return env
+generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
+    generateExp env exp
+    emitLn $ "istore " ++ (show a) env
+    updateVar id 1 (s,v,l,a,c)
+    return (s,v,l,a,c)
+generateStm env (SReturn exp) = do
+    generateExp env exp
+    emitLn "return" env -- return void atm
+    return env
+generateStm env (SWhile exp stm) = do
+    start <- genLabel env
+    end <- genLabel env
+    emitLn $ start ++ ":" env
+    generateExp env exp
+    emitLn $ "ifeq " ++ end env
+    generateStm env stm
+    emitLn $ "goto " ++ start env
+    emitLn $ end ++ ":" env
+    return env
+generateStm env (SBlock stms) = do
+    push env
+    generateStms env stms
+    pop env
+    return env
+generateStm env (SIfElse exp stm1 stm2) = do
+    els <- genLabel env
+    end <- genLabel env
+    generateExp env exp
+    emitLn $ "ifeq " ++ els env
+    generateStm env stm1
+    emitLn $ "goto " ++ end env
+    emitLn $ els ++ ":" env
+    generateStm env stm2
+    emitLn $ end ++ ":" env
 
-generateExp :: Exp -> M ()
-generateExp (ETrue) = do
-    emitLn $ "ldc 1"
-generateExp (EFalse) = do
-    emitLn $ "ldc 0"
-generateExp (EInt int) = do
-    emitLn $ "ldc " ++ show int
-generateExp (EDouble double) = undefined -- Not needed in lab
-generateExp (EId (Id adrId)) = do
-    p <- lookupVar(adrId)
-    emitLn $ "iload " ++ (show p)
-generateExp (EPostIncr exp) = do
-    generateExp exp
-    emitLn $ "dup"
-    emitLn $ "ldc " ++ "1"
-    emitLn $ "iadd"
+generateExp :: Env -> Exp -> IO Env
+generateExp env (ETrue) = do
+    emitLn $ "ldc 1" env
+    return env
+generateExp env (EFalse) = do
+    emitLn $ "ldc 0" env
+    return env
+generateExp env (EInt int) = do
+    emitLn $ "ldc " ++ show int env
+    return env
+generateExp env (EDouble double) = undefined -- Not needed in lab
+generateExp env (EId (Id adrId)) = do
+    p <- lookupVar(adrId) env
+    emitLn $ "iload " ++ (show p) env
+    return env
+generateExp env (EPostIncr exp) = do
+    generateExp env exp
+    emitLn $ "dup" env
+    emitLn $ "ldc " ++ "1" env
+    emitLn $ "iadd" env
     let (EId (Id id)) = exp
-    a <- lookupVar id
-    emitLn $ 
-    "istore " ++ (show a)
-generateExp (EPostDecr exp) = do
-    generateExp exp
-    emitLn $ "dup"
-    emitLn $ "ldc " ++ "1"
-    emitLn $ "isub"
+    a <- lookupVar id env
+    emitLn $ "istore " ++ (show a) env
+    return env
+generateExp env (EPostDecr exp) = do
+    generateExp env exp
+    emitLn $ "dup" env
+    emitLn $ "ldc " ++ "1" env
+    emitLn $ "isub" env
     let (EId (Id id)) = exp
-    a <- lookupVar id
-    emitLn $ "istore " ++ (show a)
-generateExp (EPreIncr exp) = do 
-    generateExp exp
-    emitLn $ "ldc " ++ "1"
-    emitLn $ "iadd"
-    emitLn $ "dup"
+    a <- lookupVar id env
+    emitLn $ "istore " ++ (show a) env
+    return env
+generateExp env (EPreIncr exp) = do 
+    generateExp env exp
+    emitLn $ "ldc " ++ "1" env
+    emitLn $ "iadd" env
+    emitLn $ "dup" env
     let (EId (Id id)) = exp
-    a <- lookupVar id
-    emitLn $ "istore " ++ (show a)
-generateExp (EPreDecr exp) = do
-    generateExp exp
-    emitLn $ "ldc " ++ "1"
-    emitLn $ "isub"
-    emitLn $ "dup"
+    a <- lookupVar id env
+    emitLn $ "istore " ++ (show a) env
+    return env
+generateExp env (EPreDecr exp) = do
+    generateExp env exp
+    emitLn $ "ldc " ++ "1" env
+    emitLn $ "isub" env
+    emitLn $ "dup" env
     let (EId (Id id)) = exp
-    a <- lookupVar id
-    emitLn $ "istore " ++ (show a)
-generateExp (EPlus exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emitLn $ "iadd"
-generateExp (ETimes exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emitLn $ "imul" 
-generateExp (EDiv exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emitLn $ "idiv" 
-generateExp (EMinus exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emitLn $ "isub" 
-generateExp (ELt exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_icmplt" -- something more maybe
-generateExp (EGt exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_icmpgt" 
-generateExp (ELtEq exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_icmple" 
-generateExp (EGtEq exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_icmpge" 
-generateExp (EEq exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_acmpeq"
-generateExp (ENEq exp1 exp2) = do    
-    generateExp exp1
-    generateExp exp2
-    emit $ "if_acmpne"
-generateExp (EAnd exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
-    emit $ "iand"
-generateExp (EOr exp1 exp2) = do    
-    generateExp exp1
-    generateExp exp2
-    emit $ "ior"
-generateExp (EAss exp1 exp2) = do
-    generateExp exp1
-    generateExp exp2
+    a <- lookupVar id env
+    emitLn $ "istore " ++ (show a) env
+    return env
+generateExp env (EPlus exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emitLn $ "iadd" env 
+    return env
+generateExp env (ETimes exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emitLn $ "imul" env
+    return env
+generateExp env (EDiv exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emitLn $ "idiv" env
+    return env
+generateExp env (EMinus exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emitLn $ "isub" env 
+    return env
+generateExp env (ELt exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_icmplt" env -- something more maybe
+    return env
+generateExp env (EGt exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_icmpgt" env
+    return env 
+generateExp env (ELtEq exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_icmple" env 
+    return env 
+generateExp env (EGtEq exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_icmpge" env
+    return env
+generateExp env (EEq exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_acmpeq" env
+    return env
+generateExp env (ENEq exp1 exp2) = do    
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "if_acmpne" env
+    return env
+generateExp env (EAnd exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "iand" env
+    return env 
+generateExp env (EOr exp1 exp2) = do    
+    generateExp env exp1
+    generateExp env exp2
+    emit $ "ior" env
+    return env
+generateExp env (EAss exp1 exp2) = do
+    generateExp env exp1
+    generateExp env exp2
     let (EId (Id id)) = exp1
-    a <- lookupVar id
-    emitLn $ "istore " ++ (show a)
-generateExp (EApp (Id fcnid) args) = do 
-    mapM generateExp args
-    fsig <- lookupFun fcnid
+    a <- lookupVar id env
+    emitLn $ "istore " ++ (show a) env
+    return env
+generateExp env (EApp (Id fcnid) args) = do 
+    mapM generateExp args env
+    fsig <- lookupFun fcnid env
     if (null $ fsIntyps fsig) then
-        emit $ "invokestatic runtime/readInt()I"
+        emit $ "invokestatic runtime/readInt()I" env
     else 
-        emit $ "invokestatic runtime/printInt(I)V"
+        emit $ "invokestatic runtime/printInt(I)V" env
     if (fsOuttyp fsig == Type_void) then
-        emit "bipush 0"
+        emit "bipush 0" env
     else
-        return () 
+        return env
 
 
 
