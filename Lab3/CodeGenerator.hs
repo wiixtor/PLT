@@ -25,23 +25,26 @@ type EnvVariables = [Map String Address]
 type LabelCounter = Int
 type EnvAddress = Int
 type Code = String
-type Address = String
+type Address = Int
 type FunSig = ([Type], Type) -- ([intyps],outtyp)
 
-genLabel :: Env -> (Env, M String)
+genLabel :: Env -> IO (Env, String)
 genLabel (s,v,l,a,c) = return ((s,v,l+1,a,c), ("label" ++ (show l)))
 
 updateVar :: String -> Int -> Env -> IO Env
-updateVar id size (s,v,l,a,c) = return (s, Map.insert id a v, l, a+size, c)
+updateVar id size (s,(v:vs),l,a,c) = return (s, Map.insert id a v : vs, l, a+size, c)
 
 updateFun ::  Env -> Def -> IO Env
-updateFun (s,v,l,a,c) (t, id, args, _) = (Map.insert id (args,t) s,v,l,a,c)
+updateFun (s,v,l,a,c) (DFun t (Id id) args _) = return (Map.insert id (gettypes args,t) s,v,l,a,c)
+  where
+    gettypes :: [Arg] -> [Type]
+    gettypes = map (\(ADecl t _) -> t)
 
 lookupFun :: String -> Env -> IO FunSig
-lookupFun id (s,v,l,a,c) = return s Map.! id
+lookupFun id (s,v,l,a,c) = return $ s Map.! id
 
 lookupVar :: String -> Env -> IO Address
-lookupVar id (s,v,l,a,c) = return help v id
+lookupVar id (s,v,l,a,c) = return $ help v id
  where 
     help :: [Map String Address] -> String -> Address
     help [] id = error "no variable found"
@@ -50,7 +53,7 @@ lookupVar id (s,v,l,a,c) = return help v id
             Nothing -> help vs id
             Just x -> x
 
-emptyEnv :: Env 
+emptyEnv :: IO Env 
 emptyEnv = return (Map.empty, [Map.empty], 0, 0, "")
 
 emitLn :: String -> Env -> IO Env
@@ -69,15 +72,15 @@ pop (s,(v:vs),l,a,c) = return (s,vs,l,a,c)
 generateCode :: Program -> IO String
 generateCode (PDefs defs) = do
     env <- emptyEnv
-    env' <- updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void}) env
-    env'' <- updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int}) env
+    env' <- updateFun env (DFun Type_void (Id "printInt") [ADecl Type_int (Id "x")] [])
+    env'' <- updateFun env (DFun Type_int (Id "readInt") [] [])
         -- skipping adding user defined functions to signature
     env''' <- foldM
         updateFun
         env''
         defs
     env'''' <- foldM
-        (\(Def _ _ _ stms) -> generateStms stms)
+        (\(DFun _ _ _ stms) -> generateStms env''' stms)
         env'''
         defs
     return code env''''
@@ -104,8 +107,8 @@ generateStm env (SDecls typ ids) = do
         ids
     return env
 generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
-    generateExp env exp
-    emitLn $ "istore " ++ (show a) env
+    generateExp (s,v,l,a,c) exp
+    emitLn $ "istore " ++ (show a) (s,v,l,a,c)
     updateVar id 1 (s,v,l,a,c)
     return (s,v,l,a,c)
 generateStm env (SReturn exp) = do
@@ -258,12 +261,12 @@ generateExp env (EAss exp1 exp2) = do
     return env
 generateExp env (EApp (Id fcnid) args) = do 
     mapM generateExp args env
-    fsig <- lookupFun fcnid env
-    if (null $ fsIntyps fsig) then
+    (fsig) <- lookupFun fcnid env
+    if (null $ fst fsig) then
         emit $ "invokestatic runtime/readInt()I" env
     else 
         emit $ "invokestatic runtime/printInt(I)V" env
-    if (fsOuttyp fsig == Type_void) then
+    if (snd fsig == Type_void) then
         emit "bipush 0" env
     else
         return env
@@ -286,8 +289,7 @@ check s = do
           putStrLn "TYPE ERROR"
           putStrLn err
           exitFailure
-        Ok _ -> do
-            let x = extract $ generateCode tree
+        Ok _ -> generateCode tree
 
 main :: IO ()
 main = do
