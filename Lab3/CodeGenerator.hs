@@ -103,12 +103,12 @@ emptyEnv =
 emitLn :: String -> M ()
 emitLn line = do
     env <- get
-    put $ env { code = line ++ "\n" ++ (code env) }
+    put $ env { code = (code env) ++ line ++ "\n" }
 
 emit :: String -> M ()
 emit line = do
     env <- get
-    put $ env { code = line ++ (code env) }
+    put $ env { code = (code env) ++ line }
 
 push :: M ()
 push = do
@@ -124,27 +124,27 @@ pop = do
     return ()
 
 
-generateCode :: Program ->  M ()
+generateCode :: Program ->  M String
 generateCode (PDefs defs) = do
     evalStateT f emptyEnv -- Monad function
-    return ()
+    env <- get
+    return (code env)
     where 
         f = do
             updateFun "printInt" (FunSig {fsIntyps = [Type_int], fsOuttyp = Type_void})
             updateFun "readInt" (FunSig {fsIntyps = [], fsOuttyp = Type_int})
             -- skipping adding user defined functions to signature
-            out <- mapM (\(DFun outtyp (Id id) args stms) -> do 
+            mapM (\(DFun outtyp (Id id) args stms) -> do 
                 updateFun id (FunSig {fsIntyps = map (\(ADecl t _) -> t) args, fsOuttyp = outtyp})
                 generateStms stms )
                 defs
             -- do something with out
             return ()
 
-generateStms :: [Stm] -> M String ()
+generateStms :: [Stm] -> M ()
 generateStms stms = do
     mapM generateStm stms     
-    env <- get
-    return (code env)
+    return ()
 
 generateStm :: Stm -> M ()
 generateStm (SExp exp) = do
@@ -207,7 +207,8 @@ generateExp (EPostIncr exp) = do
     emitLn $ "iadd"
     let (EId (Id id)) = exp
     a <- lookupVar id
-    emitLn $ "istore " ++ (show a)
+    emitLn $ 
+    "istore " ++ (show a)
 generateExp (EPostDecr exp) = do
     generateExp exp
     emitLn $ "dup"
@@ -316,7 +317,8 @@ check s = do
           putStrLn "TYPE ERROR"
           putStrLn err
           exitFailure
-        Ok _ -> generateCode tree
+        Ok _ -> do
+            let x = extract $ generateCode tree
 
 main :: IO ()
 main = do
