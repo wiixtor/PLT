@@ -268,23 +268,27 @@ generateExp env (EAss exp1 exp2) = do
     a <- lookupVar id env''
     env''' <- emitLn ("istore " ++ (show a)) env''
     return env'''
-generateExp env (EApp (Id fcnid) args) = do 
-    env' <- foldM
+
+generateExp env (EApp (Id fcnid) args) = do
+    e <- emptyEnv 
+    return e
+{-    env' <- foldM
         generateExp 
-        env'
+        env
         args
-    (fsig) <- lookupFun fcnid env
-    if (null $ fst fsig) then
+    fsig <- lookupFun fcnid env
+
+    if (null $ fst fsig) then do
         env'' <- emit "invokestatic runtime/readInt()I" env'
-    else 
+    else do
         env'' <- emit "invokestatic runtime/printInt(I)V" env'
-    if (snd fsig == Type_void) then
+    if (snd fsig == Type_void) then do
         env''' <- emit "bipush 0" env''
         return env'''
     else
         return env''
 
-
+-}
 
 
 -- driver
@@ -302,7 +306,9 @@ check s = do
           putStrLn "TYPE ERROR"
           putStrLn err
           exitFailure
-        Ok _ -> generateCode tree
+        Ok _ -> do
+            s <- generateCode tree
+            writeFile "~/Downloads/lab3-testsuite/good/good17.j" s
 
 main :: IO ()
 main = do
