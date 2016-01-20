@@ -290,12 +290,13 @@ generateExp env (EApp (Id fcnid) args) = do
   where 
     help :: [Type] -> IO String
     help [] = return ""
-    help t:ts = return "I" ++ help ts
+    help (t:ts) = do
+        rest <- help ts
+        return $ "I" ++ rest
 
 -- driver
-
-check :: String -> IO ()
-check s = do
+check :: String -> String -> IO ()
+check f s = do
   case pProgram (myLexer s) of
     Bad err  -> do
       putStrLn "SYNTAX ERROR"
@@ -309,13 +310,13 @@ check s = do
           exitFailure
         Ok _ -> do
             s <- generateCode tree
-            writeFile "~/Downloads/lab3-testsuite/good/good17.j" s
+            writeFile ("/home/gmop/Downloads/lab3-testsuite/" ++ f ++ ".j") s
 
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [file] -> readFile file >>= check
+    [file] -> readFile file >>= check file
     _      -> do
       putStrLn "Usage: lab2 <SourceFile>"
       exitFailure
