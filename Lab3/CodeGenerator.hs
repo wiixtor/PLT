@@ -101,48 +101,50 @@ generateStms env stms = do
 
 generateStm :: Env -> Stm -> IO Env
 generateStm env (SExp exp) = do
-    generateExp env exp
-    emitLn "pop" env
-    return env
+    env' <- generateExp env exp
+    env'' <- emitLn "pop" env'
+    return env''
 generateStm env (SDecls typ ids) = do
-    mapM (\(Id id) -> do
+    env' <- foldM (\(Id id) -> do
         updateVar id 1 env) -- no doubles so size always 1
+        env
         ids
-    return env
+    return env'
 generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
-    generateExp (s,v,l,a,c) exp
-    emitLn $ "istore " ++ (show a) $ (s,v,l,a,c)
-    updateVar id 1 (s,v,l,a,c)
-    return (s,v,l,a,c)
+    env <- generateExp (s,v,l,a,c) exp
+    env' <- emitLn $ "istore " ++ (show a) $ env
+    env'' <- updateVar id 1 env'
+    return env''
 generateStm env (SReturn exp) = do
     env' <- generateExp env exp
-    emitLn "return" env' -- return void atm
-    return env'
+    env'' <- emitLn "return" env' -- return void atm
+    return env''
 generateStm env (SWhile exp stm) = do
     (env', start) <- genLabel env
     (env'', end) <- genLabel env'
-    emitLn (start ++ ":") env''
-    env''' <- generateExp env'' exp
-    emitLn ("ifeq " ++ end) env'''
-    env'''' <- generateStm env''' stm
-    emitLn ("goto " ++ start) env''''
-    emitLn (end ++ ":") env''''
-    return env''''
+    env''' <- emitLn (start ++ ":") env''
+    env4 <- generateExp env''' exp
+    env5 <- emitLn ("ifeq " ++ end) env4
+    env6 <- generateStm env5 stm
+    env7 <- emitLn ("goto " ++ start) env6
+    env8 <- emitLn (end ++ ":") env7
+    return env8
 generateStm env (SBlock stms) = do
-    push env
-    generateStms env stms
-    pop env
-    return env
+    env' <- push env
+    env'' <- generateStms env' stms
+    env''' <- pop env''
+    return env'''
 generateStm env (SIfElse exp stm1 stm2) = do
-    els <- genLabel env
-    end <- genLabel env
-    generateExp env exp
-    emitLn ("ifeq " ++ els) env
-    generateStm env stm1
-    emitLn ("goto " ++ end) env
-    emitLn (els ++ ":") env
-    generateStm env stm2
-    emitLn (end ++ ":") env
+    (env', els) <- genLabel env
+    (env'', end) <- genLabel env'
+    env''' <- generateExp env'' exp
+    env4 <- emitLn ("ifeq " ++ els) env'''
+    env5 <- generateStm env4 stm1
+    env6 <- emitLn ("goto " ++ end) env5
+    env7 <- emitLn (els ++ ":") env6
+    env8 <- generateStm env7 stm2
+    env9 <- emitLn (end ++ ":") env8
+    return env9
 
 generateExp :: Env -> Exp -> IO Env
 generateExp env (ETrue) = do
