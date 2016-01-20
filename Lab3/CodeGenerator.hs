@@ -80,10 +80,13 @@ generateCode (PDefs defs) = do
         env''
         defs
     env'''' <- foldM
-        (\(DFun _ _ _ stms) -> generateStms env''' stms)
+        halp
         env'''
         defs
-    return code env''''
+    return $ code env''''
+  where
+    halp :: Env -> Def -> IO Env
+    halp e (DFun _ _ _ stms) = generateStms e stms
 
 code :: Env -> Code
 code (s,v,l,a,c) = c
@@ -94,7 +97,7 @@ generateStms env stms = do
         generateStm 
         env 
         stms
-    return ()
+    return env'
 
 generateStm :: Env -> Stm -> IO Env
 generateStm env (SExp exp) = do
