@@ -105,14 +105,17 @@ generateStm env (SExp exp) = do
     env'' <- emitLn "pop" env'
     return env''
 generateStm env (SDecls typ ids) = do
-    env' <- foldM (\(Id id) -> do
-        updateVar id 1 env) -- no doubles so size always 1
+    env' <- foldM 
+        declsHelp -- no doubles so size always 1
         env
         ids
     return env'
+  where
+    declsHelp :: Env -> Id -> IO Env
+    declsHelp e (Id id) = updateVar id 1 e
 generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
     env <- generateExp (s,v,l,a,c) exp
-    env' <- emitLn $ "istore " ++ (show a) $ env
+    env' <- emitLn ("istore " ++ (show a)) env
     env'' <- updateVar id 1 env'
     return env''
 generateStm env (SReturn exp) = do
@@ -145,6 +148,7 @@ generateStm env (SIfElse exp stm1 stm2) = do
     env8 <- generateStm env7 stm2
     env9 <- emitLn (end ++ ":") env8
     return env9
+
 
 generateExp :: Env -> Exp -> IO Env
 generateExp env (ETrue) = do
