@@ -115,19 +115,19 @@ generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
     updateVar id 1 (s,v,l,a,c)
     return (s,v,l,a,c)
 generateStm env (SReturn exp) = do
-    generateExp env exp
-    emitLn "return" env -- return void atm
-    return env
+    env' <- generateExp env exp
+    emitLn "return" env' -- return void atm
+    return env'
 generateStm env (SWhile exp stm) = do
-    start <- genLabel env
-    end <- genLabel env
-    emitLn (start ++ ":") env
-    generateExp env exp
-    emitLn ("ifeq " ++ end) env
-    generateStm env stm
-    emitLn ("goto " ++ start) env
-    emitLn (end ++ ":") env
-    return env
+    (env', start) <- genLabel env
+    (env'', end) <- genLabel env'
+    emitLn (start ++ ":") env''
+    env''' <- generateExp env'' exp
+    emitLn ("ifeq " ++ end) env'''
+    env'''' <- generateStm env''' stm
+    emitLn ("goto " ++ start) env''''
+    emitLn (end ++ ":") env''''
+    return env''''
 generateStm env (SBlock stms) = do
     push env
     generateStms env stms
