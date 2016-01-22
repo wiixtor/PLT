@@ -14,7 +14,7 @@ import Control.Monad.State
 import Control.Monad.Reader
 
 import System.Environment (getArgs)
-import System.Exit (exitFailure)
+import System.Exit
 import System.IO
 import System.FilePath.Posix
 import System.Process
@@ -90,8 +90,8 @@ generateCode name (PDefs defs) = do
     halp :: Env -> Def -> IO Env
     halp e (DFun _ _ _ stms) = generateStms e stms
 
-    boilerplate :: String -> String
-    boilerplate name = unlines
+    boilerplate :: String
+    boilerplate = unlines
       [ ".class public " ++ name
       , ".super java/lang/Object"
       , ""
@@ -289,17 +289,17 @@ generateExp env (EAss exp1 exp2) = do
     env''' <- emitLn ("istore " ++ (show a)) env''
     return env'''
 
-generateExp env (EApp (Id "printInt") args) -> do
+generateExp env (EApp (Id "printInt") args) = do
     env' <- foldM
         generateExp 
         env
         args
-    env'' <- emit "invokestatic runtime/printInt(I)V" env'
-    env''' <- emit "bipush 0" env''
+    env'' <- emitLn "invokestatic runtime/printInt(I)V" env'
+    env''' <- emitLn "bipush 0" env''
     return env'''
 
-generateExp env (EApp (Id "readInt") args) -> do
-    env' <- emit "invokestatic runtime/readInt()I" env
+generateExp env (EApp (Id "readInt") args) = do
+    env' <- emitLn "invokestatic runtime/readInt()I" env
     return env'
 
 generateExp env (EApp (Id fcnid) args) = do
@@ -341,7 +341,7 @@ check file s = case pProgram (myLexer s) of
       Ok () -> do
         -- hPutStrLn stderr $ show annTree
         let name   = takeBaseName file
-        let jasmin = generateCode name tree
+        jasmin <- generateCode name tree
         let dir    = takeDirectory file
         let jfile  = replaceExtension file "j"
         writeFile jfile jasmin

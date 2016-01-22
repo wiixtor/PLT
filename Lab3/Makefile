@@ -3,7 +3,7 @@ all:
 	bnfc CPP.cf
 	happy -gca ParCPP.y
 	alex -g LexCPP.x
-	ghc CodeGenerator.hs
+	ghc CodeGenerator.hs -o lab3
 
 clean:
 	-rm -f lab2
