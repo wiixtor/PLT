@@ -242,53 +242,103 @@ generateExp env (EMinus exp1 exp2) = do
     env''' <- emitLn "isub" env'' 
     return env'''
 generateExp env (ELt exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_icmplt" env'' -- something more maybe
-    return env'''
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_icmplt " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
 generateExp env (EGt exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_icmpgt" env''
-    return env''' 
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_icmpgt " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
 generateExp env (ELtEq exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_icmple" env''
-    return env'''
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_icmple " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
 generateExp env (EGtEq exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_icmpge" env''
-    return env'''
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_icmpge " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
 generateExp env (EEq exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_acmpeq" env''
-    return env'''
-generateExp env (ENEq exp1 exp2) = do    
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "if_acmpne" env''
-    return env'''
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_acmpeq " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
+generateExp env (ENEq exp1 exp2) = do
+    (env', l1) <- genLabel env 
+    env'' <- emitLn "bipush 1" env'
+    env''' <- generateExp env'' exp1
+    env4 <- generateExp env''' exp2
+    env5 <- emit ("if_acmpne " ++ l1) env4
+    env6 <- emitLn "pop" env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- emitLn (l1 ++ ":") env7
+    return env8
 generateExp env (EAnd exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "iand" env''
-    return env'''
+    (env', l1) <- genLabel env
+    (env'', l1) <- genLabel env'
+    env''' <- emitLn "bipush 1" env''
+    env4 <- generateExp env''' exp1
+    env5 <- emit ("iand " ++ l1) env4
+    env6 <- emitLn "bipush 1" env5
+    env7 <- generateExp env6 exp2
+    env8 <- emit ("iand " ++ l2) env7
+    env9 <- emitLn "bipush 1" env8
+    env10 <- emitLn ("goto " ++ l2) env9
+    env11 <- emitLn (l1 ++ ":") env10
+    env12 <- emitLn "bipush 0" env11
+    env13 <- emitLn (l2 ++ ":") env12
+    return env13
 generateExp env (EOr exp1 exp2) = do    
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emit "ior" env''
-    return env'''
+    (env', l1) <- genLabel env
+    (env'', l1) <- genLabel env'
+    env''' <- emitLn "bipush 1" env''
+    env4 <- generateExp env''' exp1
+    env5 <- emit ("ior " ++ l1) env4
+    env6 <- emitLn "bipush 1" env5
+    env7 <- generateExp env6 exp2
+    env8 <- emit ("ior " ++ l2) env7
+    env9 <- emitLn "bipush 0" env8
+    env10 <- emitLn ("goto " ++ l2) env9
+    env11 <- emitLn (l1 ++ ":") env10
+    env12 <- emitLn "bipush 1" env11
+    env13 <- emitLn (l2 ++ ":") env12
+    return env13
 generateExp env (EAss exp1 exp2) = do
     env' <- generateExp env exp1
     env'' <- generateExp env' exp2
     let (EId (Id id)) = exp1
     a <- lookupVar id env''
-    env''' <- emitLn ("istore " ++ (show a)) env''
-    return env'''
-
+    env''' <- emitLn ("dup")
+    env'''' <- emitLn ("istore " ++ (show a)) env''
+    return env''''
 generateExp env (EApp (Id "printInt") args) -> do
     env' <- foldM
         generateExp 
@@ -297,11 +347,9 @@ generateExp env (EApp (Id "printInt") args) -> do
     env'' <- emit "invokestatic runtime/printInt(I)V" env'
     env''' <- emit "bipush 0" env''
     return env'''
-
 generateExp env (EApp (Id "readInt") args) -> do
     env' <- emit "invokestatic runtime/readInt()I" env
     return env'
-
 generateExp env (EApp (Id fcnid) args) = do
     env' <- foldM
         generateExp 
