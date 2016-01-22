@@ -3,19 +3,21 @@ module Main where
 import AbsCPP
 import PrintCPP
 import ErrM
-
-import Control.Monad
+import LexCPP
+import ParCPP
 
 import Data.Map (Map)
 import qualified Data.Map as Map
 
+import Control.Monad
 import Control.Monad.State
+import Control.Monad.Reader
 
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
-
-import LexCPP
-import ParCPP
+import System.IO
+import System.FilePath.Posix
+import System.Process
 
 import TypeChecker (typecheck)
 
@@ -69,8 +71,8 @@ pop :: Env -> IO Env
 pop (s,(v:vs),l,a,c) = return (s,vs,l,a,c)
 
 
-generateCode :: Program -> IO String
-generateCode (PDefs defs) = do
+generateCode :: FilePath -> Program -> IO String
+generateCode name (PDefs defs) = do
     env <- emptyEnv
     env' <- updateFun env (DFun Type_void (Id "printInt") [ADecl Type_int (Id "x")] [])
     env'' <- updateFun env (DFun Type_int (Id "readInt") [] [])
@@ -83,10 +85,28 @@ generateCode (PDefs defs) = do
         halp
         env'''
         defs
-    return $ code env''''
+    return $ (boilerplate ++ code env'''')
   where
     halp :: Env -> Def -> IO Env
     halp e (DFun _ _ _ stms) = generateStms e stms
+
+    boilerplate :: String -> String
+    boilerplate name = unlines
+      [ ".class public " ++ name
+      , ".super java/lang/Object"
+      , ""
+      , ".method public <init>()V"
+      , "  aload_0"
+      , "  invokespecial java/lang/Object/<init>()V"
+      , "  return"
+      , ".end method"
+      , ""
+      , ".method public static main([Ljava/lang/String;)V"
+      , ".limit locals 1"
+      , "  invokestatic " ++ name ++ "/main()I"
+      , "  pop"
+      , "  return"
+      , ".end method" ]
 
 code :: Env -> Code
 code (s,v,l,a,c) = c
@@ -269,9 +289,20 @@ generateExp env (EAss exp1 exp2) = do
     env''' <- emitLn ("istore " ++ (show a)) env''
     return env'''
 
+generateExp env (EApp (Id "printInt") args) -> do
+    env' <- foldM
+        generateExp 
+        env
+        args
+    env'' <- emit "invokestatic runtime/printInt(I)V" env'
+    env''' <- emit "bipush 0" env''
+    return env'''
+
+generateExp env (EApp (Id "readInt") args) -> do
+    env' <- emit "invokestatic runtime/readInt()I" env
+    return env'
+
 generateExp env (EApp (Id fcnid) args) = do
-    e <- emptyEnv 
-    return e
     env' <- foldM
         generateExp 
         env
@@ -281,11 +312,11 @@ generateExp env (EApp (Id fcnid) args) = do
     intypstring <- help intyps
     case outtyp of
         Type_void -> do
-            env'' <- emit ("invokestatic runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
+            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
             env''' <- emit "bipush 0" env''
             return env'''
         Type_int -> do
-            env'' <- emit ("invokestatic runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
+            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
             return env''
   where 
     help :: [Type] -> IO String
@@ -295,22 +326,44 @@ generateExp env (EApp (Id fcnid) args) = do
         return $ "I" ++ rest
 
 -- driver
-check :: String -> String -> IO ()
-check f s = do
-  case pProgram (myLexer s) of
-    Bad err  -> do
-      putStrLn "SYNTAX ERROR"
-      putStrLn err
-      exitFailure
-    Ok  tree -> do
-      case typecheck tree of
-        Bad err -> do
-          putStrLn "TYPE ERROR"
-          putStrLn err
-          exitFailure
-        Ok _ -> do
-            s <- generateCode tree
-            writeFile ("/home/gmop/Downloads/lab3-testsuite/" ++ f ++ ".j") s
+check :: FilePath -> String -> IO ()
+check file s = case pProgram (myLexer s) of
+  Bad err  -> do
+    putStrLn "SYNTAX ERROR"
+    putStrLn err
+    exitFailure
+  Ok tree -> do
+    case typecheck tree of
+      Bad err -> do
+        putStrLn "TYPE ERROR"
+        putStrLn err
+        exitFailure
+      Ok () -> do
+        -- hPutStrLn stderr $ show annTree
+        let name   = takeBaseName file
+        let jasmin = generateCode name tree
+        let dir    = takeDirectory file
+        let jfile  = replaceExtension file "j"
+        writeFile jfile jasmin
+
+        -- Convert jasmin to JVM
+        -- Pipe stdout to stderr, otherwise the "Generated xxx.class" upsets test suite
+        pHandle <- runProcess
+                   "java" -- executable
+                   ["-jar", "jasmin.jar", "-d", dir, jfile] -- arguments
+                   Nothing -- working directory
+                   Nothing -- environment
+                   Nothing -- input handle
+                   (Just stderr) -- output handle
+                   Nothing -- error handle
+        exitCode <- waitForProcess pHandle
+        case exitCode of
+          ExitSuccess -> do
+            hPutStrLn stderr "OK"
+            exitSuccess
+          ExitFailure i -> do
+            putStrLn "JASMIN CONVERSION ERROR"
+            exitWith exitCode
 
 main :: IO ()
 main = do
@@ -318,5 +371,5 @@ main = do
   case args of
     [file] -> readFile file >>= check file
     _      -> do
-      putStrLn "Usage: lab2 <SourceFile>"
+      putStrLn "Usage: lab3 <SourceFile>"
       exitFailure
