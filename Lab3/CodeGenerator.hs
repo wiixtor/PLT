@@ -303,7 +303,7 @@ generateExp env (ENEq exp1 exp2) = do
     return env8
 generateExp env (EAnd exp1 exp2) = do
     (env', l1) <- genLabel env
-    (env'', l1) <- genLabel env'
+    (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
     env5 <- emit ("iand " ++ l1) env4
@@ -318,7 +318,7 @@ generateExp env (EAnd exp1 exp2) = do
     return env13
 generateExp env (EOr exp1 exp2) = do    
     (env', l1) <- genLabel env
-    (env'', l1) <- genLabel env'
+    (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
     env5 <- emit ("ior " ++ l1) env4
@@ -336,17 +336,10 @@ generateExp env (EAss exp1 exp2) = do
     env'' <- generateExp env' exp2
     let (EId (Id id)) = exp1
     a <- lookupVar id env''
-<<<<<<< HEAD
-    env''' <- emitLn ("istore " ++ (show a)) env''
-    return env'''
-
-generateExp env (EApp (Id "printInt") args) = do
-=======
-    env''' <- emitLn ("dup")
-    env'''' <- emitLn ("istore " ++ (show a)) env''
+    env''' <- emitLn ("dup") env''
+    env'''' <- emitLn ("istore " ++ (show a)) env'''
     return env''''
-generateExp env (EApp (Id "printInt") args) -> do
->>>>>>> 3e5314e7dad340c340c9e81746c49bc0a30dceb5
+generateExp env (EApp (Id "printInt") args) = do
     env' <- foldM
         generateExp 
         env
@@ -354,14 +347,8 @@ generateExp env (EApp (Id "printInt") args) -> do
     env'' <- emitLn "invokestatic runtime/printInt(I)V" env'
     env''' <- emitLn "bipush 0" env''
     return env'''
-<<<<<<< HEAD
-
 generateExp env (EApp (Id "readInt") args) = do
-    env' <- emitLn "invokestatic runtime/readInt()I" env
-=======
-generateExp env (EApp (Id "readInt") args) -> do
     env' <- emit "invokestatic runtime/readInt()I" env
->>>>>>> 3e5314e7dad340c340c9e81746c49bc0a30dceb5
     return env'
 generateExp env (EApp (Id fcnid) args) = do
     env' <- foldM
