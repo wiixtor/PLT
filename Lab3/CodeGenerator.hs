@@ -360,12 +360,21 @@ generateExp env (EApp (Id fcnid) args) = do
     intypstring <- help intyps
     case outtyp of
         Type_void -> do
-            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
-            env''' <- emit "bipush 0" env''
-            return env'''
+            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
+            env''' <- emitLn "  .limit locals 1000" env''
+            env4 <- emitLn "  .limit stack 1000"  env'''
+            env5 <- emitLn "bipush 0" env4
+            return env5
         Type_int -> do
             env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
-            return env''
+            env''' <- emitLn "  .limit locals 1000" env''
+            env4 <- emitLn "  .limit stack 1000"  env'''
+            return env4
+        Type_bool -> do
+            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
+            env''' <- emitLn "  .limit locals 1000" env''
+            env4 <- emitLn "  .limit stack 1000"  env'''
+            return env4
   where 
     help :: [Type] -> IO String
     help [] = return ""
