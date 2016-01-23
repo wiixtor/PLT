@@ -89,22 +89,23 @@ generateCode name (PDefs defs) = do
         (intyps, outtyp) <- lookupFun id e
         out <- help2 t
         intypstring <- help intyps
-        env'' <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) e
-        env''' <- emitLn "  .limit locals 1000" env''
-        env4 <- emitLn "  .limit stack 1000"  env'''
-        env5 <- push env4
-        env6 <- generateStms env5 stms
-        env7 <- pop env6
+        en <- emitLn "" e
+        env <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) en
+        env' <- emitLn "  .limit locals 1000" env
+        env'' <- emitLn "  .limit stack 1000"  env'
+        env''' <- push env''
+        env4 <- generateStms env''' stms
+        env5 <- pop env4
         case t of
             Type_void -> do
-                env8 <- emitLn "ireturn" env7
-                env9 <- emitLn ".end method" env8
-                return env9
+                env6 <- emitLn "ireturn" env5
+                env7 <- emitLn ".end method" env6
+                return env7
             _ -> do
-                env8 <- emitLn "bipush 0" env7
-                env9 <- emitLn "ireturn" env8
-                env10 <- emitLn ".end method" env9
-                return env10
+                env6 <- emitLn "bipush 0" env5
+                env7 <- emitLn "ireturn" env6
+                env8 <- emitLn ".end method" env7
+                return env8
       where 
     help :: [Type] -> IO String
     help [] = return ""
