@@ -330,45 +330,39 @@ generateExp env (ENEq exp1 exp2) = do
     env8 <- emitLn (l1 ++ ":") env7
     return env8
 generateExp env (EAnd exp1 exp2) = do
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emitLn "iand" env''
-    return env'''
-
-    {-(env', l1) <- genLabel env
+    (env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
-    env5 <- emitLn ("iand " ++ l1) env4
-    env6 <- emitLn "bipush 1" env5
-    env7 <- generateExp env6 exp2
-    env8 <- emitLn ("iand " ++ l2) env7
-    env9 <- emitLn "bipush 1" env8
-    env10 <- emitLn ("goto " ++ l2) env9
-    env11 <- emitLn (l1 ++ ":") env10
-    env12 <- emitLn "bipush 0" env11
-    env13 <- emitLn (l2 ++ ":") env12
-    return env13 -}
+    env5 <- emitLn "iand" env4
+    env6 <- emitLn ("ifeq " ++ l1) env5
+    env7 <- emitLn "bipush 1" env6
+    env8 <- generateExp env7 exp2
+    env9 <- emitLn "iand" env8
+    env10 <- emitLn ("ifeq " ++ l2) env9
+    env11 <- emitLn "bipush  1" env10
+    env12 <- emitLn ("goto " ++ l2) env11
+    env13 <- emitLn (l1 ++ ":") env12
+    env14 <- emitLn "bipush 0" env13
+    env15 <- emitLn (l2 ++ ":") env14
+    return env15
 generateExp env (EOr exp1 exp2) = do  
-    env' <- generateExp env exp1
-    env'' <- generateExp env' exp2
-    env''' <- emitLn "ior" env''
-    return env'''
-
-    {- (env', l1) <- genLabel env
+    (env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
-    env''' <- emitLn "bipush 1" env''
+    env''' <- emitLn "bipush 0" env''
     env4 <- generateExp env''' exp1
-    env5 <- emitLn ("ior " ++ l1) env4
-    env6 <- emitLn "bipush 1" env5
-    env7 <- generateExp env6 exp2
-    env8 <- emitLn ("ior " ++ l2) env7
-    env9 <- emitLn "bipush 0" env8
-    env10 <- emitLn ("goto " ++ l2) env9
-    env11 <- emitLn (l1 ++ ":") env10
-    env12 <- emitLn "bipush 1" env11
-    env13 <- emitLn (l2 ++ ":") env12
-    return env13 -}
+    env5 <- emitLn "ior" env4
+    env6 <- emitLn ("ifne " ++ l1) env5
+    env7 <- emitLn "bipush 0" env6
+    env8 <- generateExp env7 exp2
+    env9 <- emitLn "ior" env8
+    env10 <- emitLn ("ifne " ++ l1) env9
+    env11 <- emitLn "bipush  0" env10
+    env12 <- emitLn ("goto " ++ l2) env11
+    env13 <- emitLn (l1 ++ ":") env12
+    env14 <- emitLn "bipush 1" env13
+    env15 <- emitLn (l2 ++ ":") env14
+    return env15
 generateExp env (EAss exp1 exp2) = do
     env' <- generateExp env exp1
     env'' <- generateExp env' exp2
