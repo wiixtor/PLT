@@ -329,7 +329,11 @@ generateExp env (ENEq exp1 exp2) = do
     env8 <- emitLn (l1 ++ ":") env7
     return env8
 generateExp env (EAnd exp1 exp2) = do
-    (env', l1) <- genLabel env
+    env' <- generateExp env exp1
+    env'' <- generateExp env' exp2
+    env''' <- emitLn "iand" env''
+
+    {-(env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
@@ -342,9 +346,13 @@ generateExp env (EAnd exp1 exp2) = do
     env11 <- emitLn (l1 ++ ":") env10
     env12 <- emitLn "bipush 0" env11
     env13 <- emitLn (l2 ++ ":") env12
-    return env13
-generateExp env (EOr exp1 exp2) = do    
-    (env', l1) <- genLabel env
+    return env13 -}
+generateExp env (EOr exp1 exp2) = do  
+    env' <- generateExp env exp1
+    env'' <- generateExp env' exp2
+    env''' <- emitLn "ior" env''
+
+    {- (env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
@@ -357,7 +365,7 @@ generateExp env (EOr exp1 exp2) = do
     env11 <- emitLn (l1 ++ ":") env10
     env12 <- emitLn "bipush 1" env11
     env13 <- emitLn (l2 ++ ":") env12
-    return env13
+    return env13 -}
 generateExp env (EAss exp1 exp2) = do
     env' <- generateExp env exp1
     env'' <- generateExp env' exp2
@@ -388,7 +396,7 @@ generateExp env (EApp (Id fcnid) args) = do
     out <- help2 outtyp
     env'' <- emitLn ("invokestatic Runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ out) env'
     return env''
-    
+
   where 
     help :: [Type] -> IO String
     help [] = return ""
