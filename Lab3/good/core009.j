@@ -13,6 +13,7 @@
   pop
   return
 .end method
+
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
@@ -27,6 +28,7 @@ ireturn
 bipush 0
 ireturn
 .end method
+
 .method public static foo()I
   .limit locals 1000
   .limit stack 1000

@@ -13,6 +13,7 @@
   pop
   return
 .end method
+
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
@@ -20,6 +21,8 @@ ldc 0
 istore_0
 ldc 0
 istore_1
+ldc 0
+istore_2
 label0:
 bipush 1
 iload_2

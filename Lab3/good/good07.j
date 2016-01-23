@@ -13,6 +13,7 @@
   pop
   return
 .end method
+
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
