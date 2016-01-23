@@ -254,3 +254,36 @@ Running good/good17.cc...
 
 ------------------------------------------------------------
 [031mGood programs: passed 7 of 13 tests[0m
+
+
+
+
+
+
+
+
+
+
+
+
+========================================================================
+KÖRDE DE SOM FAILADE HÄR GENOM LAB3 MANUELLT OCH FICK FÖLJANDE RESULTAT:
+
+
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/core009.cc
+Generated: good/core009.class
+OK
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/core015.cc
+lab3: no variable found
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/good07.cc
+Generated: good/good07.class
+OK
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/good11.cc
+Generated: good/good11.class
+OK
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/good13.cc
+Generated: good/good13.class
+OK
+gmop@noobpc:~/plt1/PLT/Lab3$ ./lab3 good/good15.cc
+Generated: good/good15.class
+OK
