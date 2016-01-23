@@ -135,7 +135,7 @@ generateStm env (SDecls typ ids) = do
     declsHelp e (Id id) = updateVar id 1 e
 generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
     env <- generateExp (s,v,l,a,c) exp
-    env' <- emitLn ("istore " ++ (show a)) env
+    env' <- emitLn ("istore_" ++ (show a)) env
     env'' <- updateVar id 1 env'
     return env''
 generateStm env (SReturn exp) = do
@@ -183,7 +183,7 @@ generateExp env (EInt int) = do
 generateExp env (EDouble double) = undefined -- Not needed in lab
 generateExp env (EId (Id adrId)) = do
     p <- lookupVar(adrId) env
-    env' <- emitLn ("iload " ++ (show p)) env
+    env' <- emitLn ("iload_" ++ (show p)) env
     return env'
 generateExp env (EPostIncr exp) = do
     env' <- generateExp env exp
@@ -192,7 +192,7 @@ generateExp env (EPostIncr exp) = do
     env4 <- emitLn ("iadd") env'''
     let (EId (Id id)) = exp
     a <- lookupVar id env4
-    env5 <- emitLn ("istore " ++ (show a)) env4
+    env5 <- emitLn ("istore_" ++ (show a)) env4
     return env5
 generateExp env (EPostDecr exp) = do
     env' <- generateExp env exp
@@ -201,7 +201,7 @@ generateExp env (EPostDecr exp) = do
     env4 <- emitLn "isub" env'''
     let (EId (Id id)) = exp
     a <- lookupVar id env4
-    env5 <- emitLn ("istore " ++ (show a)) env4
+    env5 <- emitLn ("istore_" ++ (show a)) env4
     return env5
 generateExp env (EPreIncr exp) = do 
     env' <- generateExp env exp
@@ -210,7 +210,7 @@ generateExp env (EPreIncr exp) = do
     env4 <- emitLn "dup" env'''
     let (EId (Id id)) = exp
     a <- lookupVar id env4
-    env5 <- emitLn ("istore " ++ (show a)) env4
+    env5 <- emitLn ("istore_" ++ (show a)) env4
     return env5
 generateExp env (EPreDecr exp) = do
     env' <- generateExp env exp
@@ -219,7 +219,7 @@ generateExp env (EPreDecr exp) = do
     env4 <- emitLn "dup" env'''
     let (EId (Id id)) = exp
     a <- lookupVar id env4
-    env5 <- emitLn ("istore " ++ (show a)) env4
+    env5 <- emitLn ("istore_" ++ (show a)) env4
     return env5
 generateExp env (EPlus exp1 exp2) = do
     env' <- generateExp env exp1
@@ -337,7 +337,7 @@ generateExp env (EAss exp1 exp2) = do
     let (EId (Id id)) = exp1
     a <- lookupVar id env''
     env''' <- emitLn ("dup") env''
-    env'''' <- emitLn ("istore " ++ (show a)) env'''
+    env'''' <- emitLn ("istore_" ++ (show a)) env'''
     return env''''
 generateExp env (EApp (Id "printInt") args) = do
     env' <- foldM
