@@ -1,0 +1,256 @@
+This is the (reduced) test program for Programming Languages Lab 3
+Running good/core002.cc...
+Running good/core009.cc...
+[031mjava -noverify -cp .:good core009 failed: invalid output[0m
+For input file good/core009.cc:
+---------------- begin good/core009.cc ------------------
+[032m// Calling functions which take zero parameters
+
+int main() {
+ int x = foo();
+ printInt(x);
+ return 0 ;
+
+}
+
+int foo() {
+ return 10;
+}
+
+//void printInt(int x) { }
+//void printDouble(double x) { }
+[0m
+----------------- end good/core009.cc -------------------
+It printed this to standard error:
+[036mException in thread "main" java.lang.NoSuchMethodError: Runtime.foo()I
+	at core009.main(core009.j)
+	at core009.main(core009.j)
+[0m
+Expected output:
+[036m10
+[0m
+Running good/core013.cc...
+Running good/core015.cc...
+[031mjava -noverify -cp .:good core015 failed: invalid output[0m
+For input file good/core015.cc:
+---------------- begin good/core015.cc ------------------
+[032m/* parity of positive integers by recursion */
+
+int main () {
+  printInt(ev(17)) ;
+  return 0 ;
+}
+
+int ev (int y) {
+  int e ;
+  if (y > 0)
+    e = ev (y-2) ;
+  else
+    if (y < 0)
+      e = 0 ;
+    else
+      e = 1 ;
+  return e ;
+}
+
+//void printInt(int x) { }
+//void printDouble(double x) { }
+[0m
+----------------- end good/core015.cc -------------------
+It printed this to standard error:
+[036mError: Could not find or load main class core015
+[0m
+Expected output:
+[036m0
+[0m
+Running good/good01.cc...
+Running good/good03.cc...
+Running good/good05.cc...
+Running good/good07.cc...
+[031mjava -noverify -cp .:good good07 failed: invalid output[0m
+For input file good/good07.cc:
+---------------- begin good/good07.cc ------------------
+[032mint main ()
+{
+  int x = readInt () ;
+
+  int d = x/2 ;
+
+  while (d > 1) {
+    if (d * (x/d) == x)
+      printInt(d) ;
+    else
+      {}
+
+    d-- ;
+  }
+
+}
+[0m
+----------------- end good/good07.cc -------------------
+Given this input:
+[036m42
+[0m
+It printed this to standard output:
+[036m=============== DEBUG MESSAGE: illegal bytecode sequence - method not verified ================
+
+[0m
+It printed this to standard error:
+[036mException in thread "main" java.lang.NullPointerException
+	at good07.main(good07.j)
+	at good07.main(good07.j)
+[0m
+Expected output:
+[036m21
+14
+7
+6
+3
+2
+[0m
+Running good/good09.cc...
+Running good/good11.cc...
+[031mjava -noverify -cp .:good good11 failed: invalid output[0m
+For input file good/good11.cc:
+---------------- begin good/good11.cc ------------------
+[032m//read numbers until 0 is read, and print their average
+
+int main () 
+{
+  int sum = 0 ;
+  int num = 0 ;
+  int x = 0;
+  while ((x = readInt()) != 0) {
+    sum = sum + x ;
+    num++ ;
+  }
+  printInt(sum/num) ;
+
+}
+[0m
+----------------- end good/good11.cc -------------------
+Given this input:
+[036m1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+[0m
+It printed this to standard error:
+[036mException in thread "main" java.lang.ArithmeticException: / by zero
+	at good11.main(good11.j)
+	at good11.main(good11.j)
+[0m
+Expected output:
+[036m5
+[0m
+Running good/good13.cc...
+[031mjava -noverify -cp .:good good13 failed: invalid output[0m
+For input file good/good13.cc:
+---------------- begin good/good13.cc ------------------
+[032mint main () {
+	int n, i;
+	n = readInt();
+	i = 2;
+	while (i <= n) {
+		bool iPrime = true;
+		int j = 2;
+		while (j*j <= i && iPrime) {
+			if ((i / j) * j == i) {
+				iPrime = false;
+			} else {}
+			j++;
+		}
+
+		if (iPrime && (n / i) * i == n) {
+			printInt(i);
+			n = n / i;
+		} else { 
+			i++; 
+		}
+	}
+
+	return 0;
+}
+[0m
+----------------- end good/good13.cc -------------------
+Given this input:
+[036m1023
+[0m
+It printed this to standard output:
+[036m=============== DEBUG MESSAGE: illegal bytecode sequence - method not verified ================
+
+[0m
+It printed this to standard error:
+[036mException in thread "main" java.lang.NullPointerException
+	at good13.main(good13.j)
+	at good13.main(good13.j)
+[0m
+Expected output:
+[036m3
+11
+31
+[0m
+Running good/good15.cc...
+[031mjava -noverify -cp .:good good15 failed: invalid output[0m
+For input file good/good15.cc:
+---------------- begin good/good15.cc ------------------
+[032mint main () {
+    int i = 1;
+    printInt(i);
+    true || i++ != 45;
+    printInt(i);
+    false || i++ >= 0;
+    printInt(i);
+    true && i++ < 0;
+    printInt(i);
+    false && i++ > 0;
+    printInt(i);
+    int j = 0;
+      // Initialization of j would not be needed as the access of j
+      // is in dead code, if compiled correctly.
+      // However, the JVM bytecode verifier is picky and will complain.
+    if (34 < 6 && j < 0) {
+    	printInt(i);
+    } else {
+    	printInt (42);
+    }
+}
+[0m
+----------------- end good/good15.cc -------------------
+It printed this to standard output:
+[036m1
+2
+3
+4
+5
+42
+[0m
+Expected output:
+[036m1
+1
+2
+3
+3
+42
+[0m
+Running good/good17.cc...
+
+------------------------------------------------------------
+[031mGood programs: passed 7 of 13 tests[0m
