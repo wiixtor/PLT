@@ -345,11 +345,15 @@ generateExp env (EApp (Id "printInt") args) = do
         env
         args
     env'' <- emitLn "invokestatic runtime/printInt(I)V" env'
+    env''' <- emitLn "  .limit locals 1000" env''
+    env4 <- emitLn "  .limit stack 1000"  env'''
     env''' <- emitLn "bipush 0" env''
     return env'''
 generateExp env (EApp (Id "readInt") args) = do
     env' <- emit "invokestatic runtime/readInt()I" env
-    return env'
+    env'' <- emitLn "  .limit locals 1000" env'
+    env''' <- emitLn "  .limit stack 1000"  env''
+    return env'''
 generateExp env (EApp (Id fcnid) args) = do
     env' <- foldM
         generateExp 
