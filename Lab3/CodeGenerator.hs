@@ -85,7 +85,37 @@ generateCode name (PDefs defs) = do
     return $ (boilerplate ++ code env'''')
   where
     halp :: Env -> Def -> IO Env
-    halp e (DFun _ _ _ stms) = generateStms e stms
+    halp e (DFun t (Id id) args stms) = do
+        (intyps, outtyp) <- lookupFun id e
+        out <- help2
+        intypstring <- help intyps
+        env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ out) e
+        env''' <- emitLn "  .limit locals 1000" env'
+        env4 <- emitLn "  .limit stack 1000"  env''
+        env5 <- push env4
+        env6 <- generateStms env5 stms
+        env7 <- pop env6
+        case t of
+            Type_void -> do
+                env8 <- emitLn "ireturn" env7
+                env9 <- emitLn ".end method" env8
+                return env9
+            _ -> do
+                env8 <- emitLn "bipush 0" env7
+                env9 <- emitLn "ireturn" env8
+                env10 <- emitLn ".end method" env9
+                return env10
+      where 
+    help :: [Type] -> IO String
+    help [] = return ""
+    help (t:ts) = do
+        rest <- help ts
+        return $ "I" ++ rest
+    help2 :: Type -> IO String
+    help2 t = case t of
+        Type_int    -> "I"
+        Type_bool   -> "I"
+        Type_void   -> "V"
 
     boilerplate :: String
     boilerplate = unlines
@@ -137,7 +167,7 @@ generateStm (s,v,l,a,c) (SInit typ (Id id) exp) = do
     return env''
 generateStm env (SReturn exp) = do
     env' <- generateExp env exp
-    env'' <- emitLn "return" env' -- return void atm
+    env'' <- emitLn "ireturn" env' -- return void atm
     return env''
 generateStm env (SWhile exp stm) = do
     (env', start) <- genLabel env
@@ -342,15 +372,11 @@ generateExp env (EApp (Id "printInt") args) = do
         env
         args
     env'' <- emitLn "invokestatic Runtime/printInt(I)V" env'
-    env''' <- emitLn "  .limit locals 1000" env''
-    env4 <- emitLn "  .limit stack 1000"  env'''
     env''' <- emitLn "bipush 0" env''
     return env'''
 generateExp env (EApp (Id "readInt") args) = do
     env' <- emitLn "invokestatic Runtime/readInt()I" env
-    env'' <- emitLn "  .limit locals 1000" env'
-    env''' <- emitLn "  .limit stack 1000"  env''
-    return env'''
+    return env'
 generateExp env (EApp (Id fcnid) args) = do
     env' <- foldM
         generateExp 
@@ -359,29 +385,21 @@ generateExp env (EApp (Id fcnid) args) = do
 
     (intyps, outtyp) <- lookupFun fcnid env'
     intypstring <- help intyps
-    case outtyp of
-        Type_void -> do
-            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "V") env'
-            env''' <- emitLn "  .limit locals 1000" env''
-            env4 <- emitLn "  .limit stack 1000"  env'''
-            env5 <- emitLn "bipush 0" env4
-            return env5
-        Type_int -> do
-            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
-            env''' <- emitLn "  .limit locals 1000" env''
-            env4 <- emitLn "  .limit stack 1000"  env'''
-            return env4
-        Type_bool -> do
-            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
-            env''' <- emitLn "  .limit locals 1000" env''
-            env4 <- emitLn "  .limit stack 1000"  env'''
-            return env4
+    out <- help2 outtyp
+    env'' <- emitLn ("invokestatic Runtime/" ++ fcnid ++ "(" ++  intypstring ++ ")" ++ out) env'
+    return env''
+    
   where 
     help :: [Type] -> IO String
     help [] = return ""
     help (t:ts) = do
         rest <- help ts
         return $ "I" ++ rest
+    help2 :: Type -> IO String
+    help2 t = case t of
+        Type_int    -> "I"
+        Type_bool   -> "I"
+        Type_void   -> "V"
 
 -- driver
 check :: FilePath -> String -> IO ()
