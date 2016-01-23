@@ -42,16 +42,26 @@ ldc 2
 istore_3
 label3:
 bipush 1
+bipush 1
 iload_3
 iload_3
 imul
 iload_1
-if_icmple label5
+if_icmple label7
 pop
 bipush 0
-label5:
+label7:
+iand
+ifeq label5
+bipush 1
 iload_2
 iand
+ifeq label6
+bipush  1
+goto label6
+label5:
+bipush 0
+label6:
 ifeq label4
 bipush 1
 iload_1
@@ -60,19 +70,19 @@ idiv
 iload_3
 imul
 iload_1
-if_acmpeq label8
+if_acmpeq label10
 pop
 bipush 0
-label8:
-ifeq label6
+label10:
+ifeq label8
 iload_2
 ldc 0
 dup
 istore_2
 pop
-goto label7
-label6:
-label7:
+goto label9
+label8:
+label9:
 iload_3
 dup
 ldc 1
@@ -81,7 +91,11 @@ istore_3
 pop
 goto label3
 label4:
+bipush 1
 iload_2
+iand
+ifeq label13
+bipush 1
 bipush 1
 iload_0
 iload_1
@@ -89,12 +103,18 @@ idiv
 iload_1
 imul
 iload_0
-if_acmpeq label11
+if_acmpeq label15
 pop
 bipush 0
-label11:
+label15:
 iand
-ifeq label9
+ifeq label14
+bipush  1
+goto label14
+label13:
+bipush 0
+label14:
+ifeq label11
 iload_1
 invokestatic Runtime/printInt(I)V
 bipush 0
@@ -106,15 +126,15 @@ idiv
 dup
 istore_0
 pop
-goto label10
-label9:
+goto label12
+label11:
 iload_1
 dup
 ldc 1
 iadd
 istore_1
 pop
-label10:
+label12:
 goto label0
 label1:
 ldc 0
