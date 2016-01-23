@@ -61,9 +61,6 @@ emptyEnv = return (Map.empty, [Map.empty], 0, 0, "")
 emitLn :: String -> Env -> IO Env
 emitLn line (s,v,l,a,c) = return (s,v,l,a, c ++ line ++ "\n")
 
-emit :: String -> Env -> IO Env
-emit line (s,v,l,a,c) = return (s,v,l,a, c ++ line)
-
 push :: Env -> IO Env
 push (s,v,l,a,c) = return (s, Map.empty : v,l,a,c)
 
@@ -246,7 +243,7 @@ generateExp env (ELt exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_icmplt " ++ l1) env4
+    env5 <- emitLn ("if_icmplt " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -256,7 +253,7 @@ generateExp env (EGt exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_icmpgt " ++ l1) env4
+    env5 <- emitLn ("if_icmpgt " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -266,7 +263,7 @@ generateExp env (ELtEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_icmple " ++ l1) env4
+    env5 <- emitLn ("if_icmple " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -276,7 +273,7 @@ generateExp env (EGtEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_icmpge " ++ l1) env4
+    env5 <- emitLn ("if_icmpge " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -286,7 +283,7 @@ generateExp env (EEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_acmpeq " ++ l1) env4
+    env5 <- emitLn ("if_acmpeq " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -296,7 +293,7 @@ generateExp env (ENEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp env'' exp1
     env4 <- generateExp env''' exp2
-    env5 <- emit ("if_acmpne " ++ l1) env4
+    env5 <- emitLn ("if_acmpne " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -306,10 +303,10 @@ generateExp env (EAnd exp1 exp2) = do
     (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
-    env5 <- emit ("iand " ++ l1) env4
+    env5 <- emitLn ("iand " ++ l1) env4
     env6 <- emitLn "bipush 1" env5
     env7 <- generateExp env6 exp2
-    env8 <- emit ("iand " ++ l2) env7
+    env8 <- emitLn ("iand " ++ l2) env7
     env9 <- emitLn "bipush 1" env8
     env10 <- emitLn ("goto " ++ l2) env9
     env11 <- emitLn (l1 ++ ":") env10
@@ -321,10 +318,10 @@ generateExp env (EOr exp1 exp2) = do
     (env'', l2) <- genLabel env'
     env''' <- emitLn "bipush 1" env''
     env4 <- generateExp env''' exp1
-    env5 <- emit ("ior " ++ l1) env4
+    env5 <- emitLn ("ior " ++ l1) env4
     env6 <- emitLn "bipush 1" env5
     env7 <- generateExp env6 exp2
-    env8 <- emit ("ior " ++ l2) env7
+    env8 <- emitLn ("ior " ++ l2) env7
     env9 <- emitLn "bipush 0" env8
     env10 <- emitLn ("goto " ++ l2) env9
     env11 <- emitLn (l1 ++ ":") env10
@@ -370,7 +367,7 @@ generateExp env (EApp (Id fcnid) args) = do
             env5 <- emitLn "bipush 0" env4
             return env5
         Type_int -> do
-            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
+            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
             env''' <- emitLn "  .limit locals 1000" env''
             env4 <- emitLn "  .limit stack 1000"  env'''
             return env4
