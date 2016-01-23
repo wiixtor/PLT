@@ -13,32 +13,39 @@
   pop
   return
 .end method
-invokestatic runtime/readInt()Iistore 0
-iload 0
-invokestatic runtime/printInt(I)V
+.method public static main()I
+  .limit locals 1000
+  .limit stack 1000
+invokestatic Runtime/readInt()I
+istore_0
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
+iload_0
 dup
 ldc 1
 iadd
-istore 0
-invokestatic runtime/printInt(I)V
+istore_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
+iload_0
 ldc 1
 iadd
 dup
-istore 0
-invokestatic runtime/printInt(I)V
+istore_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
+bipush 0
+ireturn
+.end method

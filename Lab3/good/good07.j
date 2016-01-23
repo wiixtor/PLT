@@ -13,42 +13,51 @@
   pop
   return
 .end method
-invokestatic runtime/readInt()Iistore 0
-iload 0
+.method public static main()I
+  .limit locals 1000
+  .limit stack 1000
+invokestatic Runtime/readInt()I
+istore_0
+iload_0
 ldc 2
 idiv
-istore 1
+istore_1
 label0:
 bipush 1
-iload 1
+iload_1
 ldc 1
-if_icmpgt label2pop
+if_icmpgt label2
+pop
 bipush 0
 label2:
 ifeq label1
 bipush 1
-iload 1
-iload 0
-iload 1
+iload_1
+iload_0
+iload_1
 idiv
 imul
-iload 0
-if_acmpeq label5pop
+iload_0
+if_acmpeq label5
+pop
 bipush 0
 label5:
 ifeq label3
-iload 1
-invokestatic runtime/printInt(I)V
+iload_1
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 goto label4
 label3:
 label4:
-iload 1
+iload_1
 dup
 ldc 1
 isub
-istore 1
+istore_1
 pop
 goto label0
 label1:
+bipush 0
+ireturn
+.end method

@@ -13,134 +13,156 @@
   pop
   return
 .end method
+.method public static main()I
+  .limit locals 1000
+  .limit stack 1000
 ldc 1
-istore 0
-iload 0
-invokestatic runtime/printInt(I)V
+istore_0
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 bipush 1
 ldc 1
-ior label0bipush 1
+ior label0
 bipush 1
-iload 0
+bipush 1
+iload_0
 dup
 ldc 1
 iadd
-istore 0
+istore_0
 ldc 45
-if_acmpne label2pop
+if_acmpne label2
+pop
 bipush 0
 label2:
-ior label1bipush 0
+ior label1
+bipush 0
 goto label1
 label0:
 bipush 1
 label1:
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 bipush 1
 ldc 0
-ior label3bipush 1
+ior label3
 bipush 1
-iload 0
+bipush 1
+iload_0
 dup
 ldc 1
 iadd
-istore 0
+istore_0
 ldc 0
-if_icmpge label5pop
+if_icmpge label5
+pop
 bipush 0
 label5:
-ior label4bipush 0
+ior label4
+bipush 0
 goto label4
 label3:
 bipush 1
 label4:
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 bipush 1
 ldc 1
-iand label6bipush 1
+iand label6
 bipush 1
-iload 0
+bipush 1
+iload_0
 dup
 ldc 1
 iadd
-istore 0
+istore_0
 ldc 0
-if_icmplt label8pop
+if_icmplt label8
+pop
 bipush 0
 label8:
-iand label7bipush 1
+iand label7
+bipush 1
 goto label7
 label6:
 bipush 0
 label7:
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 bipush 1
 ldc 0
-iand label9bipush 1
+iand label9
 bipush 1
-iload 0
+bipush 1
+iload_0
 dup
 ldc 1
 iadd
-istore 0
+istore_0
 ldc 0
-if_icmpgt label11pop
+if_icmpgt label11
+pop
 bipush 0
 label11:
-iand label10bipush 1
+iand label10
+bipush 1
 goto label10
 label9:
 bipush 0
 label10:
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 ldc 0
-istore 1
+istore_1
 bipush 1
 bipush 1
 ldc 34
 ldc 6
-if_icmplt label16pop
+if_icmplt label16
+pop
 bipush 0
 label16:
-iand label14bipush 1
+iand label14
 bipush 1
-iload 1
+bipush 1
+iload_1
 ldc 0
-if_icmplt label17pop
+if_icmplt label17
+pop
 bipush 0
 label17:
-iand label15bipush 1
+iand label15
+bipush 1
 goto label15
 label14:
 bipush 0
 label15:
 ifeq label12
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 goto label13
 label12:
 ldc 42
-invokestatic runtime/printInt(I)V
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 label13:
+bipush 0
+ireturn
+.end method

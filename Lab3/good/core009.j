@@ -13,14 +13,25 @@
   pop
   return
 .end method
-.method public static foo()I  .limit locals 1000
+.method public static main()I
+  .limit locals 1000
   .limit stack 1000
-istore 0
-iload 0
-invokestatic runtime/printInt(I)V
+invokestatic Runtime/foo()I
+istore_0
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
 ldc 0
-return
+ireturn
+bipush 0
+ireturn
+.end method
+.method public static foo()I
+  .limit locals 1000
+  .limit stack 1000
 ldc 10
-return
+ireturn
+bipush 0
+ireturn
+.end method

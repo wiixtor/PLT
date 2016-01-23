@@ -13,45 +13,51 @@
   pop
   return
 .end method
-iload 0
+.method public static main()I
+  .limit locals 1000
+  .limit stack 1000
+iload_0
 ldc 6
 dup
-istore 0
+istore_0
 pop
-iload 1
-iload 0
+iload_1
+iload_0
 ldc 7
 iadd
 dup
-istore 1
+istore_1
 pop
-iload 1
-invokestatic runtime/printInt(I)V
+iload_1
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 2
+iload_2
 ldc 4
 dup
-istore 2
+istore_2
 pop
-iload 2
-invokestatic runtime/printInt(I)V
+iload_2
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
-iload 2
+iload_0
+iload_2
 dup
-istore 0
+istore_0
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 0
-invokestatic runtime/printInt(I)V
+iload_0
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload 1
-invokestatic runtime/printInt(I)V
+iload_1
+invokestatic Runtime/printInt(I)V
 bipush 0
 pop
+bipush 0
+ireturn
+.end method
