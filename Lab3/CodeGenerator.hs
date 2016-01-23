@@ -87,11 +87,11 @@ generateCode name (PDefs defs) = do
     halp :: Env -> Def -> IO Env
     halp e (DFun t (Id id) args stms) = do
         (intyps, outtyp) <- lookupFun id e
-        out <- help2
+        out <- help2 t
         intypstring <- help intyps
-        env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ out) e
-        env''' <- emitLn "  .limit locals 1000" env'
-        env4 <- emitLn "  .limit stack 1000"  env''
+        env'' <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) e
+        env''' <- emitLn "  .limit locals 1000" env''
+        env4 <- emitLn "  .limit stack 1000"  env'''
         env5 <- push env4
         env6 <- generateStms env5 stms
         env7 <- pop env6
@@ -113,9 +113,9 @@ generateCode name (PDefs defs) = do
         return $ "I" ++ rest
     help2 :: Type -> IO String
     help2 t = case t of
-        Type_int    -> "I"
-        Type_bool   -> "I"
-        Type_void   -> "V"
+        Type_int    -> return "I"
+        Type_bool   -> return "I"
+        Type_void   -> return "V"
 
     boilerplate :: String
     boilerplate = unlines
@@ -397,9 +397,9 @@ generateExp env (EApp (Id fcnid) args) = do
         return $ "I" ++ rest
     help2 :: Type -> IO String
     help2 t = case t of
-        Type_int    -> "I"
-        Type_bool   -> "I"
-        Type_void   -> "V"
+        Type_int    -> return "I"
+        Type_bool   -> return "I"
+        Type_void   -> return "V"
 
 -- driver
 check :: FilePath -> String -> IO ()

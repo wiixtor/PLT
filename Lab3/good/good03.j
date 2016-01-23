@@ -13,9 +13,10 @@
   pop
   return
 .end method
-invokestatic Runtime/readInt()I
+.method public static main()I
   .limit locals 1000
   .limit stack 1000
+invokestatic Runtime/readInt()I
 istore_0
 ldc 1
 istore_1
@@ -51,3 +52,6 @@ iload_1
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
+bipush 0
+ireturn
+.end method
