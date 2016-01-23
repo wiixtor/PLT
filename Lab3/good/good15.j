@@ -22,10 +22,7 @@ iload_0
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-bipush 1
 ldc 1
-ior label0
-bipush 1
 bipush 1
 iload_0
 dup
@@ -33,25 +30,53 @@ ldc 1
 iadd
 istore_0
 ldc 45
-if_acmpne label2
+if_acmpne label0
+pop
+bipush 0
+label0:
+ior
+pop
+iload_0
+invokestatic Runtime/printInt(I)V
+bipush 0
+pop
+ldc 0
+bipush 1
+iload_0
+dup
+ldc 1
+iadd
+istore_0
+ldc 0
+if_icmpge label1
+pop
+bipush 0
+label1:
+ior
+pop
+iload_0
+invokestatic Runtime/printInt(I)V
+bipush 0
+pop
+ldc 1
+bipush 1
+iload_0
+dup
+ldc 1
+iadd
+istore_0
+ldc 0
+if_icmplt label2
 pop
 bipush 0
 label2:
-ior label1
-bipush 0
-goto label1
-label0:
-bipush 1
-label1:
+iand
 pop
 iload_0
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-bipush 1
 ldc 0
-ior label3
-bipush 1
 bipush 1
 iload_0
 dup
@@ -59,68 +84,11 @@ ldc 1
 iadd
 istore_0
 ldc 0
-if_icmpge label5
+if_icmpgt label3
 pop
 bipush 0
-label5:
-ior label4
-bipush 0
-goto label4
 label3:
-bipush 1
-label4:
-pop
-iload_0
-invokestatic Runtime/printInt(I)V
-bipush 0
-pop
-bipush 1
-ldc 1
-iand label6
-bipush 1
-bipush 1
-iload_0
-dup
-ldc 1
-iadd
-istore_0
-ldc 0
-if_icmplt label8
-pop
-bipush 0
-label8:
-iand label7
-bipush 1
-goto label7
-label6:
-bipush 0
-label7:
-pop
-iload_0
-invokestatic Runtime/printInt(I)V
-bipush 0
-pop
-bipush 1
-ldc 0
-iand label9
-bipush 1
-bipush 1
-iload_0
-dup
-ldc 1
-iadd
-istore_0
-ldc 0
-if_icmpgt label11
-pop
-bipush 0
-label11:
-iand label10
-bipush 1
-goto label10
-label9:
-bipush 0
-label10:
+iand
 pop
 iload_0
 invokestatic Runtime/printInt(I)V
@@ -129,40 +97,32 @@ pop
 ldc 0
 istore_1
 bipush 1
-bipush 1
 ldc 34
 ldc 6
-if_icmplt label16
+if_icmplt label6
 pop
 bipush 0
-label16:
-iand label14
-bipush 1
+label6:
 bipush 1
 iload_1
 ldc 0
-if_icmplt label17
+if_icmplt label7
 pop
 bipush 0
-label17:
-iand label15
-bipush 1
-goto label15
-label14:
-bipush 0
-label15:
-ifeq label12
+label7:
+iand
+ifeq label4
 iload_0
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-goto label13
-label12:
+goto label5
+label4:
 ldc 42
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-label13:
+label5:
 bipush 0
 ireturn
 .end method

@@ -332,6 +332,7 @@ generateExp env (EAnd exp1 exp2) = do
     env' <- generateExp env exp1
     env'' <- generateExp env' exp2
     env''' <- emitLn "iand" env''
+    return env'''
 
     {-(env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
@@ -351,6 +352,7 @@ generateExp env (EOr exp1 exp2) = do
     env' <- generateExp env exp1
     env'' <- generateExp env' exp2
     env''' <- emitLn "ior" env''
+    return env'''
 
     {- (env', l1) <- genLabel env
     (env'', l2) <- genLabel env'
