@@ -347,7 +347,7 @@ generateExp env (EApp (Id "printInt") args) = do
     env''' <- emitLn "bipush 0" env''
     return env'''
 generateExp env (EApp (Id "readInt") args) = do
-    env' <- emit "invokestatic runtime/readInt()I" env
+    env' <- emitLn "invokestatic runtime/readInt()I" env
     env'' <- emitLn "  .limit locals 1000" env'
     env''' <- emitLn "  .limit stack 1000"  env''
     return env'''
@@ -372,7 +372,7 @@ generateExp env (EApp (Id fcnid) args) = do
             env4 <- emitLn "  .limit stack 1000"  env'''
             return env4
         Type_bool -> do
-            env'' <- emit (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
+            env'' <- emitLn (".method public static " ++ fcnid ++ "(" ++  intypstring ++ ")" ++ "I") env' 
             env''' <- emitLn "  .limit locals 1000" env''
             env4 <- emitLn "  .limit stack 1000"  env'''
             return env4
