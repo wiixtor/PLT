@@ -49,7 +49,7 @@ lookupVar :: String -> Env -> IO Address
 lookupVar id (s,v,l,a,c) = return $ help v id
  where 
     help :: [Map String Address] -> String -> Address
-    help [] id = error "no variable found"
+    help [] id = error $ "no variable found: " ++ id
     help (v:vs) id =
         case (Map.lookup id v) of
             Nothing -> help vs id
@@ -383,8 +383,10 @@ generateExp name env (EApp (Id "readInt") args) = do
     env' <- emitLn "invokestatic Runtime/readInt()I" env
     return env'
 generateExp name env (EApp (Id fcnid) args) = do
+    -- ADD INPUTS TO ENVIRONMENT WITH NAMES AND STUFF; BUT HOW?
+
     env' <- foldM
-        (generateExp name )
+        (generateExp name)
         env
         args
 
