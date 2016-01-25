@@ -17,12 +17,10 @@
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
-iload_0
 ldc 6
 dup
 istore_0
 pop
-iload_1
 iload_0
 ldc 7
 iadd
@@ -33,7 +31,6 @@ iload_1
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload_2
 ldc 4
 dup
 istore_2
@@ -42,7 +39,6 @@ iload_2
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload_0
 iload_2
 dup
 istore_0

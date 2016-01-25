@@ -17,12 +17,10 @@
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
-iload_0
 invokestatic Runtime/readInt()I
 dup
 istore_0
 pop
-iload_1
 ldc 2
 dup
 istore_1
@@ -75,7 +73,6 @@ pop
 bipush 0
 label10:
 ifeq label8
-iload_2
 ldc 0
 dup
 istore_2
@@ -119,7 +116,6 @@ iload_1
 invokestatic Runtime/printInt(I)V
 bipush 0
 pop
-iload_0
 iload_0
 iload_1
 idiv

@@ -371,8 +371,8 @@ generateExp name env (EOr exp1 exp2) = do
     env15 <- emitLn (l2 ++ ":") env14
     return env15
 generateExp name env (EAss exp1 exp2) = do
-    env' <- generateExp name env exp1
-    env'' <- generateExp name env' exp2
+    --env' <- generateExp name env exp1
+    env'' <- generateExp name env exp2
     let (EId (Id id)) = exp1
     a <- lookupVar id env''
     env''' <- emitLn ("dup") env''

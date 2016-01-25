@@ -39,7 +39,6 @@ pop
 bipush 0
 label2:
 ifeq label0
-iload_1
 iload_0
 ldc 2
 isub
@@ -57,14 +56,12 @@ pop
 bipush 0
 label5:
 ifeq label3
-iload_1
 ldc 0
 dup
 istore_1
 pop
 goto label4
 label3:
-iload_1
 ldc 1
 dup
 istore_1

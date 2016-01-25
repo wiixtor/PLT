@@ -13,6 +13,9 @@ int main () {
 		}
 
 		if (iPrime && (n / i) * i == n) {
+			printInt(n/i);
+			printInt((n/i) * i);
+			printInt(iPrime);
 			printInt(i);
 			n = n / i;
 		} else { 

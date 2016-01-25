@@ -25,7 +25,6 @@ ldc 0
 istore_2
 label0:
 bipush 1
-iload_2
 invokestatic Runtime/readInt()I
 dup
 istore_2
@@ -35,7 +34,6 @@ pop
 bipush 0
 label2:
 ifeq label1
-iload_0
 iload_0
 iload_2
 iadd

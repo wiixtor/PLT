@@ -34,7 +34,6 @@ pop
 bipush 0
 label2:
 ifeq label1
-iload_1
 iload_2
 iload_1
 imul
