@@ -21,8 +21,6 @@ ldc 0
 istore_0
 ldc 0
 istore_1
-ldc 0
-istore_2
 label0:
 bipush 1
 invokestatic Runtime/readInt()I

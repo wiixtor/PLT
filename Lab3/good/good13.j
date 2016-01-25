@@ -54,7 +54,7 @@ ifeq label5
 bipush 1
 iload_2
 iand
-ifeq label6
+ifeq label5
 bipush  1
 goto label6
 label5:
@@ -105,7 +105,7 @@ pop
 bipush 0
 label15:
 iand
-ifeq label14
+ifeq label13
 bipush  1
 goto label14
 label13:

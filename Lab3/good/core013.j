@@ -28,7 +28,7 @@ bipush 1
 ldc 0
 invokestatic core013/test(I)I
 iand
-ifeq label1
+ifeq label0
 bipush  1
 goto label1
 label0:
@@ -67,7 +67,7 @@ ldc 5
 isub
 invokestatic core013/test(I)I
 iand
-ifeq label7
+ifeq label6
 bipush  1
 goto label7
 label6:
@@ -78,7 +78,7 @@ ifeq label4
 bipush 1
 ldc 1
 iand
-ifeq label5
+ifeq label4
 bipush  1
 goto label5
 label4:
@@ -102,7 +102,7 @@ ifeq label10
 bipush 1
 ldc 1
 iand
-ifeq label11
+ifeq label10
 bipush  1
 goto label11
 label10:

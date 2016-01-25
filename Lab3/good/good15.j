@@ -96,7 +96,7 @@ pop
 bipush 0
 label8:
 iand
-ifeq label7
+ifeq label6
 bipush  1
 goto label7
 label6:
@@ -124,7 +124,7 @@ pop
 bipush 0
 label11:
 iand
-ifeq label10
+ifeq label9
 bipush  1
 goto label10
 label9:
@@ -156,7 +156,7 @@ pop
 bipush 0
 label17:
 iand
-ifeq label15
+ifeq label14
 bipush  1
 goto label15
 label14:
