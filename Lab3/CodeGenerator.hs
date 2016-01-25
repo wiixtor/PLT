@@ -86,7 +86,7 @@ generateCode name (PDefs defs) = do
   where
     halp :: FilePath -> Env -> Def -> IO Env
     halp name e (DFun t (Id id) args stms) = do
-        initEnv <- help3 args env
+        initEnv <- help3 args e
         (intyps, outtyp) <- lookupFun id e
         out <- help2 t
         intypstring <- help intyps
@@ -118,11 +118,11 @@ generateCode name (PDefs defs) = do
         Type_int    -> return "I"
         Type_bool   -> return "I"
         Type_void   -> return "V"
-    help3 :: [Arg] -> Env -> Env
-    help3 [] env = env
+    help3 :: [Arg] -> Env -> IO Env
+    help3 [] env = return env
     help3 ((ADecl _ (Id id)) : ds) env = do 
         env' <- updateVar id 1 env
-        return help3 ds env'
+        help3 ds env'
 
     boilerplate :: String
     boilerplate = unlines
