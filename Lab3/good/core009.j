@@ -17,7 +17,7 @@
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
-invokestatic Runtime/foo()I
+invokestatic core009/foo()I
 istore_0
 iload_0
 invokestatic Runtime/printInt(I)V
