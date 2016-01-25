@@ -70,7 +70,7 @@ idiv
 iload_3
 imul
 iload_1
-if_acmpeq label10
+if_icmpeq label10
 pop
 bipush 0
 label10:
@@ -103,7 +103,7 @@ idiv
 iload_1
 imul
 iload_0
-if_acmpeq label15
+if_icmpeq label15
 pop
 bipush 0
 label15:

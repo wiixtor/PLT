@@ -35,7 +35,7 @@ ldc 1
 iadd
 istore_0
 ldc 45
-if_acmpne label2
+if_icmpne label2
 pop
 bipush 0
 label2:

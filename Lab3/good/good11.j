@@ -30,7 +30,7 @@ invokestatic Runtime/readInt()I
 dup
 istore_2
 ldc 0
-if_acmpne label2
+if_icmpne label2
 pop
 bipush 0
 label2:

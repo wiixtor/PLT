@@ -17,7 +17,7 @@
 .method public static main()I
   .limit locals 1000
   .limit stack 1000
-invokestatic Runtime/foo()V
+invokestatic core002/foo()V
 pop
 ldc 0
 ireturn

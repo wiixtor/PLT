@@ -39,7 +39,7 @@ iload_1
 idiv
 imul
 iload_0
-if_acmpeq label5
+if_icmpeq label5
 pop
 bipush 0
 label5:
