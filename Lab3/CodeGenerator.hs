@@ -87,7 +87,7 @@ generateCode name (PDefs defs) = do
 generateFunction :: FilePath -> Env -> Def -> IO Env
 generateFunction name e (DFun t (Id id) args stms) = do
     initEnv <- help3 args e
-    (intyps, outtyp) <- lookupFun id e
+    (intyps, outtyp) <- lookupFun id initEnv
     out <- help2 t
     intypstring <- help intyps
     en <- emitLn "" e
