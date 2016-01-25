@@ -83,6 +83,24 @@ generateCode name (PDefs defs) = do
         env'''
         defs
     return $ (boilerplate ++ code env'''')
+  where
+    boilerplate :: String
+    boilerplate = unlines
+      [ ".class public " ++ name
+      , ".super java/lang/Object"
+      , ""
+      , ".method public <init>()V"
+      , "  aload_0"
+      , "  invokespecial java/lang/Object/<init>()V"
+      , "  return"
+      , ".end method"
+      , ""
+      , ".method public static main([Ljava/lang/String;)V"
+      , ".limit locals 1"
+      , "  invokestatic " ++ name ++ "/main()I"
+      , "  pop"
+      , "  return"
+      , ".end method" ]
 
 generateFunction :: FilePath -> Env -> Def -> IO Env
 generateFunction name e (DFun t (Id id) args stms) = do
@@ -123,23 +141,7 @@ generateFunction name e (DFun t (Id id) args stms) = do
     help3 ((ADecl _ (Id id)) : ds) env = do 
         env' <- updateVar id 1 env
         help3 ds env'
-    boilerplate :: String
-    boilerplate = unlines
-      [ ".class public " ++ name
-      , ".super java/lang/Object"
-      , ""
-      , ".method public <init>()V"
-      , "  aload_0"
-      , "  invokespecial java/lang/Object/<init>()V"
-      , "  return"
-      , ".end method"
-      , ""
-      , ".method public static main([Ljava/lang/String;)V"
-      , ".limit locals 1"
-      , "  invokestatic " ++ name ++ "/main()I"
-      , "  pop"
-      , "  return"
-      , ".end method" ]
+
 
 code :: Env -> Code
 code (s,v,l,a,c) = c
