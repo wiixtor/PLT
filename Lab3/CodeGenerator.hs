@@ -79,35 +79,35 @@ generateCode name (PDefs defs) = do
         env''
         defs
     env'''' <- foldM
-        (halp name)
+        (generateFunction name)
         env'''
         defs
     return $ (boilerplate ++ code env'''')
-  where
-    halp :: FilePath -> Env -> Def -> IO Env
-    halp name e (DFun t (Id id) args stms) = do
-        initEnv <- help3 args e
-        (intyps, outtyp) <- lookupFun id e
-        out <- help2 t
-        intypstring <- help intyps
-        en <- emitLn "" e
-        env <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) en
-        env' <- emitLn "  .limit locals 1000" env
-        env'' <- emitLn "  .limit stack 1000"  env'
-        env''' <- push env''
-        env4 <- generateStms name env''' stms
-        env5 <- pop env4
-        case t of
-            Type_void -> do
-                env6 <- emitLn "ireturn" env5
-                env7 <- emitLn ".end method" env6
-                return env7
-            _ -> do
-                env6 <- emitLn "bipush 0" env5
-                env7 <- emitLn "ireturn" env6
-                env8 <- emitLn ".end method" env7
-                return env8
-      where 
+
+generateFunction :: FilePath -> Env -> Def -> IO Env
+generateFunction name e (DFun t (Id id) args stms) = do
+    initEnv <- help3 args e
+    (intyps, outtyp) <- lookupFun id e
+    out <- help2 t
+    intypstring <- help intyps
+    en <- emitLn "" e
+    env <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) en
+    env' <- emitLn "  .limit locals 1000" env
+    env'' <- emitLn "  .limit stack 1000"  env'
+    env''' <- push env''
+    env4 <- generateStms name env''' stms
+    env5 <- pop env4
+    case t of
+        Type_void -> do
+            env6 <- emitLn "ireturn" env5
+            env7 <- emitLn ".end method" env6
+            return env7
+        _ -> do
+            env6 <- emitLn "bipush 0" env5
+            env7 <- emitLn "ireturn" env6
+            env8 <- emitLn ".end method" env7
+            return env8
+  where 
     help :: [Type] -> IO String
     help [] = return ""
     help (t:ts) = do
@@ -123,7 +123,6 @@ generateCode name (PDefs defs) = do
     help3 ((ADecl _ (Id id)) : ds) env = do 
         env' <- updateVar id 1 env
         help3 ds env'
-
     boilerplate :: String
     boilerplate = unlines
       [ ".class public " ++ name
