@@ -90,7 +90,7 @@ generateFunction name e (DFun t (Id id) args stms) = do
     (intyps, outtyp) <- lookupFun id initEnv
     out <- help2 t
     intypstring <- help intyps
-    en <- emitLn "" e
+    en <- emitLn "" initEnv
     env <- emitLn (".method public static " ++ id ++ "(" ++  intypstring ++ ")" ++ out) en
     env' <- emitLn "  .limit locals 1000" env
     env'' <- emitLn "  .limit stack 1000"  env'
