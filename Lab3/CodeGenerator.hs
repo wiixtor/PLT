@@ -321,7 +321,7 @@ generateExp name env (EEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp name env'' exp1
     env4 <- generateExp name env''' exp2
-    env5 <- emitLn ("if_acmpeq " ++ l1) env4
+    env5 <- emitLn ("if_icmpeq " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
@@ -331,7 +331,7 @@ generateExp name env (ENEq exp1 exp2) = do
     env'' <- emitLn "bipush 1" env'
     env''' <- generateExp name env'' exp1
     env4 <- generateExp name env''' exp2
-    env5 <- emitLn ("if_acmpne " ++ l1) env4
+    env5 <- emitLn ("if_icmpne " ++ l1) env4
     env6 <- emitLn "pop" env5
     env7 <- emitLn "bipush 0" env6
     env8 <- emitLn (l1 ++ ":") env7
