@@ -344,7 +344,7 @@ generateExp name env (EAnd exp1 exp2) = do
     env5 <- emitLn "iand" env4
     env6 <- emitLn ("ifeq " ++ l1) env5
     env7 <- emitLn "bipush 1" env6
-    env8 <- generateExp name env7 exp2
+    env8 <- generateExp name env6 exp2
     env9 <- emitLn "iand" env8
     env10 <- emitLn ("ifeq " ++ l2) env9
     env11 <- emitLn "bipush  1" env10
